@@ -1472,6 +1472,21 @@ export interface ConvTokenSummary {
 }
 
 // ---- Command recording (Bash execution history) ----
+export interface ScanJob {
+  id: string;
+  task_id: string;
+  tool: string;
+  args: string[];
+  status: "queued" | "running" | "succeeded" | "failed" | "cancelled" | string;
+  cached_from?: string;
+  output?: string;
+  error?: string;
+  exit_code?: number;
+  created_at: string;
+  started_at?: string;
+  finished_at?: string;
+}
+
 export interface CommandRecord {
   id: number;
   exploration_id: number;

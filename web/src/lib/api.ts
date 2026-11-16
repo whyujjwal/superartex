@@ -23,6 +23,7 @@ import type {
   BatchControlItem,
   ChatAttachment,
   CommandRecord,
+  ScanJob,
   Company,
   CompanyScopeMutation,
   CompanyScopeRule,
@@ -1307,6 +1308,13 @@ export const api = {
     if (params?.q) sp.set("q", params.q);
     return get<{ stats: ToolStat[] }>(`/commands/stats?${sp}`);
   },
+  scanJobs: (params?: { task?: string; status?: string }) => {
+    const sp = new URLSearchParams();
+    if (params?.task) sp.set("task", params.task);
+    if (params?.status) sp.set("status", params.status);
+    return get<{ jobs: ScanJob[] }>(`/scan-jobs?${sp}`).then((r) => arr(r.jobs));
+  },
+  cancelScanJob: (id: string) => post<ScanJob>(`/scan-jobs/${encodeURIComponent(id)}/cancel`),
 
   // ---- LLM records ----
   llmRecords: (params?: { model?: string; session?: string; task?: string; page?: number; size?: number }) => {

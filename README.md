@@ -91,6 +91,33 @@ docker compose logs superartex | grep "Setup token"
 
 ---
 
+## Toolkit
+
+Shipped skills are playbooks. They do not add a second way to run commands. Each one is off until you grant it to an agent.
+
+| Skill | What it covers |
+|---|---|
+| `network-recon` | nmap, rustscan, masscan, arp-scan |
+| `web-fuzzing` | gobuster, ffuf, feroxbuster, dirsearch, httpx |
+| `vuln-scan` | nuclei, nikto, wpscan, wafw00f, dalfox |
+| `osint-recon` | subfinder, amass, theHarvester, sherlock |
+| `cloud-audit` | prowler, scout, trivy, kube-hunter, kube-bench |
+| `password-audit` | hashcat, john (offline, hashes the task holds), hydra (one in-scope service, rate-capped) |
+| `forensics-ctf` | binwalk, exiftool, steghide, zsteg, volatility3, read-only |
+| `exploit-dev` | checksec, gdb+gef, ropper, pwntools — lab/CTF binaries |
+
+`password-audit` and `exploit-dev` run through the ordinary Bash path with the existing approval gates. They are not in the background-scan allowlist.
+
+Long runs of those binaries go through `start_scan_job` (`task_id`, `tool`, `args`). The runner executes the binary directly. Arguments may not contain a shell metacharacter. `get_scan_job` and `wait_scan_job` read the result. `cancel_scan_job` stops a queued or running job.
+
+A successful run with the same task and the same arguments is not executed again. The new row is marked cached. Four jobs can run at once, two of them for the same tool. After three failures the tool pauses on that task for 15 minutes. Output is capped. A restart marks leftover queued and running rows as failed.
+
+**Processes** (`/function/processes`) streams the job list, filters it, and cancels a live job. The same events are written to the server log with the prefix `[scan-job]`.
+
+Built-in task templates, inserted once and never re-seeded after you delete one: Bug Bounty Recon, Network Penetration Test, Cloud Security Audit, API Security Assessment, CTF Binary Challenge, AD Security Audit (read-only posture review). Applying one copies its goal into a new task. The worker, pentest, and auto agents are bound to the scan-job tools on first seed. You can turn that binding off per agent.
+
+Not shipped: a C2/WebShell session manager and AD lateral-movement playbooks. Every execution path in this product goes through the same approval gate, target scope check, and audit log, and that is deliberate.
+
 ## How it works
 
 ### Dual-graph architecture: exploration graph + asset graph

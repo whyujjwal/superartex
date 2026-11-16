@@ -44,6 +44,7 @@ func (s *Server) hostTools() ([]actool.CoreTool, map[string][]string) {
 	tools := append(s.m.HostTools(), s.orchestrationTools()...)
 	tools = append(tools, s.findingRetestTools()...)
 	tools = append(tools, s.platformTools()...) // platform operation tools (create/edit skills/tools/MCP, for Auto)
+	tools = append(tools, s.scanJobTools()...)
 	custom, err := s.customTools()
 	if err != nil {
 		log.Printf("[custom-tool] load failed: %v", err)

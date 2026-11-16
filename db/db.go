@@ -345,6 +345,9 @@ ON CONFLICT (name) DO NOTHING`,
 	if err := d.seedTargetGateExemptions(); err != nil {
 		return fmt.Errorf("seed target-gate exemptions: %w", err)
 	}
+	if err := d.seedEngagementTemplates(); err != nil {
+		return fmt.Errorf("seed engagement templates: %w", err)
+	}
 	return nil
 }
 

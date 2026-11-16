@@ -46,6 +46,9 @@ type Server struct {
 	ctx    context.Context
 
 	skillDir string // root directory for skill subdirectories
+
+	jobsOnce sync.Once
+	jobs     *ScanJobs
 	jwtKey   []byte // HS256 signing key loaded from / generated into keyDir/jwt.key
 
 	scrubSecrets bool // drop SUPERARTEX_PG_DSN and the API keys from the environment once read (binary only)
@@ -241,6 +244,7 @@ func New(ctx context.Context, m *Manager, skillDir string, dataDir string, keyDi
 		seedPrompts(m.pg)            // seed built-in agent default prompt bodies into agent_prompts (only when empty)
 		warnBrokenSkills(s.skillDir) // surface skills whose frontmatter silently failed to parse
 		s.seedOrchestrationTools()   // seed P2 cross-task orchestration tools into the tools table (bindable per agent)
+		s.seedScanJobTools()
 		if err := s.seedFindingRetester(); err != nil {
 			log.Printf("[retester] seed: %v", err)
 		}
@@ -703,6 +707,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("PATCH /api/task-categories/{id}", s.pgRenameTaskCategory)
 	mux.HandleFunc("DELETE /api/task-categories/{id}", s.pgDeleteTaskCategory)
 	mux.HandleFunc("POST /api/tasks/category/batch", s.updateTasksCategoryBatch)
+	mux.HandleFunc("GET /api/scan-jobs", s.listScanJobs)
+	mux.HandleFunc("GET /api/scan-jobs/stream", s.streamScanJobs)
+	mux.HandleFunc("POST /api/scan-jobs/{id}/cancel", s.cancelScanJobHTTP)
+
 	mux.HandleFunc("GET /api/task-templates", s.pgListTaskTemplates)
 	mux.HandleFunc("POST /api/task-templates", s.pgCreateTaskTemplate)
 	mux.HandleFunc("PATCH /api/task-templates/{id}", s.pgUpdateTaskTemplate)

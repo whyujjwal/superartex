@@ -1608,3 +1608,24 @@ CREATE INDEX IF NOT EXISTS idx_coverage_ledger_history_task ON coverage_ledger_h
 -- written with the guarded terminal status, cleared when the task moves back to a
 -- non-terminal state (revive), so an earlier run's reason never marks a later one.
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS end_reason TEXT NOT NULL DEFAULT '';
+
+-- Background allowlisted scanner jobs. Idempotent recon only; the runner refuses
+-- anything outside the code allowlist. task_ref is the task id the agent passed
+-- (exploration id as text). No FK: the row must survive task deletion for audit.
+CREATE TABLE IF NOT EXISTS scan_jobs (
+    id           TEXT PRIMARY KEY,
+    task_ref     TEXT NOT NULL DEFAULT '',
+    tool         TEXT NOT NULL,
+    args         JSONB NOT NULL DEFAULT '[]',
+    args_hash    TEXT NOT NULL,
+    status       TEXT NOT NULL CHECK (status IN ('queued','running','succeeded','failed','cancelled')),
+    cached_from  TEXT,
+    output       TEXT NOT NULL DEFAULT '',
+    error        TEXT NOT NULL DEFAULT '',
+    exit_code    INTEGER,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    started_at   TIMESTAMPTZ,
+    finished_at  TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_scan_jobs_task ON scan_jobs(task_ref, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scan_jobs_cache ON scan_jobs(task_ref, tool, args_hash) WHERE status = 'succeeded';
