@@ -11,6 +11,8 @@ export const KIND_LABEL: Record<string, string> = {
   webhook: "Generic Webhook",
   telegram: "Telegram",
   email: "Email",
+  discord: "Discord",
+  slack: "Slack",
 };
 
 // Config field definitions per channel.
@@ -111,6 +113,24 @@ export const CHANNEL_FIELDS: Record<string, FieldDef[]> = {
     { key: "from", label: "From", kind: "text", placeholder: "artex@example.com" },
     { key: "to", label: "Recipients", kind: "list", help: "Separate multiple addresses with commas" },
     { key: "tls", label: "Implicit TLS", kind: "switch", help: "On for port 465; keep off for 587 (STARTTLS is automatic)" },
+  ],
+  discord: [
+    {
+      key: "webhook_url",
+      label: "Webhook URL",
+      kind: "password",
+      placeholder: "https://discord.com/api/webhooks/...",
+      help: "Server Settings → Integrations → Webhooks → Copy Webhook URL. The URL itself is the credential",
+    },
+  ],
+  slack: [
+    {
+      key: "webhook_url",
+      label: "Webhook URL",
+      kind: "password",
+      placeholder: "https://hooks.slack.com/services/...",
+      help: "App → Incoming Webhooks. The URL itself is the credential",
+    },
   ],
 };
 

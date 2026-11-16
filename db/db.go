@@ -24,9 +24,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/whyujjwal/superartex/config"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib" // pgx database/sql driver ("pgx")
+	"github.com/whyujjwal/superartex/config"
 )
 
 //go:embed schema.sql

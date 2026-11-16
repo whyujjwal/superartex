@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
+	actool "github.com/Autumn-27/norma/tool"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/intercept"
-	actool "github.com/Autumn-27/norma/tool"
 )
 
 const askOperatorMaxImage = 10 << 20

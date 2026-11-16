@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Autumn-27/norma/llm"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
-	"github.com/Autumn-27/norma/llm"
 )
 
 // ConfigFrom("ollama", ...) must normalize to the keyless sentinel with our own

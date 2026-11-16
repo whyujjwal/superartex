@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/whyujjwal/superartex/agent"
 	"github.com/Autumn-27/norma/llm"
+	"github.com/whyujjwal/superartex/agent"
 )
 
 // With the budget env vars unset the engine decides exactly as before (no round

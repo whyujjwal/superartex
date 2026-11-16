@@ -1629,3 +1629,30 @@ CREATE TABLE IF NOT EXISTS scan_jobs (
 );
 CREATE INDEX IF NOT EXISTS idx_scan_jobs_task ON scan_jobs(task_ref, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_scan_jobs_cache ON scan_jobs(task_ref, tool, args_hash) WHERE status = 'succeeded';
+
+-- Operator-defined scan workflows. Steps reference typed scan wrapper keys
+-- (server/typed_scan_tools.go); every step executes only through the
+-- allowlisted scan runner. A run is started by an operator from the UI with a
+-- chosen task, and each step lands in scan_jobs with a full record.
+CREATE TABLE IF NOT EXISTS workflows (
+    id          BIGSERIAL PRIMARY KEY,
+    name        TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    steps       JSONB NOT NULL DEFAULT '[]',
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+DROP TRIGGER IF EXISTS trg_workflows_upd ON workflows;
+CREATE TRIGGER trg_workflows_upd BEFORE UPDATE ON workflows
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TABLE IF NOT EXISTS workflow_runs (
+    id            BIGSERIAL PRIMARY KEY,
+    workflow_id   BIGINT NOT NULL REFERENCES workflows(id) ON DELETE CASCADE,
+    task_ref      TEXT NOT NULL,
+    status        TEXT NOT NULL CHECK (status IN ('running','succeeded','failed','cancelled')),
+    step_results  JSONB NOT NULL DEFAULT '[]',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    finished_at   TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_workflow_runs_wf ON workflow_runs(workflow_id, created_at DESC);

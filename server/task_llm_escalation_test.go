@@ -6,8 +6,8 @@ import (
 	"iter"
 	"testing"
 
-	"github.com/whyujjwal/superartex/db"
 	"github.com/Autumn-27/norma/llm"
+	"github.com/whyujjwal/superartex/db"
 )
 
 type failingProvider struct{ err error }

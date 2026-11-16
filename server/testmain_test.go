@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/whyujjwal/superartex/db"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/whyujjwal/superartex/db"
 )
 
 // TestMain acquires a PostgreSQL advisory lock (7337741002) for the entire

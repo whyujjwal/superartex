@@ -1472,6 +1472,48 @@ export interface ConvTokenSummary {
 }
 
 // ---- Command recording (Bash execution history) ----
+export interface WorkflowStep {
+  tool: string;
+  params: Record<string, unknown>;
+  on_failure?: "stop" | "continue";
+}
+
+export interface Workflow {
+  id: number;
+  name: string;
+  description: string;
+  steps: WorkflowStep[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StepResult {
+  index: number;
+  tool: string;
+  job_id?: string;
+  status: string;
+  error?: string;
+  cached_from?: string;
+}
+
+export interface WorkflowRun {
+  id: number;
+  workflow_id: number;
+  task_id: string;
+  status: "running" | "succeeded" | "failed" | "cancelled" | string;
+  step_results: StepResult[];
+  created_at: string;
+  finished_at?: string;
+}
+
+export interface ScanToolSpec {
+  key: string;
+  bin: string;
+  description: string;
+  params: Record<string, unknown>;
+  required: string[];
+}
+
 export interface ScanJob {
   id: string;
   task_id: string;

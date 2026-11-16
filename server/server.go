@@ -20,6 +20,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Autumn-27/norma/llm"
+	actool "github.com/Autumn-27/norma/tool"
+	"github.com/Autumn-27/norma/transcript"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/egress"
@@ -28,9 +31,6 @@ import (
 	"github.com/whyujjwal/superartex/llmrec"
 	"github.com/whyujjwal/superartex/report"
 	"github.com/whyujjwal/superartex/traffic"
-	"github.com/Autumn-27/norma/llm"
-	actool "github.com/Autumn-27/norma/tool"
-	"github.com/Autumn-27/norma/transcript"
 )
 
 // BuildVersion is the backend application version, injected from cmd/superartex at
@@ -245,6 +245,7 @@ func New(ctx context.Context, m *Manager, skillDir string, dataDir string, keyDi
 		warnBrokenSkills(s.skillDir) // surface skills whose frontmatter silently failed to parse
 		s.seedOrchestrationTools()   // seed P2 cross-task orchestration tools into the tools table (bindable per agent)
 		s.seedScanJobTools()
+		s.seedCTFAgent()
 		if err := s.seedFindingRetester(); err != nil {
 			log.Printf("[retester] seed: %v", err)
 		}
@@ -710,6 +711,12 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/scan-jobs", s.listScanJobs)
 	mux.HandleFunc("GET /api/scan-jobs/stream", s.streamScanJobs)
 	mux.HandleFunc("POST /api/scan-jobs/{id}/cancel", s.cancelScanJobHTTP)
+	mux.HandleFunc("GET /api/scan-tools", s.pgListScanTools)
+	mux.HandleFunc("GET /api/workflows", s.pgListWorkflows)
+	mux.HandleFunc("POST /api/workflows", s.pgCreateWorkflow)
+	mux.HandleFunc("DELETE /api/workflows/{id}", s.pgDeleteWorkflow)
+	mux.HandleFunc("POST /api/workflows/{id}/run", s.pgRunWorkflow)
+	mux.HandleFunc("GET /api/workflows/runs", s.pgListWorkflowRuns)
 
 	mux.HandleFunc("GET /api/task-templates", s.pgListTaskTemplates)
 	mux.HandleFunc("POST /api/task-templates", s.pgCreateTaskTemplate)

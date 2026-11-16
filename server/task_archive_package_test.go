@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	pgdb "github.com/whyujjwal/superartex/db"
 	"github.com/klauspost/compress/zstd"
+	pgdb "github.com/whyujjwal/superartex/db"
 )
 
 func TestTaskArchivePackageFilesRoundTrip(t *testing.T) {

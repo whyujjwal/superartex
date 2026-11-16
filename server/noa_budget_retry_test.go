@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/whyujjwal/superartex/agent"
 	"github.com/Autumn-27/norma/harness"
+	"github.com/whyujjwal/superartex/agent"
 )
 
 // A NOA budget refusal is deterministic: the engine must not rerun the intent,

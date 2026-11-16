@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Autumn-27/norma/llm"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/llmrec"
-	"github.com/Autumn-27/norma/llm"
 )
 
 // Usage reported by one failed attempt, and by a successful one. A stream

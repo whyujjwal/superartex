@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Autumn-27/norma/permission"
+	actool "github.com/Autumn-27/norma/tool"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/intercept"
-	"github.com/Autumn-27/norma/permission"
-	actool "github.com/Autumn-27/norma/tool"
 )
 
 // jsonResult marshals v to a JSON tool result.
@@ -45,6 +45,7 @@ func (s *Server) hostTools() ([]actool.CoreTool, map[string][]string) {
 	tools = append(tools, s.findingRetestTools()...)
 	tools = append(tools, s.platformTools()...) // platform operation tools (create/edit skills/tools/MCP, for Auto)
 	tools = append(tools, s.scanJobTools()...)
+	tools = append(tools, s.typedScanTools()...)
 	custom, err := s.customTools()
 	if err != nil {
 		log.Printf("[custom-tool] load failed: %v", err)

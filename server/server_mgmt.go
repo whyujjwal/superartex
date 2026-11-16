@@ -23,11 +23,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/Autumn-27/norma/llm"
+	"github.com/Autumn-27/norma/skill"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/notify"
-	"github.com/Autumn-27/norma/llm"
-	"github.com/Autumn-27/norma/skill"
 )
 
 // validSkillName checks the agentskills.io name constraints, widened so a skill can

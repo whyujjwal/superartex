@@ -15,8 +15,8 @@ import (
 	"strconv"
 	"strings"
 
-	pgdb "github.com/whyujjwal/superartex/db"
 	"github.com/klauspost/compress/zstd"
+	pgdb "github.com/whyujjwal/superartex/db"
 )
 
 const (

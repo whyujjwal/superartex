@@ -1,5 +1,6 @@
 import {
   Activity,
+  Workflow,
   Ban,
   BellRing,
   Bot,
@@ -73,6 +74,7 @@ export const sidebarItems: NavGroup[] = [
       { id: "traffic", title: "Traffic", url: "/function/traffic", icon: Activity },
       { id: "commands", title: "Tool Execution", url: "/function/commands", icon: Terminal },
       { id: "processes", title: "Processes", url: "/function/processes", icon: Activity },
+      { id: "workflows", title: "Workflows", url: "/function/workflows", icon: Workflow as LucideIcon },
       { id: "llm-records", title: "LLM Recording", url: "/function/llm-records", icon: Radio },
       { id: "assets", title: "Assets", url: "/function/assets", icon: Network },
       { id: "sync", title: "Asset Sync", url: "/function/sync", icon: FolderSync },

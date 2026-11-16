@@ -94,7 +94,6 @@ docker compose logs superartex | grep "Setup token"
 ## Toolkit
 
 Shipped skills are playbooks. They do not add a second way to run commands. Each one is off until you grant it to an agent.
-
 | Skill | What it covers |
 |---|---|
 | `network-recon` | nmap, rustscan, masscan, arp-scan |
@@ -118,6 +117,16 @@ A successful run with the same task and the same arguments is not executed again
 Built-in task templates, inserted once and never re-seeded after you delete one: Bug Bounty Recon, Network Penetration Test, Cloud Security Audit, API Security Assessment, CTF Binary Challenge, AD Security Audit (read-only posture review). Applying one copies its goal into a new task. The worker, pentest, and auto agents are bound to the scan-job tools on first seed. You can turn that binding off per agent.
 
 Not shipped: a C2/WebShell session manager and AD lateral-movement playbooks. Every execution path in this product goes through the same approval gate, target scope check, and audit log, and that is deliberate.
+
+## Typed wrappers, workflows, and the CTF solver
+
+**Typed scan wrappers.** Each allowlisted scanner also has a structured tool (for example `nmap_scan` with `target`, `ports`, `service_version`) that maps typed parameters to argv and submits through the same runner — same cache, same caps, same audit. Interactive attack tools (sqlmap, hashcat, john, hydra) deliberately get no typed wrapper; they stay on the approval-gated Bash path.
+
+**Workflows** (`/function/workflows`) chain typed wrappers into an ordered step list with stop/continue-on-failure, run against a task you pick. Runs execute in order, each step is an ordinary recorded scan job, and the run history shows per-step status. The editor is form-based; each step's params are validated against the tool's schema.
+
+**CTF solver agent.** A built-in `ctf` agent seeded with a classify → attempt → verify → iterate prompt and visibility on the lab skills (exploit-dev, forensics-ctf, sqli-audit, password-audit, web-fuzzing, vuln-scan, network-recon). It works on challenge files in the task workspace or deliberately vulnerable lab targets; nothing about it changes the approval gates.
+
+**Discord and Slack notification channels.** Same model as the existing channels: the webhook URL is the credential, masked on readback, validated against the official hosts before sending.
 
 ## How it works
 

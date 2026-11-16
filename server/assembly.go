@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Autumn-27/norma/skill"
+	actool "github.com/Autumn-27/norma/tool"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/traffic"
-	"github.com/Autumn-27/norma/skill"
-	actool "github.com/Autumn-27/norma/tool"
 )
 
 // mcpUntrustedNote is appended to every MCP tool description: a one-line

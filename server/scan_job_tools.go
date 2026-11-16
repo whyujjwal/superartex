@@ -125,6 +125,10 @@ func (s *Server) seedScanJobTools() {
 		schema, _ := json.Marshal(t.InputSchema())
 		_ = s.m.PG().SeedTool(t.Name(), t.Description(), schema, agents)
 	}
+	for _, spec := range typedScanSpecs {
+		schema, _ := json.Marshal(objSchema(spec.propsWithWait(), spec.required...))
+		_ = s.m.PG().SeedTool(spec.key, spec.desc, schema, agents)
+	}
 }
 
 func (s *Server) listScanJobs(w http.ResponseWriter, r *http.Request) {

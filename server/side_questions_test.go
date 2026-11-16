@@ -14,11 +14,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Autumn-27/norma/harness"
+	"github.com/Autumn-27/norma/llm"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/sidequestion"
-	"github.com/Autumn-27/norma/harness"
-	"github.com/Autumn-27/norma/llm"
 )
 
 type sideHTTPProvider struct {

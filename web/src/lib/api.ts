@@ -24,6 +24,10 @@ import type {
   ChatAttachment,
   CommandRecord,
   ScanJob,
+  ScanToolSpec,
+  Workflow,
+  WorkflowRun,
+  WorkflowStep,
   Company,
   CompanyScopeMutation,
   CompanyScopeRule,
@@ -1315,6 +1319,19 @@ export const api = {
     return get<{ jobs: ScanJob[] }>(`/scan-jobs?${sp}`).then((r) => arr(r.jobs));
   },
   cancelScanJob: (id: string) => post<ScanJob>(`/scan-jobs/${encodeURIComponent(id)}/cancel`),
+  scanTools: () => get<{ tools: ScanToolSpec[] }>("/scan-tools").then((r) => arr(r.tools)),
+  workflows: () => get<{ workflows: Workflow[] }>("/workflows").then((r) => arr(r.workflows)),
+  createWorkflow: (input: { name: string; description?: string; steps: WorkflowStep[] }) =>
+    post<Workflow>("/workflows", input),
+  deleteWorkflow: (id: number) => del<{ deleted: number }>(`/workflows/${id}`),
+  runWorkflow: (id: number, taskID: string) =>
+    post<{ run_id: number; status: string }>(`/workflows/${id}/run`, { task_id: taskID }),
+  workflowRuns: (params?: { workflow?: number; limit?: number }) => {
+    const sp = new URLSearchParams();
+    if (params?.workflow) sp.set("workflow", String(params.workflow));
+    if (params?.limit) sp.set("limit", String(params.limit));
+    return get<{ runs: WorkflowRun[] }>(`/workflows/runs?${sp}`).then((r) => arr(r.runs));
+  },
 
   // ---- LLM records ----
   llmRecords: (params?: { model?: string; session?: string; task?: string; page?: number; size?: number }) => {

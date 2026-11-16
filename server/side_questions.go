@@ -15,12 +15,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Autumn-27/norma/llm"
+	"github.com/Autumn-27/norma/transcript"
 	"github.com/whyujjwal/superartex/agent"
 	"github.com/whyujjwal/superartex/db"
 	"github.com/whyujjwal/superartex/llmrec"
 	"github.com/whyujjwal/superartex/sidequestion"
-	"github.com/Autumn-27/norma/llm"
-	"github.com/Autumn-27/norma/transcript"
 )
 
 type sideRun struct {
