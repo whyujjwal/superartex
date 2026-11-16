@@ -20,25 +20,25 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/llmpool"
-	"github.com/Autumn-27/artex/llmrec"
-	"github.com/Autumn-27/artex/report"
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/whyujjwal/superartex/agent"
+	"github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/egress"
+	"github.com/whyujjwal/superartex/intercept"
+	"github.com/whyujjwal/superartex/llmpool"
+	"github.com/whyujjwal/superartex/llmrec"
+	"github.com/whyujjwal/superartex/report"
+	"github.com/whyujjwal/superartex/traffic"
 	"github.com/Autumn-27/norma/llm"
 	actool "github.com/Autumn-27/norma/tool"
 	"github.com/Autumn-27/norma/transcript"
 )
 
-// BuildVersion is the backend application version, injected from cmd/artex at
+// BuildVersion is the backend application version, injected from cmd/superartex at
 // startup (which in turn gets it from -ldflags "-X main.version=<tag>").
 // Defaults to "dev" for local builds. Exposed to the frontend via GET /api/health.
 var BuildVersion = "dev"
 
-// Server exposes the ARTEX backend over a JSON HTTP API for the shadcn/ui
+// Server exposes the SUPERARTEX backend over a JSON HTTP API for the shadcn/ui
 // frontend.
 type Server struct {
 	m      *Manager
@@ -48,13 +48,13 @@ type Server struct {
 	skillDir string // root directory for skill subdirectories
 	jwtKey   []byte // HS256 signing key loaded from / generated into keyDir/jwt.key
 
-	scrubSecrets bool // drop ARTEX_PG_DSN and the API keys from the environment once read (binary only)
+	scrubSecrets bool // drop SUPERARTEX_PG_DSN and the API keys from the environment once read (binary only)
 
 	setupMu    sync.Mutex
 	setupToken string // one-time token POST /api/auth/init requires; empty when none is active
 
 	loginLimit     *loginLimiter  // per-IP attempt limit on POST /api/auth/login
-	trustedProxies []netip.Prefix // ARTEX_TRUSTED_PROXIES; see clientIP
+	trustedProxies []netip.Prefix // SUPERARTEX_TRUSTED_PROXIES; see clientIP
 
 	// concMu serializes concurrency-cap decisions (admission + reconcile) so a
 	// scheduler tick and an HTTP settings change / task creation can't both count
@@ -995,8 +995,8 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 200, map[string]any{"ok": true})
 		return
 	}
-	out := map[string]any{"ok": true, "service": "artex", "version": BuildVersion}
-	// Opt-in only (ARTEX_UPDATE_CHECK); off, this returns "" without any request.
+	out := map[string]any{"ok": true, "service": "superartex", "version": BuildVersion}
+	// Opt-in only (SUPERARTEX_UPDATE_CHECK); off, this returns "" without any request.
 	if latest := updates.newerVersion(r.Context(), time.Now(), BuildVersion); latest != "" {
 		out["latest_version"] = latest
 	}
@@ -2346,7 +2346,7 @@ func (s *Server) findingsExport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stage, err := os.MkdirTemp("", "artex-finding-export-")
+	stage, err := os.MkdirTemp("", "superartex-finding-export-")
 	if err != nil {
 		writeErr(w, 500, err.Error())
 		return
@@ -3532,7 +3532,7 @@ func (s *Server) settingsPayload() map[string]any {
 		// Render limits of IM messages; 0 = no truncation.
 		"notify_summary_max_runes": limits.SummaryRunes,
 		"notify_assets_max_shown":  limits.AssetsShown,
-		// Effective target noise profile (off by default): the stored setting, else ARTEX_NOISE_PROFILE.
+		// Effective target noise profile (off by default): the stored setting, else SUPERARTEX_NOISE_PROFILE.
 		"noise_profile": egress.CurrentProfile().Name,
 	}
 }

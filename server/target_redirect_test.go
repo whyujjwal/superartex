@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/whyujjwal/superartex/db"
 )
 
 // Step 1.9: the redirect hops of the custom http tool and of a worker's

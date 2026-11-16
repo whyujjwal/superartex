@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/llmrec"
+	"github.com/whyujjwal/superartex/agent"
+	"github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/llmrec"
 	"github.com/Autumn-27/norma/llm"
 	"github.com/Autumn-27/norma/transcript"
 )

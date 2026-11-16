@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/whyujjwal/superartex/db"
 )
 
 // The gate inside the custom tools: GateRenderedURL and GateRenderedCommand

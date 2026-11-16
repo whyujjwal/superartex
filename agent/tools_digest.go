@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/whyujjwal/superartex/db"
 	actool "github.com/Autumn-27/norma/tool"
 )
 

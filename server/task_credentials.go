@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/notify"
+	"github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/notify"
 )
 
 // Task credential HTTP handlers (#3). The agent-side write path is the

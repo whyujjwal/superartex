@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"net/url"
 
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/whyujjwal/superartex/egress"
+	"github.com/whyujjwal/superartex/intercept"
 	actool "github.com/Autumn-27/norma/tool"
 )
 

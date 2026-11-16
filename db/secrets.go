@@ -22,13 +22,13 @@ import (
 // Secrets at rest: AES-256-GCM, a random nonce per value, AAD "<table>.<column>"
 // ("settings.<key>" for the secret settings).
 // TEXT stores "enc:v1:<base64(nonce||ciphertext)>"; JSONB stores
-// {"__artex_enc":"enc:v1:..."} over the canonical JSON. Empty values stay empty.
+// {"__superartex_enc":"enc:v1:..."} over the canonical JSON. Empty values stay empty.
 // A value that fails to decrypt is an error, never returned as-is.
 
 const (
 	secretPrefix  = "enc:v1:"
-	sealedJSONKey = "__artex_enc"
-	secretKeyEnv  = "ARTEX_SECRET_KEY"
+	sealedJSONKey = "__superartex_enc"
+	secretKeyEnv  = "SUPERARTEX_SECRET_KEY"
 	secretKeyFile = "secret.key"
 )
 
@@ -149,7 +149,7 @@ func (b *secretBox) decrypt(aad, v string) (string, error) {
 	return string(plain), nil
 }
 
-// sealedJSON returns the ciphertext of a {"__artex_enc":"enc:v1:..."} envelope.
+// sealedJSON returns the ciphertext of a {"__superartex_enc":"enc:v1:..."} envelope.
 func sealedJSON(raw string) (string, bool) {
 	if !strings.Contains(raw, `"`+sealedJSONKey+`"`) {
 		return "", false
@@ -242,7 +242,7 @@ func parseSecretKey(s string) ([]byte, error) {
 	return nil, errors.New("must be 32 bytes, base64 or hex encoded")
 }
 
-// InitSecrets loads the key (ARTEX_SECRET_KEY, else keyDir/secret.key, else a new
+// InitSecrets loads the key (SUPERARTEX_SECRET_KEY, else keyDir/secret.key, else a new
 // one, refused when encrypted data exists) and encrypts legacy plaintext, under
 // the schema advisory lock so concurrent instances backfill once.
 func (d *DB) InitSecrets(keyDir string) error {

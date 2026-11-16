@@ -17,11 +17,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/notify"
+	"github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/egress"
+	"github.com/whyujjwal/superartex/guard"
+	"github.com/whyujjwal/superartex/intercept"
+	"github.com/whyujjwal/superartex/notify"
 	"github.com/Autumn-27/norma/permission"
 	actool "github.com/Autumn-27/norma/tool"
 )

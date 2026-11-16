@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/whyujjwal/superartex/db"
 )
 
 func TestMain(m *testing.M) {

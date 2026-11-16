@@ -158,7 +158,7 @@ func emailCfg(t *testing.T, f *fakeSMTP, extra map[string]any) map[string]any {
 func TestEmailSendDeliversFullMessage(t *testing.T) {
 	f := newFakeSMTP(t)
 	f.advertiseAuth = true
-	cfg := emailCfg(t, f, map[string]any{"username": "artex", "password": "pw"})
+	cfg := emailCfg(t, f, map[string]any{"username": "superartex", "password": "pw"})
 
 	if _, err := (emailChannel{}).Send(context.Background(), cfg, singleMsg()); err != nil {
 		t.Fatalf("delivery failed: %v", err)
@@ -249,7 +249,7 @@ func TestEmailSendRefusesPlaintextCredentials(t *testing.T) {
 		"port":     float64(port),
 		"from":     "a@example.com",
 		"to":       []any{"b@example.com"},
-		"username": "artex",
+		"username": "superartex",
 		"password": "pw",
 	}
 	_, err := (emailChannel{}).Send(context.Background(), cfg, singleMsg())

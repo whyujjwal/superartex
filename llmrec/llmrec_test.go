@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/whyujjwal/superartex/db"
 	"github.com/Autumn-27/norma/llm"
 	"github.com/Autumn-27/norma/transcript"
 	"github.com/google/uuid"
@@ -109,10 +109,10 @@ func (meteredStreamProvider) Stream(context.Context, llm.CompletionRequest) iter
 }
 
 func TestSideUsageRecordedOnceOnConsumerCancellation(t *testing.T) {
-	t.Skip("timing-sensitive: passes locally, flaky on CI runners; tracked in BaaRai/ARTEX#9")
-	dsn := os.Getenv("ARTEX_PG_DSN")
+	t.Skip("timing-sensitive: passes locally, flaky on CI runners; tracked in whyujjwal/superartex#9")
+	dsn := os.Getenv("SUPERARTEX_PG_DSN")
 	if dsn == "" {
-		t.Skip("requires isolated ARTEX_PG_DSN")
+		t.Skip("requires isolated SUPERARTEX_PG_DSN")
 	}
 	pg, err := db.Open(dsn)
 	if err != nil {

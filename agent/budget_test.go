@@ -105,7 +105,7 @@ func TestDispatchStopsUnderOneWorkerEstimate(t *testing.T) {
 
 func TestBudgetUnsetIsPassthrough(t *testing.T) {
 	for _, v := range []string{"", "0", "abc"} {
-		for _, k := range []string{"ARTEX_TASK_BUDGET_TOKENS", "ARTEX_TASK_BUDGET_TURNS", "ARTEX_INTENT_BUDGET_TOKENS", "ARTEX_INTENT_BUDGET_TURNS"} {
+		for _, k := range []string{"SUPERARTEX_TASK_BUDGET_TOKENS", "SUPERARTEX_TASK_BUDGET_TURNS", "SUPERARTEX_INTENT_BUDGET_TOKENS", "SUPERARTEX_INTENT_BUDGET_TURNS"} {
 			t.Setenv(k, v)
 		}
 		if NewBudgetLedger(BudgetsFromEnv()) != nil {

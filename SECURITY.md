@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-ARTEX is an autonomous penetration-testing tool. Security fixes are provided only for the latest official release line. The `main` branch is not considered a stable release and may change at any time.
+SUPERARTEX is an autonomous penetration-testing tool. Security fixes are provided only for the latest official release line. The `main` branch is not considered a stable release and may change at any time.
 
 Only the latest release line receives security fixes. Older releases do not receive fixes; please upgrade to the latest release.
 
@@ -14,11 +14,11 @@ Notes:
 
 **Do not open a public issue for a security vulnerability.**
 
-Report through **GitHub Security Advisories**: **Security** tab → **Report a vulnerability** in the `BaaRai/ARTEX` repository. This is the only reporting channel.
+Report through **GitHub Security Advisories**: **Security** tab → **Report a vulnerability** in the `whyujjwal/superartex` repository. This is the only reporting channel.
 
 Please include:
 - A description of the vulnerability and its expected impact.
-- The ARTEX version and/or commit hash.
+- The SUPERARTEX version and/or commit hash.
 - Runtime environment (OS, Docker/local, PostgreSQL, LLM provider, etc.).
 - Minimal reproduction steps (PoC).
 - Logs, screenshots, or sample traffic with **sensitive data removed**.
@@ -28,8 +28,8 @@ Please include:
 
 ## Scope and Authorized Testing
 
-ARTEX is an offensive-security tool. Test only against:
-- Your own ARTEX deployment in a lab or local environment;
+SUPERARTEX is an offensive-security tool. Test only against:
+- Your own SUPERARTEX deployment in a lab or local environment;
 - Systems you own;
 - Targets explicitly authorized in writing (bug bounty, pentest contract, etc.).
 
@@ -51,21 +51,21 @@ This is an open-source project maintained on a best-effort basis. We aim to ackn
 
 We will explain the reason, for example:
 - It is not a security vulnerability but intended behavior.
-- It is outside ARTEX’s scope (e.g., an issue in an LLM provider, PostgreSQL, Docker, or a browser).
+- It is outside SUPERARTEX’s scope (e.g., an issue in an LLM provider, PostgreSQL, Docker, or a browser).
 - There is insufficient information to reproduce it.
-- The report only states that “the tool can be misused” without identifying a specific technical flaw in ARTEX.
+- The report only states that “the tool can be misused” without identifying a specific technical flaw in SUPERARTEX.
 
 Where appropriate, we may convert the report into a public hardening issue or feature request.
 
 ## Out of Scope
 
-The following are generally **not** considered ARTEX security vulnerabilities:
+The following are generally **not** considered SUPERARTEX security vulnerabilities:
 - Attacks or scans against systems you do not own or are not authorized to test.
 - Self-XSS, spam, or brute-force without real impact.
 - Large-scale DoS/DDoS or resource-exhaustion attacks.
 - Social engineering targeting maintainers or users.
-- Issues that exist only in third-party dependencies and do not affect ARTEX.
-- Reports that “ARTEX can be used to attack systems” when the user has valid authorization — this is the nature of a penetration-testing tool, not a vulnerability.
+- Issues that exist only in third-party dependencies and do not affect SUPERARTEX.
+- Reports that “SUPERARTEX can be used to attack systems” when the user has valid authorization — this is the nature of a penetration-testing tool, not a vulnerability.
 - Missing headers or hardening configuration without a concrete security impact.
 
 ## Safe Harbor
@@ -78,4 +78,4 @@ We welcome ethical security research. If you follow this policy and test only wi
 - Do not publish a public PoC without maintainer consent.
 - If you do not receive a response within a reasonable time, please ping the contact channel above before disclosing.
 
-Thank you for helping make ARTEX safer.
+Thank you for helping make SUPERARTEX safer.

@@ -161,7 +161,7 @@ func isTrusted(a netip.Addr, trusted []netip.Prefix) bool {
 	return false
 }
 
-// ParseTrustedProxies parses ARTEX_TRUSTED_PROXIES: comma-separated CIDRs (a
+// ParseTrustedProxies parses SUPERARTEX_TRUSTED_PROXIES: comma-separated CIDRs (a
 // bare address means that one host). Empty means no trusted proxy.
 func ParseTrustedProxies(s string) ([]netip.Prefix, error) {
 	var out []netip.Prefix

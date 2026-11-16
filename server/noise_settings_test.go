@@ -8,15 +8,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/egress"
+	"github.com/whyujjwal/superartex/egress"
 )
 
 func TestNoiseProfileSettingHTTP(t *testing.T) {
 	skipWithoutDSN(t)
 	prev := egress.CurrentProfile()
 	t.Cleanup(func() { egress.SetProfile(prev) })
-	t.Setenv("ARTEX_NOISE_PROFILE", "quiet")
-	t.Setenv("ARTEX_TARGET_USER_AGENT", "artex-noise-test/1")
+	t.Setenv("SUPERARTEX_NOISE_PROFILE", "quiet")
+	t.Setenv("SUPERARTEX_TARGET_USER_AGENT", "superartex-noise-test/1")
 
 	m, err := NewManager(t.TempDir(), "")
 	if err != nil {
@@ -43,7 +43,7 @@ func TestNoiseProfileSettingHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 	m2.Close()
-	if p := egress.CurrentProfile(); p.Name != "balanced" || p.UserAgent != "artex-noise-test/1" {
+	if p := egress.CurrentProfile(); p.Name != "balanced" || p.UserAgent != "superartex-noise-test/1" {
 		t.Fatalf("NewManager with setting balanced applied %+v", p)
 	}
 	if err := m.pg.SetSetting(settingNoiseProfile, "loud"); err != nil {

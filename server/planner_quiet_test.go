@@ -3,7 +3,7 @@ package server
 import (
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/whyujjwal/superartex/db"
 )
 
 // Planner quiet-mode (#79): an edge round is dropped only when BOTH hold — the

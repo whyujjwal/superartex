@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/guard"
+	"github.com/whyujjwal/superartex/intercept"
 	"github.com/Autumn-27/norma/agentcore"
 	"github.com/Autumn-27/norma/llm"
 	"github.com/Autumn-27/norma/permission"
@@ -17,7 +17,7 @@ import (
 // Exercise the actual SDK event -> hook -> execution -> result path. No real
 // model or command is used; the probe tool only returns a fixed string.
 func TestCaptureApprovalLifecycle(t *testing.T) {
-	t.Skip("known failure with a fresh database, pre-existing on unmodified upstream; tracked in BaaRai/ARTEX#9")
+	t.Skip("known failure with a fresh database, pre-existing on unmodified upstream; tracked in whyujjwal/superartex#9")
 	dsn, _, err := db.DSN()
 	if err != nil {
 		t.Skip("no test database configured")

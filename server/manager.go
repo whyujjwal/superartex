@@ -16,14 +16,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/config"
-	pgdb "github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/enrich"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/whyujjwal/superartex/agent"
+	"github.com/whyujjwal/superartex/config"
+	pgdb "github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/egress"
+	"github.com/whyujjwal/superartex/enrich"
+	"github.com/whyujjwal/superartex/guard"
+	"github.com/whyujjwal/superartex/intercept"
+	"github.com/whyujjwal/superartex/traffic"
 	actool "github.com/Autumn-27/norma/tool"
 )
 
@@ -306,7 +306,7 @@ const (
 	// agent/chat) have context compaction taken over by noa, replacing the built-in compaction. Read once per run; toggling affects only runs started afterwards.
 	settingNoaCompaction = "noa_compaction"
 	// Target noise profile (off|quiet|balanced|aggressive). When stored it wins over
-	// ARTEX_NOISE_PROFILE, which stays the fallback; applied at startup and on PUT.
+	// SUPERARTEX_NOISE_PROFILE, which stays the fallback; applied at startup and on PUT.
 	settingNoiseProfile = "noise_profile"
 	// defaultWebSearchBackend is used when web search is on but no backend was picked.
 	defaultWebSearchBackend = "ddgs"

@@ -33,14 +33,15 @@ function isFullBleed(pathname: string) {
   return normalized.startsWith("/function/tasks/");
 }
 
-const RELEASES_URL = "https://github.com/BaaRai/ARTEX/releases";
-const UPDATE_DISMISSED_KEY = "artex-update-dismissed";
+const RELEASES_URL =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_RELEASES_URL?.trim()) || "";
+const UPDATE_DISMISSED_KEY = "superartex-update-dismissed";
 
 export function MainContent({ children }: { children: ReactNode }) {
   const currentUser = useCurrentUser();
   const pathname = usePathname();
   const [version, setVersion] = useState("");
-  // Only set when the backend has the opt-in update check on (ARTEX_UPDATE_CHECK) and found a newer release.
+  // Only set when the backend has the opt-in update check on (SUPERARTEX_UPDATE_CHECK) and found a newer release.
   const [latest, setLatest] = useState("");
 
   useEffect(() => {
@@ -56,9 +57,13 @@ export function MainContent({ children }: { children: ReactNode }) {
 
   const updateBanner = latest ? (
     <div className="flex shrink-0 items-center justify-center gap-2 border-b bg-muted/50 px-4 py-1 text-xs">
-      <a href={RELEASES_URL} target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
-        ARTEX {latest} is available. See the release notes.
-      </a>
+      {RELEASES_URL ? (
+        <a href={RELEASES_URL} target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
+          Version {latest} is available. See the release notes.
+        </a>
+      ) : (
+        <span>Version {latest} is available.</span>
+      )}
       <button
         type="button"
         aria-label="Dismiss update notice"

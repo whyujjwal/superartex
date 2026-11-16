@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Autumn-27/artex/agent"
+	"github.com/whyujjwal/superartex/agent"
 	"github.com/Autumn-27/norma/harness"
 )
 

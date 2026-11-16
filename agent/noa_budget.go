@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/Autumn-27/artex/sidequestion"
+	"github.com/whyujjwal/superartex/sidequestion"
 	"github.com/Autumn-27/norma/llm"
 )
 

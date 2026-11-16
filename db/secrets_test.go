@@ -45,7 +45,7 @@ func TestSecretBoxCrypto(t *testing.T) {
 	if p, err := b.open(colMCPEnv, sealed); err != nil || p != `{"a":"tok","b":1}` {
 		t.Fatalf("canonical JSON round trip: %q %v", p, err)
 	}
-	if _, err := b.seal(colMCPEnv, `{"__artex_enc":"x"}`); err == nil {
+	if _, err := b.seal(colMCPEnv, `{"__superartex_enc":"x"}`); err == nil {
 		t.Fatal("reserved key must be refused")
 	}
 	if out, _ := b.seal(colMCPEnv, `{}`); out != `{}` {
@@ -205,7 +205,7 @@ func TestSecretsAtRestWriteRead(t *testing.T) {
 	r := secretFixture(t, d, false)
 	rawSecrets(t, d, r)
 	assertPlainReads(t, d, r)
-	if _, err := d.SaveMCP(&MCPServer{Name: "t-sec-reserved", Transport: "http", Env: json.RawMessage(`{"__artex_enc":"x"}`)}); err == nil {
+	if _, err := d.SaveMCP(&MCPServer{Name: "t-sec-reserved", Transport: "http", Env: json.RawMessage(`{"__superartex_enc":"x"}`)}); err == nil {
 		t.Fatal("reserved key must be refused on write")
 	}
 }

@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/whyujjwal/superartex/agent"
+	"github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/guard"
+	"github.com/whyujjwal/superartex/intercept"
 	"github.com/Autumn-27/norma/llm"
 )
 
@@ -398,7 +398,7 @@ func TestTargetGateSeamAllowsWithoutDBWrite(t *testing.T) {
 	if err := ic.SetEnabledTools([]string{"Bash"}); err != nil {
 		t.Fatal(err)
 	}
-	const sentinel = "ARTEX_TARGET_SEAM_PROBE"
+	const sentinel = "SUPERARTEX_TARGET_SEAM_PROBE"
 	rule, err := f.m.pg.CreateInterceptRule("target seam probe", "tool_input", "string", sentinel, "deny", "", 1000000, true, false, 0, "deny")
 	if err != nil {
 		t.Fatal(err)

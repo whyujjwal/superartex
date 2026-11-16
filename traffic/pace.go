@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Autumn-27/artex/egress"
+	"github.com/whyujjwal/superartex/egress"
 	mproxy "github.com/lqqyt2423/go-mitmproxy/proxy"
 )
 

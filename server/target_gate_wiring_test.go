@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/whyujjwal/superartex/db"
+	"github.com/whyujjwal/superartex/intercept"
+	"github.com/whyujjwal/superartex/traffic"
 	actool "github.com/Autumn-27/norma/tool"
 )
 
@@ -111,7 +111,7 @@ func TestTargetGateExemptionsAPI(t *testing.T) {
 		t.Fatalf("history: %d %v", code, body)
 	}
 	last, _ := changes[0].(map[string]any)
-	if last["changed_by"] != "ARTEX" || last["digest"] != digest || len(exemptionsOf(t, last, "after")) != 3 || !slices.Equal(exemptionsOf(t, last, "before"), original) {
+	if last["changed_by"] != "SUPERARTEX" || last["digest"] != digest || len(exemptionsOf(t, last, "after")) != 3 || !slices.Equal(exemptionsOf(t, last, "before"), original) {
 		t.Fatalf("last change = %v", last)
 	}
 
@@ -308,7 +308,7 @@ WHERE task_id=$1 AND status='pending' AND target_key='203.0.113.7:8080'`, task.I
 		t.Fatalf("decide: %d", code)
 	}
 	if pins, err := pg.ListTargetPins(scope); err != nil || len(pins) != 1 || pins[0].Host != "203.0.113.7" || pins[0].Port != 8080 ||
-		!slices.Equal(pins[0].PinnedIPs, []string{"203.0.113.7"}) || pins[0].DecidedBy != "ARTEX" {
+		!slices.Equal(pins[0].PinnedIPs, []string{"203.0.113.7"}) || pins[0].DecidedBy != "SUPERARTEX" {
 		t.Fatalf("pins = %+v, %v", pins, err)
 	}
 	ring := len(task.TargetGuard.Audit())

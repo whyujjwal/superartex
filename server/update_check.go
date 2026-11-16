@@ -12,18 +12,24 @@ import (
 	"time"
 )
 
-// The update check is opt-in: only ARTEX_UPDATE_CHECK=1 (or true/on/yes) lets
-// the backend ask the public GitHub releases API for the latest ARTEX tag.
-// Unset, it makes no request at all and the UI shows no banner.
-const updateCheckURL = "https://api.github.com/repos/BaaRai/ARTEX/releases/latest"
+// The update check is opt-in: SUPERARTEX_UPDATE_CHECK=1 (or true/on/yes) and
+// SUPERARTEX_UPDATE_RELEASES_API set to a GitHub releases/latest URL (your fork).
+// Without the URL, no request is made and the UI shows no banner.
 const updateCheckInterval = 24 * time.Hour
 
 func updateCheckEnabled() bool {
-	switch strings.ToLower(strings.TrimSpace(os.Getenv("ARTEX_UPDATE_CHECK"))) {
+	if strings.TrimSpace(os.Getenv("SUPERARTEX_UPDATE_RELEASES_API")) == "" {
+		return false
+	}
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("SUPERARTEX_UPDATE_CHECK"))) {
 	case "1", "true", "on", "yes":
 		return true
 	}
 	return false
+}
+
+func updateCheckURL() string {
+	return strings.TrimSpace(os.Getenv("SUPERARTEX_UPDATE_RELEASES_API"))
 }
 
 // updateCheck caches the last check (time + latest tag) in memory. A failed
@@ -62,11 +68,15 @@ func (u *updateCheck) newerVersion(ctx context.Context, now time.Time, current s
 // fetchLatestRelease sends only a generic User-Agent: no cookies, no host or
 // user identifiers.
 func fetchLatestRelease(ctx context.Context) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, updateCheckURL, nil)
+	url := updateCheckURL()
+	if url == "" {
+		return "", errors.New("update check: SUPERARTEX_UPDATE_RELEASES_API not set")
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "artex-update-check")
+	req.Header.Set("User-Agent", "superartex-update-check")
 	req.Header.Set("Accept", "application/vnd.github+json")
 	resp, err := (&http.Client{Timeout: 5 * time.Second}).Do(req)
 	if err != nil {

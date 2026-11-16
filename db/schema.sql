@@ -1,4 +1,4 @@
--- ARTEX PostgreSQL schema (single source of truth)
+-- SUPERARTEX PostgreSQL schema (single source of truth)
 -- Idempotent: safe to run repeatedly (IF NOT EXISTS / OR REPLACE / DROP TRIGGER IF EXISTS).
 
 -- =====================================================================

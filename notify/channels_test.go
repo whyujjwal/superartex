@@ -26,14 +26,14 @@ func singleMsg() Message {
 			Severity:  "high",
 			Summary:   "param id\nunfiltered leads to injection",
 			Assets:    []string{"a.example.com", "b.example.com"},
-			DetailURL: "https://artex.local/function/findings/detail?id=42",
+			DetailURL: "https://superartex.local/function/findings/detail?id=42",
 		}},
 	}
 }
 
 // batchMsg builds a batch digest message.
 func batchMsg(n int) Message {
-	m := Message{Batch: true, WindowMinutes: 30, HomeURL: "https://artex.local/function/findings"}
+	m := Message{Batch: true, WindowMinutes: 30, HomeURL: "https://superartex.local/function/findings"}
 	for i := 0; i < n; i++ {
 		m.Items = append(m.Items, Item{
 			FindingID: int64(i + 1),
@@ -75,7 +75,7 @@ func TestDingTalkSendsActionCardWhenLinkPresent(t *testing.T) {
 			t.Fatalf("with a backlink it should send actionCard, got %v", body["msgtype"])
 		}
 		card, _ := body["actionCard"].(map[string]any)
-		if card["singleURL"] != "https://artex.local/function/findings/detail?id=42" {
+		if card["singleURL"] != "https://superartex.local/function/findings/detail?id=42" {
 			t.Errorf("backlink lost: %v", card["singleURL"])
 		}
 	})
@@ -181,7 +181,7 @@ func TestFeishuCardStructureAndSign(t *testing.T) {
 			actions, _ := em["actions"].([]any)
 			for _, a := range actions {
 				am, _ := a.(map[string]any)
-				if am["url"] == "https://artex.local/function/findings/detail?id=42" {
+				if am["url"] == "https://superartex.local/function/findings/detail?id=42" {
 					foundButton = true
 				}
 			}
@@ -379,7 +379,7 @@ func TestEmailEscapesStructuralInjection(t *testing.T) {
 			Severity:  "high",
 			Name:      `<script>alert(1)</script>`,
 			Summary:   "a & b > c",
-			DetailURL: `https://artex.local/x?a="onmouseover=alert(1)`,
+			DetailURL: `https://superartex.local/x?a="onmouseover=alert(1)`,
 		}},
 	}
 	html := htmlBody(m, 0)

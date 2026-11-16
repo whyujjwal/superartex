@@ -12,18 +12,18 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: artex
+          POSTGRES_USER: supersuperartex
           POSTGRES_PASSWORD: testpass
           POSTGRES_DB: artextest
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U artex"
+          --health-cmd "pg_isready -U superartex"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      ARTEX_PG_DSN: postgres://artex:testpass@localhost:5432/artextest?sslmode=disable
+      SUPERARTEX_PG_DSN: postgres://superartex:testpass@localhost:5432/artextest?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -54,9 +54,9 @@ jobs:
         # never gets the schema (packages use suffixed databases), and cached
         # test results mean no test database is guaranteed to exist.
         env:
-          SQL_DSN: postgres://artex:testpass@localhost:5432/artextest_sqlscripts?sslmode=disable
+          SQL_DSN: postgres://superartex:testpass@localhost:5432/artextest_sqlscripts?sslmode=disable
         run: |
-          psql "$ARTEX_PG_DSN" -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE artextest_sqlscripts'
+          psql "$SUPERARTEX_PG_DSN" -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE artextest_sqlscripts'
           psql "$SQL_DSN" -X -q -v ON_ERROR_STOP=1 -f db/schema.sql
           for f in db/migrations/*.sql; do psql "$SQL_DSN" -X -q -v ON_ERROR_STOP=1 -f "$f"; done
           psql "$SQL_DSN" -X -v ON_ERROR_STOP=1 -f scripts/sql/20261115-task-query-indexes.sql
@@ -68,10 +68,10 @@ jobs:
         # Its own database: the plain run above leaves rows behind and the db tests
         # are not idempotent across runs (duplicate llm_profiles names).
         env:
-          ARTEX_PG_DSN: postgres://artex:testpass@localhost:5432/artextest_race?sslmode=disable
+          SUPERARTEX_PG_DSN: postgres://superartex:testpass@localhost:5432/artextest_race?sslmode=disable
 
         run: >-
-          go test -race -p 1 ./agent ./cmd/artex ./config ./db ./evidence ./guard
+          go test -race -p 1 ./agent ./cmd/superartex ./config ./db ./evidence ./guard
           ./intercept ./llmpool ./llmrec ./mcphttp ./notify ./server ./sidequestion
           ./traffic
 

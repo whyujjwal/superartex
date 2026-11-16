@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/llmrec"
+	"github.com/whyujjwal/superartex/agent"
+	"github.com/whyujjwal/superartex/llmrec"
 )
 
-// Hierarchical run budgets (agent/budget.go), off unless an ARTEX_*_BUDGET_* env
+// Hierarchical run budgets (agent/budget.go), off unless an SUPERARTEX_*_BUDGET_* env
 // var is set. Every helper here is a no-op when budgetFor returns nil.
 
 // budgetFor returns the task's budget ledger, created on first use from the env;

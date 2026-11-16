@@ -5,7 +5,7 @@ description: "Invoke this skill when a hunt task needs breadth-first recon on an
 
 # bbot-recon: recursive recon under program-policy gates
 
-bbot (blacklanternsecurity/bbot, AGPL-3.0 like ARTEX, pinned v3.0.2 at
+bbot (blacklanternsecurity/bbot, AGPL-3.0 like SUPERARTEX, pinned v3.0.2 at
 `/usr/local/bin/bbot`, venv `/opt/bbot`, module dependencies preinstalled in
 the image) chains every discovery into an event graph and emits structured
 JSON. Use it for breadth. Keep the single-purpose tools (subfinder, httpx,
