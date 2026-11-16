@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="web/public/logo.svg" width="84" alt="SuperArtex logo" />
+<img src="web/public/logo.svg" width="120" alt="SuperArtex logo" />
 
 # SuperArtex
 
@@ -9,17 +9,19 @@
 Self-hosted multi-agent offensive security. A planner explores, workers run real tools,
 and every finding stays bound to the assets and HTTP traffic that prove it.
 
-[![License](https://img.shields.io/badge/license-AGPL--3.0-6b34db)](LICENSE)
-[![Go](https://img.shields.io/github/go-mod/go-version/whyujjwal/superartex?color=6b34db)](go.mod)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-8b5cf6)](LICENSE)
+[![Go](https://img.shields.io/github/go-mod/go-version/whyujjwal/superartex?color=8b5cf6)](go.mod)
 
-[Quick start](#quick-start) · [Screenshots](#screenshots) · [How it works](#how-it-works) · [Install](#installation) · [Configuration](#configuration) · [Security](SECURITY.md)
+[Quick start](#quick-start) · [Toolkit](#toolkit) · [How it works](#how-it-works) · [Installation](#installation) · [Configuration](#configuration) · [Security](SECURITY.md)
 
 </div>
 
 ---
 
-SUPERARTEX is a self-hosted, LLM-driven penetration testing platform. It is not a chat wrapper around
-a scanner: a planner splits a goal into intents, workers execute them with real tools, and the
+## What SuperArtex is
+
+SuperArtex is a self-hosted, LLM-driven penetration testing platform — not a chat wrapper around
+a scanner. A planner splits a goal into intents, workers execute them with real tools, and the
 results are written back into **two linked graphs**: one for what you know about the target, one
 for how the test is progressing. Every finding can carry the captured request and response that
 justify it, and every autonomous action passes through scope rules, approval gates and budgets.
@@ -30,17 +32,21 @@ justify it, and every autonomous action passes through scope rules, approval gat
   exploration graph says *what was tried, what it produced, and why*. Anchors link the two.
 - **Findings with evidence.** A recording MITM proxy and a browser extension capture real traffic;
   findings, evidence quotes and retests are tied to the exact request/response.
-- **Autonomy with brakes.** Human-in-the-loop approvals, argv-prefix rules, scope/deny gates,
-  token and turn budgets, a target noise governor, and prompt-injection framing on tool output.
-- **Self-hosted and model-agnostic.** One Go binary with the Next.js UI embedded, PostgreSQL,
-  your own Anthropic/OpenAI-compatible endpoint, or a local Ollama.
+- **Autonomy with brakes.** Human-in-the-loop approvals, argv-prefix rules, scope and target
+  gates, token and turn budgets, a target noise governor, and prompt-injection framing on tool
+  output.
+- **Self-hosted and model-agnostic.** One Go binary with the Next.js UI embedded, PostgreSQL, and
+  your own Anthropic/OpenAI-compatible endpoint or a local Ollama.
+
+> **SuperArtex is an offensive-security tool.** Use it only against systems you own or are
+> explicitly authorized to test. See [License and disclaimer](#license-and-disclaimer).
 
 ---
 
 ## Quick start
 
 ```bash
-git clone <your-repo-url> superartex
+git clone https://github.com/whyujjwal/superartex.git
 cd superartex
 cp .env.example .env            # set POSTGRES_PASSWORD (and optionally an LLM key)
 docker compose up -d --build    # builds from this checkout, starts PostgreSQL
@@ -53,47 +59,19 @@ printed at startup:
 docker compose logs superartex | grep "Setup token"
 ```
 
-> There is no prebuilt Docker image to pull: the image is always built from your checkout.
-> For all installation paths (script, binaries, source, release archives), see [Installation](#installation).
-
----
-
-## Screenshots
-
-| Tasks | Findings |
-| :---: | :---: |
-| ![Tasks](screenshots/tasks.png) | ![Findings](screenshots/findings.png) |
-
-| Task execution: sessions and tool calls | Exploration graph |
-| :---: | :---: |
-| ![Execution](screenshots/sessions.png) | ![Exploration graph](screenshots/graph.png) |
-
-| Asset coverage graph | Traffic recording |
-| :---: | :---: |
-| ![Asset coverage graph](screenshots/assets_test.png) | ![Traffic](screenshots/traffic.png) |
-
-| Human-in-the-loop chat | Interception approvals |
-| :---: | :---: |
-| ![Chat](screenshots/chat.png) | ![Interception](screenshots/intercept.png) |
-
-<details>
-<summary>More screenshots (assets, agents, LLM, logs)</summary>
-
-| Assets | Agent management |
-| :---: | :---: |
-| ![Assets](screenshots/assets.png) | ![Agent](screenshots/agents.png) |
-
-| LLM configuration | Backend logs |
-| :---: | :---: |
-| ![LLM](screenshots/llm.png) | ![Logs](screenshots/logs.png) |
-
-</details>
+There is no prebuilt Docker image to pull: the image is always built from your checkout.
+Login is a single fixed account (`SUPERARTEX`) with a password you set at setup.
 
 ---
 
 ## Toolkit
 
-Shipped skills are playbooks. They do not add a second way to run commands. Each one is off until you grant it to an agent.
+### Skills
+
+Skills are playbooks that teach the agent how to run industry-standard CLI tools. They add agent
+knowledge, not a second execution path: every command still goes through the same approval gate,
+scope check and audit log. **Every skill is disabled until an operator grants it to an agent.**
+
 | Skill | What it covers |
 |---|---|
 | `network-recon` | nmap, rustscan, masscan, arp-scan |
@@ -101,49 +79,83 @@ Shipped skills are playbooks. They do not add a second way to run commands. Each
 | `vuln-scan` | nuclei, nikto, wpscan, wafw00f, dalfox |
 | `sqli-audit` | sqlmap: detect an injection on one in-scope parameter, prove access, stop |
 | `osint-recon` | subfinder, amass, theHarvester, sherlock |
-| `cloud-audit` | prowler, scout, trivy, kube-hunter, kube-bench |
+| `cloud-audit` | prowler, scout, trivy, kube-hunter, kube-bench (read-only posture) |
 | `password-audit` | hashcat, john (offline, hashes the task holds), hydra (one in-scope service, rate-capped) |
-| `forensics-ctf` | binwalk, exiftool, steghide, zsteg, volatility3, read-only |
+| `forensics-ctf` | binwalk, exiftool, steghide, zsteg, volatility3 (read-only) |
 | `exploit-dev` | checksec, gdb+gef, ropper, pwntools — lab/CTF binaries |
 
-`password-audit` and `exploit-dev` run through the ordinary Bash path with the existing approval gates. They are not in the background-scan allowlist.
+### Background scan runner
 
-Long runs of those binaries go through `start_scan_job` (`task_id`, `tool`, `args`). The runner executes the binary directly. Arguments may not contain a shell metacharacter. `get_scan_job` and `wait_scan_job` read the result. `cancel_scan_job` stops a queued or running job.
+Long runs of those binaries go through `start_scan_job` (`task_id`, `tool`, `args`). The runner
+executes the binary directly with an argv list — no shell, no shell metacharacters, and only
+tools on a code-level allowlist. `get_scan_job` and `wait_scan_job` read results,
+`cancel_scan_job` stops a job.
 
-A successful run with the same task and the same arguments is not executed again. The new row is marked cached. Four jobs can run at once, two of them for the same tool. After three failures the tool pauses on that task for 15 minutes. Output is capped. A restart marks leftover queued and running rows as failed.
+- **Caching**: a successful run with the same task and the same argv is never executed again; the
+  repeat is marked `cached`.
+- **Concurrency**: at most 4 jobs at once, 2 per tool.
+- **Circuit breaker**: after 3 failures a tool pauses for 15 minutes on that task.
+- **Durability**: output is capped, and a restart marks leftover running jobs as failed.
 
-**Processes** (`/function/processes`) streams the job list, filters it, and cancels a live job. The same events are written to the server log with the prefix `[scan-job]`.
+The **Processes** page (`/function/processes`) streams the job list live, filters it, and
+cancels a live job.
 
-Built-in task templates, inserted once and never re-seeded after you delete one: Bug Bounty Recon, Network Penetration Test, Cloud Security Audit, API Security Assessment, CTF Binary Challenge, AD Security Audit (read-only posture review). Applying one copies its goal into a new task. The worker, pentest, and auto agents are bound to the scan-job tools on first seed. You can turn that binding off per agent.
+### Typed scan wrappers
 
-Not shipped: a C2/WebShell session manager and AD lateral-movement playbooks. Every execution path in this product goes through the same approval gate, target scope check, and audit log, and that is deliberate.
+Each allowlisted scanner also has a structured tool — for example `nmap_scan` with `target`,
+`ports`, `service_version` — that maps typed parameters to argv and submits through the same
+runner: same cache, same caps, same audit. About 25 wrappers ship (`httpx_probe`,
+`nuclei_scan`, `subfinder_enum`, `trivy_scan`, `masscan_ports`, …), bound to the worker, pentest
+and auto agents by default; you can rebind per agent.
 
-## Typed wrappers, workflows, and the CTF solver
+Interactive attack tools (sqlmap, hashcat, john, hydra) deliberately get **no** typed wrapper and
+no background runner: they stay on the one approval-gated Bash path.
 
-**Typed scan wrappers.** Each allowlisted scanner also has a structured tool (for example `nmap_scan` with `target`, `ports`, `service_version`) that maps typed parameters to argv and submits through the same runner — same cache, same caps, same audit. Interactive attack tools (sqlmap, hashcat, john, hydra) deliberately get no typed wrapper; they stay on the approval-gated Bash path.
+### Workflows
 
-**Workflows** (`/function/workflows`) chain typed wrappers into an ordered step list with stop/continue-on-failure, run against a task you pick. Runs execute in order, each step is an ordinary recorded scan job, and the run history shows per-step status. The editor is form-based; each step's params are validated against the tool's schema.
+`/function/workflows` chains typed wrappers into an ordered step list with stop/continue-on-failure
+and runs it against a task you pick. Each step is an ordinary recorded scan job; run history shows
+per-step status. Starting a run is an operator decision — verify the task's scope first.
 
-**CTF solver agent.** A built-in `ctf` agent seeded with a classify → attempt → verify → iterate prompt and visibility on the lab skills (exploit-dev, forensics-ctf, sqli-audit, password-audit, web-fuzzing, vuln-scan, network-recon). It works on challenge files in the task workspace or deliberately vulnerable lab targets; nothing about it changes the approval gates.
+### CTF solver
 
-**Discord and Slack notification channels.** Same model as the existing channels: the webhook URL is the credential, masked on readback, validated against the official hosts before sending.
+A built-in `ctf` agent is seeded with a classify → pick-skill → attempt → verify → iterate prompt
+and visibility on the lab skills (`exploit-dev`, `forensics-ctf`, `sqli-audit`, `password-audit`,
+`web-fuzzing`, `vuln-scan`, `network-recon`). It works on challenge files in the task workspace
+or deliberately vulnerable lab targets. Nothing about it changes the approval gates: destructive
+steps still queue for your decision.
+
+### Task templates
+
+Built-in templates, seeded once and never re-seeded after you delete one: **Bug Bounty Recon**,
+**Network Penetration Test**, **Cloud Security Audit**, **API Security Assessment**,
+**CTF Binary Challenge**, and **AD Security Audit** (read-only posture review). Applying one
+copies its goal into a new task.
+
+### Deliberate boundaries
+
+No C2/WebShell session manager and no AD lateral-movement playbooks — every execution path in
+this product goes through the same approval gate, target scope check and audit log, and that is
+deliberate.
+
+---
 
 ## How it works
 
-### Dual-graph architecture: exploration graph + asset graph
+### Dual-graph architecture
 
-SUPERARTEX separates *what the goals are* from *how far testing has progressed* into two independent
-graphs linked by anchors:
+SuperArtex separates *what the goals are* from *how far testing has progressed* into two
+independent graphs linked by anchors:
 
 - **Asset graph (shared across tasks).** One source of truth for `root_domain / subdomain / ip /
-  service / app / endpoint`, owned by companies. Parent-child relationships and deduplication keys
-  are computed by the program; agents only submit raw observations.
+  service / app / endpoint`, owned by companies. Parent-child relationships and deduplication
+  keys are computed by the program; agents only submit raw observations.
 - **Exploration graph (per task).** The task's reasoning and progress: `goal / intent / fact /
-  finding / hint` nodes connected by `spawns / derived_from / yields / proves` edges into a lineage
-  chain.
+  finding / hint` nodes connected by `spawns / derived_from / yields / proves` edges into a
+  lineage chain.
 - **Anchors link them.** `exploration_anchors(node_id, asset_id)` ties intents, facts and findings
-  to concrete assets: which assets a direction touched, and which intents tested a given asset.
-  This also powers **asset test coverage** and the coverage graph.
+  to concrete assets — which assets a direction touched, and which intents tested a given asset.
+  This also powers asset test coverage and the coverage graph.
 
 ```mermaid
 flowchart LR
@@ -173,14 +185,14 @@ flowchart LR
   FD -. anchor .-> EP
 ```
 
-The **planner** reads the exploration graph, judges goals, and dispatches intents only when there
-is an uncovered direction; a **worker** claims one intent, executes it, writes assets/facts/findings
-back into both graphs, then stops.
+The **planner** reads the exploration graph, judges goals, and dispatches intents only when
+there is an uncovered direction. A **worker** claims one intent, executes it, writes
+assets/facts/findings back into both graphs, then stops.
 
 ### The engine loop
 
-The engine is event-driven: any graph change wakes the planner, workers claim and execute intents,
-write-back triggers the next round, until `prove_goal` closes the task.
+The engine is event-driven: any graph change wakes the planner, workers claim and execute
+intents, write-back triggers the next round, until `prove_goal` closes the task.
 
 ```mermaid
 sequenceDiagram
@@ -198,8 +210,8 @@ sequenceDiagram
   Note over P,FR: most wake-ups dispatch 0 (no new direction means done)
   W->>FR: claimNext claims one intent
   W->>DB: fetch the raw assets of the intent's asset_ids
-  W->>PX: real tool execution (Kali / Bash / HTTP)
-  PX-->>W: response (fully traced + CA verified)
+  W->>PX: real tool execution (Bash / HTTP, fully traced)
+  PX-->>W: response (recorded + CA verified)
   W->>DB: write back fact / asset / finding + per-step activity
   DB-->>EV: graph change
   EV-->>P: wake again (closed loop)
@@ -207,99 +219,59 @@ sequenceDiagram
 
 ### Durable attack chains, shared worker memory
 
-Real attack chains are multi-step and ordered (find an injection → get credentials → move
-laterally). The planner keeps a **todolist retained per task across wake-ups**: it records the
-chain once, then dispatches the next step only when its prerequisites are satisfied by facts.
-
-Workers can also **search each other's execution traces** (`search_all_worker_traces`,
-`list_worker_traces`, `get_worker_trace`). Observations that never became formal facts (an error
-message, a response snippet, a hidden parameter) are still reusable by the next worker, while each
-worker remains confined to the intent it claimed.
+Real attack chains are multi-step and ordered. The planner keeps a **todolist retained per task
+across wake-ups**: it records the chain once, then dispatches the next step only when its
+prerequisites are satisfied by facts. Workers can also **search each other's execution traces**
+(`search_all_worker_traces`, `list_worker_traces`, `get_worker_trace`), so observations that
+never became formal facts are still reusable by the next worker.
 
 ---
 
-## Features
-
-### Evidence, not chat logs
-
-- **Recording MITM proxy** (`:8788`) with a generated CA: every Bash/HTTP tool call is traced, and
-  request/response evidence can be bound to a finding.
-- **Browser extension** (`extension/`) for authenticated targets: log in once (captcha, email OTP,
-  2FA included), capture the session, and the requests/responses land in the same traffic store.
-
-  <details>
-  <summary>Using the traffic capture extension</summary>
-
-  - Load the unpacked extension from `extension/` (Chrome/Edge: Developer Mode → Load unpacked);
-  - In the popup, set your SUPERARTEX URL and token, then press **Start capture** on the tab you are
-    browsing;
-  - Use the site normally; text requests/responses are batched to `POST /api/traffic/ingest`
-    (authenticated). Binary bodies (images, fonts) are skipped, bodies are truncated at 256 KiB,
-    batches are capped at 50 entries;
-  - Press **Stop** when done. Everything stays in your local traffic store.
-
-  </details>
-- **Verified findings**: findings carry a POE level, a verification status and a note; a finding is
-  `verified` only when a bound proof/response and verbatim evidence quotes support it. Gzip/deflate
-  bodies are decoded before the quote check.
-- **Vulnerability retest loop**: a dedicated `retester` agent re-runs a finding with optional fixed
-  version/conditions, records `Still reproducible / Fixed / Cannot confirm`, and can move the
-  finding to `Fixed` automatically. Original evidence and reports are preserved.
-- **Reports and exports**: findings, evidence and task archives, with traffic snapshots kept
-  encrypted at rest.
-
-### Control without slowing down
+## Safety model
 
 - **Interception gate**: every tool call can require human approval, with rules by `string`,
-  `regex` or **argv prefix**. An argv rule is a JSON array of 1 to 8 tokens (Bash only, for
-  example `["git","push"]`); it matches only a single simple command whose parsed prefix equals
-  the pattern exactly. Pipes, lists, redirections, prefix assignments, subshells, background jobs,
-  wrapper programs and command/parameter substitutions do not match; flags are ignored by
-  construction (`["git","push"]` covers `git push --force`, but `git -C /repo push` matches
-  nothing). Each approval records who decided: `human`, `rule`, `model` or `system`.
+  `regex`, or **argv prefix**. Each approval records who decided: `human`, `rule`, `model` or
+  `system`.
 - **Scope and target gate**: scope rows define the coverage denominator; assets outside the
-  declared scope are not explored. The target gate (off by default, API-only) can refuse
-  destinations that were not approved.
-- **Budgets**: `SUPERARTEX_TASK_BUDGET_TOKENS` / `SUPERARTEX_TASK_BUDGET_TURNS` cap a whole task (planner and
-  workers); `SUPERARTEX_INTENT_BUDGET_TOKENS` / `SUPERARTEX_INTENT_BUDGET_TURNS` cap one worker run. Near the
-  limit the task enters a forced wrap-up; a worker is not started when the remaining budget cannot
-  cover it. Budgets are in memory: a restart starts fresh.
-- **Noise governor**: `SUPERARTEX_NOISE_PROFILE=quiet|balanced|aggressive` paces requests SUPERARTEX sends to
-  targets (per-host rate, burst, in-flight limit, jitter, backoff on 429/503, short GET caching).
-  With a profile set, agents also receive low-and-slow flags for the installed scanners.
-- **Untrusted-output boundary (on by default)**: tool results are framed between nonce-tagged
+  declared scope are not explored. The target gate (off by default) can refuse destinations that
+  were never approved.
+- **Budgets**: `SUPERARTEX_TASK_BUDGET_TOKENS` / `SUPERARTEX_TASK_BUDGET_TURNS` cap a whole
+  task; `SUPERARTEX_INTENT_BUDGET_TOKENS` / `SUPERARTEX_INTENT_BUDGET_TURNS` cap one worker run.
+  Near the limit the task enters a forced wrap-up instead of dying mid-step.
+- **Noise governor**: `SUPERARTEX_NOISE_PROFILE=quiet|balanced|aggressive` paces the requests
+  SuperArtex sends to targets (per-host rate, burst, in-flight limits, jitter, backoff on
+  429/503, short GET caching).
+- **Untrusted-output boundary** (on by default): tool results are framed between nonce-tagged
   markers so the model treats them as data, not instructions. Disable with
   `SUPERARTEX_UNTRUSTED_BOUNDARY=0`.
 
-### Assets and coverage
+## Evidence, not chat logs
 
-- **Coverage ledger and force-directed coverage graph**: in-scope assets are highlighted as tested
-  or untested, with linked intents, facts and findings per node.
-- **Company-scoped asset graph**: shared across tasks, deduplicated by the program, with
-  domain → subdomain → service → endpoint containment.
-- **ScopeSentry sync**: pull asset data from a
-  [ScopeSentry](https://github.com/Autumn-27/ScopeSentry) instance by project or task, merged by
-  company scope into the asset graph for agents to explore.
+- **Recording MITM proxy** (`:8788`) with a generated CA: every Bash/HTTP tool call is traced,
+  and request/response evidence can be bound to a finding.
+- **Browser extension** (`extension/`) for authenticated targets: log in once (captcha, email
+  OTP, 2FA included), capture the session, and the requests/responses land in the same traffic
+  store. Load it unpacked from `extension/`, set your SuperArtex URL and token in the popup, and
+  press **Start capture** on the tab you are browsing.
+- **Verified findings**: a finding is `verified` only when a bound proof/response and verbatim
+  evidence quotes support it; gzip/deflate bodies are decoded before the quote check.
+- **Vulnerability retest loop**: a dedicated `retester` agent re-runs a finding and records
+  `Still reproducible / Fixed / Cannot confirm`, preserving original evidence.
+- **Reports and exports**: findings, evidence and task archives, with traffic snapshots kept
+  encrypted at rest.
 
-  <details>
-  <summary>Syncing from ScopeSentry</summary>
+## Platform
 
-  - On the **Asset Sync** page, enter the ScopeSentry address and API key;
-  - Choose the targets and asset types by **project** or **task** (domains / subdomains / IPs /
-    ports / sites / endpoints…);
-  - Import: rows are merged by company asset scope and become part of the asset graph.
-
-  </details>
-- **Task categories, templates, relations and archives** for repeatable engagements.
-
-### Platform
-
-- **LLM profiles with failover**: Anthropic, OpenAI, OpenAI-compatible relays and keyless Ollama;
-  multiple profiles per task with automatic failover.
-- **Token accounting**: per-task and per-session usage, cache reads/writes, and an LLM record view
-  for every call.
-- **MCP servers, skills, memory and a workspace**: extend the agent with remote tools and reusable
-  prompt/playbook material.
+- **LLM profiles with failover**: Anthropic, OpenAI, OpenAI-compatible relays and keyless
+  Ollama; multiple profiles per task with automatic failover.
+- **Token accounting**: per-task and per-session usage, cache reads/writes, and an LLM record
+  view for every call.
+- **Notifications**: email, generic webhook, DingTalk, Feishu, WeCom, Telegram, **Discord** and
+  **Slack** — realtime or digest, with severity filtering.
+- **MCP servers, skills, memory and a workspace**: extend the agent with remote tools and
+  reusable playbook material.
+- **Asset sync**: pull asset data from a [ScopeSentry](https://github.com/Autumn-27/ScopeSentry)
+  instance by project or task, merged by company scope into the asset graph.
 - **Single binary**: the Next.js UI is embedded with `go:embed`; PostgreSQL is the only external
   dependency.
 
@@ -308,12 +280,13 @@ worker remains confined to the intent it claimed.
 ## Installation
 
 > Requires **PostgreSQL**; exploration requires an **LLM** (`ANTHROPIC_API_KEY` or
-> `OPENAI_API_KEY`, also configurable in the UI).
+> `OPENAI_API_KEY`, also configurable in the UI). There is no automated release pipeline —
+> build from your checkout with one of the options below.
 
-### Option 1: one-click install script (recommended)
+### Option 1: install script (recommended)
 
 ```bash
-git clone <your-repo-url> superartex
+git clone https://github.com/whyujjwal/superartex.git
 cd superartex
 ./install.sh
 ```
@@ -322,17 +295,14 @@ The script detects or installs Docker, then offers **① all-Docker** (writes `.
 `docker compose up -d --build`) or **② local build and run** (generates `config.json`, builds the
 embedded binary, starts it).
 
-Open **http://localhost:8787**; `/setup` asks for the one-time setup token printed at startup
-(`docker compose logs superartex | grep "Setup token"`).
-
 The UI listens on `127.0.0.1` by default. To reach it from another machine (or from Windows when
-SUPERARTEX runs inside WSL), set `SUPERARTEX_BIND_ADDR=0.0.0.0` in `.env` (the setup token still protects the
-first-run claim), or keep loopback and use a reverse proxy or SSH tunnel.
+SuperArtex runs inside WSL), set `SUPERARTEX_BIND_ADDR=0.0.0.0` in `.env`, or keep loopback and
+use a reverse proxy or SSH tunnel.
 
 ### Option 2: Docker Compose (manual)
 
 ```bash
-git clone <your-repo-url> superartex
+git clone https://github.com/whyujjwal/superartex.git
 cd superartex
 cp .env.example .env            # set POSTGRES_PASSWORD, optionally ANTHROPIC_API_KEY
 docker compose up -d --build
@@ -342,36 +312,7 @@ docker compose up -d --build
 The image includes a scanner toolchain (`nmap`, `nuclei`, `httpx`, `katana`, `ffuf`, `dalfox`,
 `sqlmap`, `ripgrep`, `curl`, `npm`, …); `./skills` and `./data` are persisted via bind mounts.
 
-For remote MCP you can choose `http` (Streamable HTTP) or `sse` (legacy SSE) in system settings.
-Legacy SSE servers usually establish the event stream with `GET /sse` and receive JSON-RPC over
-`/message?sessionId=...`; configure the URL as `/sse` and send `Authorization: Bearer <token>`.
-
-### Option 3: prebuilt binaries (Releases)
-
-Download the zip for your platform from [Releases](/releases). It
-contains `superartex`, `start.sh` (`start.bat` on Windows), `skills/` and `config.example.json`:
-
-```bash
-cp config.example.json config.json   # fill in the database connection
-./start.sh                           # → http://localhost:8787
-```
-
-Start with `start.sh` / `start.bat`, not `./superartex`: it is a daemon script that restarts the process
-after a backoff. To keep it in the background: `nohup ./start.sh >superartex.log 2>&1 &`.
-
-#### Verifying a release
-
-Each release attaches `SHA256SUMS` and a CycloneDX SBOM, `superartex-<tag>.cdx.json` (Go modules in the
-linux/amd64 binary, the frontend `package-lock.json`, `go.mod`/`go.sum`), next to the zips. The zips
-also carry a GitHub build provenance attestation. Releases published before this was added have
-neither.
-
-```bash
-sha256sum -c SHA256SUMS                           # add --ignore-missing if you downloaded only some zips
-gh attestation verify <zip> --repo whyujjwal/superartex   # built by this repository's release workflow
-```
-
-### Option 4: build the single binary from source
+### Option 3: build the single binary from source
 
 ```bash
 cd web && npm ci && npm run build:static && cd ..
@@ -380,24 +321,16 @@ CGO_ENABLED=0 go build -tags embedui -o superartex ./cmd/superartex
 ./start.sh
 ```
 
-Only `-tags embedui` embeds the frontend into the binary.
+Only `-tags embedui` embeds the frontend into the binary. Start with `start.sh` /
+`start.bat` (a daemon script that restarts after a backoff), not `./superartex` directly.
 
-### Option 5: cross-platform release archives
-
-`build.sh` builds and embeds the frontend, strips debug info, and writes zips for Linux
-amd64/arm64, macOS amd64/arm64 and Windows amd64 by default:
+### Option 4: cross-platform archives
 
 ```bash
 ./build.sh --release
-# output: dist/superartex-<version>-*.zip
-
+# output: dist/superartex-<version>-*.zip (linux/macOS amd64+arm64, windows amd64)
 SUPERARTEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
-./build.sh --target linux/amd64 --upx
 ```
-
-UPX is disabled by default: self-extracting binaries may be incompatible with some kernels,
-virtualization environments or security policies. Pass `--upx` only after confirming the target
-runtime supports it.
 
 ---
 
@@ -416,110 +349,56 @@ runtime supports it.
 ```
 
 **LLM**: `export ANTHROPIC_API_KEY=sk-...` (or `OPENAI_API_KEY`), or configure it in the UI's
-"LLM Configuration" page, which can also add a local Ollama server as a keyless provider (format
-"Ollama", default base URL `http://127.0.0.1:11434/v1`). Optional:
-`SUPERARTEX_LLM_PROVIDER` (`anthropic | openai | openai-responses | ollama`), `SUPERARTEX_LLM_MODEL`,
+LLM page, which can also add a local Ollama server as a keyless provider (default base URL
+`http://127.0.0.1:11434/v1`). Optional: `SUPERARTEX_LLM_PROVIDER`
+(`anthropic | openai | openai-responses | ollama`), `SUPERARTEX_LLM_MODEL`,
 `SUPERARTEX_LLM_BASE_URL`, `SUPERARTEX_LLM_PROXY`.
 
-**Base URL gotcha**: for the Anthropic format, enter the host **without** `/v1` (for example
-`https://api.anthropic.com`); SUPERARTEX appends `/v1/messages`. OpenAI-format providers append
-`/chat/completions` (or `/responses` for `openai-responses`), so their base **does** end in `/v1`
-(for example `https://api.openai.com/v1`).
-
-**Concurrency**: work agents per task, in "System Settings" (default 3).
-
-**Untrusted-output boundary (on by default)**: tool results for the worker, planner, chat and main
-agent are framed between nonce-tagged markers so the model treats them as data, not instructions.
-Unset or empty, the boundary is on; set `SUPERARTEX_UNTRUSTED_BOUNDARY=0` (or `false` / `off` / `no`) to
-disable it. Cost: about 154 bytes per tool result plus one system note.
-
-**Noise profile (off by default)**: `SUPERARTEX_NOISE_PROFILE` paces the requests SUPERARTEX sends to targets
-(WebFetch, HTTP custom tools, the enrich probe). Unset or `off` keeps today's behaviour: no limit,
-no cache. `quiet` = 2 req/s per host (burst 4, 1 in flight), `balanced` = 5 req/s (burst 10, 2 in
-flight), `aggressive` = 20 req/s (burst 40, 4 in flight). A profile adds jitter, backs off on
-429/503 (honours `Retry-After`, bounded retries, GET/HEAD/OPTIONS only), deduplicates identical
-in-flight GETs and caches them briefly (60/30/10 s; never POST/PUT/PATCH/DELETE), and logs a
-per-host noise line each minute. `SUPERARTEX_TARGET_USER_AGENT` sets a User-Agent on target requests
-that carry none. With traffic capture on, Bash commands that use the proxy (curl, wget,
-python-requests) are paced too, per host by the same rate and jitter, and counted in the same
-per-host lines. The in-flight caps, retries and cache apply only to SUPERARTEX's own requests. This is
-best effort, not a security boundary. Raw scanners such as nmap are not paced, and neither is a
-command that bypasses the proxy (`--noproxy`, a removed proxy variable). With capture off,
-nothing launched from Bash is paced. The low-and-slow prompt block supplies the rate flags in
-every case.
-The **Target noise** card in System settings sets the profile at runtime (no restart) and shows the
-per-host counters; once saved, that setting takes precedence over `SUPERARTEX_NOISE_PROFILE`.
-
-**Low-and-slow agent guidance (off by default)**: when a noise profile is set, the planner, worker,
-main agent and chat agents receive a code-owned prompt block with the profile's per-host limits and
-exact rate/delay flags for the installed scanners. It tells them to test one host at a time, back
-off on 429/503 and never raise the rate to meet a deadline.
-
-**Run budgets (off by default)**: `SUPERARTEX_TASK_BUDGET_TOKENS` / `SUPERARTEX_TASK_BUDGET_TURNS` cap a
-task's total spend (planner rounds and workers); `SUPERARTEX_INTENT_BUDGET_TOKENS` /
-`SUPERARTEX_INTENT_BUDGET_TURNS` cap one worker run. Unset or `0` means unlimited. A worker is not
-started when the remaining task budget cannot cover its estimated cost (the average of finished
-workers, else 50,000 tokens and 10 turns). Near the wrap-up reserve (the larger of 5% and 20,000
-tokens, and 2 turns) the task enters a forced wrap-up: the planner writes a summary and final goal
-judgment, and workers may only write back. The task then ends `done` if its goals are met, else
-`timeout`. Practical floor: below 50,000 tokens no worker starts; 50,000-70,000 typically gives one
-worker then wrap-up; pick well above 70,000 for real exploration.
+> **Base URL gotcha**: for the Anthropic format, enter the host **without** `/v1`
+> (`https://api.anthropic.com`) — SuperArtex appends `/v1/messages`. OpenAI-format providers
+> append `/chat/completions` (or `/responses`), so their base **does** end in `/v1`
+> (`https://api.openai.com/v1`).
 
 **Common flags**: `./start.sh -addr :8787 -proxy :8788` (`-addr` frontend/API, `-proxy` traffic
 recording proxy).
 
-### Reverse proxy deployment (HTTPS / exposing only 443)
+**Noise profile** (off by default): `SUPERARTEX_NOISE_PROFILE` — `quiet` = 2 req/s per host,
+`balanced` = 5 req/s, `aggressive` = 20 req/s, each with burst, in-flight, jitter, 429/503
+backoff and short GET caching. The **Target noise** card in system settings changes it at runtime
+and takes precedence over the variable. This is best effort, not a security boundary: raw
+scanners such as nmap are not paced.
 
-The frontend, API and SSE stream share port 8787 (the binary listens on `127.0.0.1:8787` by
-default; the Docker container publishes on `127.0.0.1`), and the activity stream is same-origin by
-default, so **no `NEXT_PUBLIC_SSE_BASE` is needed**: expose 443 and keep 8787 internal.
+**Run budgets** (off by default): unset or `0` means unlimited. Practical floor: below 50,000
+task tokens no worker starts; pick well above 70,000 for real exploration.
 
-SSE keeps a long-lived connection with continuous pushes, so the proxy **must disable buffering**;
-otherwise the browser connects but never receives events. Nginx example:
+**Update banner** (opt-in, off by default): set `SUPERARTEX_UPDATE_RELEASES_API` to a GitHub
+`releases/latest` API URL and `SUPERARTEX_UPDATE_CHECK=1` to show a dismissible banner when a
+newer tag appears (checked at most once per 24 h).
+
+### Reverse proxy (HTTPS / only exposing 443)
+
+The frontend, API and SSE stream share port 8787, and the activity stream is same-origin by
+default, so no `NEXT_PUBLIC_SSE_BASE` is needed: expose 443 and keep 8787 internal. SSE needs
+buffering disabled:
 
 ```nginx
-server {
-    listen 443 ssl;
-    server_name your.domain.com;
-    # ssl_certificate / ssl_certificate_key ...
-
-    location / {
-        proxy_pass http://127.0.0.1:8787;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        # SSE essentials: buffering off, long timeouts, HTTP/1.1
-        proxy_buffering off;
-        proxy_cache off;
-        proxy_read_timeout 3600s;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-    }
+location / {
+    proxy_pass http://127.0.0.1:8787;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_read_timeout 3600s;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
 }
 ```
 
-**Login rate limit behind a proxy**: login allows 10 attempts per minute per client IP. Behind a
-proxy every request comes from the proxy's address, so without further setup all users share one
-budget and an attacker who fails 10 logins blocks everyone, admin included, for up to 15 minutes.
-Keep the `X-Forwarded-For` line and set `SUPERARTEX_TRUSTED_PROXIES` (comma-separated CIDRs, empty by
-default) to the address SUPERARTEX sees the proxy connect from:
-
-- **nginx and SUPERARTEX both on the host** (binary, `./start.sh`): the peer is `127.0.0.1`; start SUPERARTEX
-  with `SUPERARTEX_TRUSTED_PROXIES=127.0.0.1/32`.
-- **nginx on the host, SUPERARTEX in Docker** (`docker-compose.yml`): the connection reaches the
-  container from the Docker bridge gateway (a `172.x` address), not from `127.0.0.1`. Find it with
-  `docker network inspect superartex_default --format '{{(index .IPAM.Config 0).Gateway}}'` (the network
-  is `<project directory>_default`), put `SUPERARTEX_TRUSTED_PROXIES=<gateway>/32` in `.env`, then
-  `docker compose up -d`.
-
-For a peer in that list, SUPERARTEX reads `X-Forwarded-For` from the right and takes the first address
-that is not a trusted proxy; from any other peer the header is ignored. Trust only proxies you run:
-a trusted peer can claim any client address.
-
-> Only when SSE needs a different origin from the page (e.g. a dedicated subdomain) should you set
-> `NEXT_PUBLIC_SSE_BASE` **at build time** (it is baked into the static bundle during `next build`;
-> setting it at container runtime has no effect).
+Login allows 10 attempts per minute per client IP. Behind a proxy, set
+`SUPERARTEX_TRUSTED_PROXIES` (comma-separated CIDRs) to the address SuperArtex sees the proxy
+connect from, so every user doesn't share one budget: `127.0.0.1/32` for a host-level nginx
+alongside the binary; the Docker bridge gateway for nginx on the host in front of the container
+(find it with `docker network inspect <project>_default`). Trust only proxies you run.
 
 ---
 
@@ -535,109 +414,30 @@ scripts/backup.sh --with-data          # db dump + data/ archive, keep 14
 scripts/backup.sh --keep 7             # db only, keep 7
 ```
 
-Restore into a running stack:
+Stored secrets (LLM keys, MCP env, task credentials, notification channel config, search keys,
+custom-tool specs) are encrypted with `keys/secret.key`. **A database backup without that key
+cannot restore those secrets**: back up `keys/` with the dump. Deployments without a persistent
+disk set `SUPERARTEX_SECRET_KEY` (32 bytes, e.g. `openssl rand -base64 32`).
 
-```bash
-gunzip -c backups/superartex-db-<timestamp>.sql.gz | docker compose exec -T postgres \
-  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
-```
+### Updating
 
-Stored secrets (LLM API keys and proxies, MCP env, task credentials, notification channel config,
-Brave/Tavily search keys, web search and global proxies, the execution spec of custom tools) are
-encrypted in the database with the key in `keys/secret.key` (generated at first start, mode 0600,
-next to `jwt.key`). **A database backup without that key cannot restore those secrets**: back up
-`keys/` with the dump, separately. Deployments without a persistent disk set
-`SUPERARTEX_SECRET_KEY` (32 bytes, base64 or hex, e.g. `openssl rand -base64 32`). SUPERARTEX refuses to start
-when the database holds encrypted secrets and no key is available.
-
-Daily cron example (03:20, operator crontab):
-
-```
-20 3 * * * cd /path/to/superartex && scripts/backup.sh --with-data >> backups/backup.log 2>&1
-```
-
-### Updating and upgrading
-
-> Upgrading swaps the program and never touches data: the Postgres volume `pgdata`, `./data`
-> (traffic index, task files, transcripts), `./keys` (`jwt.key`, `secret.key`) and `./skills` are
-> preserved. **No manual database step is needed**: on every start SUPERARTEX applies its embedded
-> `schema.sql` baseline, then any pending numbered migration from `db/migrations/`, in order, each
-> in its own transaction. Restarting the new binary is the upgrade. Back up `./data`, `keys/` and
-> the database before upgrading.
-
-**Update banner (opt-in, off by default)**: set `SUPERARTEX_UPDATE_RELEASES_API` to your fork’s GitHub
-`releases/latest` API URL, then start with `SUPERARTEX_UPDATE_CHECK=1` to ask the
-public GitHub releases API for the latest tag, at most once per 24 hours (cached in memory; a
-failed check is not retried within that window). When the release is newer, the web UI shows a
-dismissible strip linking to Releases. The request sends only `User-Agent: superartex-update-check`.
-Unset, SUPERARTEX makes no update request and shows no banner.
-
-#### Upgrading from a clone made before 2026-10-23
-
-The repository history was rewritten that day to drop a personal email address from the commit
-metadata. A clone made before then cannot fast-forward, and `./update.sh` now stops instead of
-silently rebuilding stale code. Recover once, then upgrade normally:
-
-```bash
-git stash                 # only if you have local changes
-git fetch origin
-git reset --hard origin/main
-git stash pop             # only if you stashed
-```
-
-Your data is unaffected: `./data`, the `pgdata` volume and `./skills` are not part of git history.
-
-#### Option 1: one-click update script
+Upgrading swaps the program and never touches data: the `pgdata` volume, `./data`, `./keys` and
+`./skills` are preserved, and schema migrations apply automatically at startup. Restarting the new
+binary is the upgrade. Back up `./data`, `keys/` and the database first.
 
 ```bash
 cd superartex
-./update.sh
+./update.sh        # optional git pull, then Docker rebuild or local rebuild
 ```
 
-The script optionally `git pull`s, then offers **① Docker update** (`docker compose build superartex` →
-`docker compose up -d superartex`) or **② local build update** (rebuild the frontend static assets, then
-recompile `./superartex`; restart the process for it to take effect).
-
-#### Option 2: Docker Compose (manual)
+### Development
 
 ```bash
-cd superartex
-git pull
-docker compose build superartex
-docker compose up -d superartex
-docker image prune -f            # optional
-```
-
-#### Option 3: prebuilt binaries
-
-Download the new zip, stop the old process, overwrite `superartex` and `skills/` (keep `config.json` and
-`data/`), then restart:
-
-```bash
-cp -r <extracted dir>/skills ./ && cp <extracted dir>/superartex ./
-./start.sh
-```
-
-#### Option 4: build from source
-
-```bash
-git pull
-cd web && npm ci && npm run build:static && cd ..
-cp -r web/out server/webui/dist
-CGO_ENABLED=0 go build -tags embedui -o superartex ./cmd/superartex
-# restart ./start.sh
-```
-
----
-
-## Development
-
-```bash
-./dev.sh    # backend(:8787) + traffic proxy(:8788) + frontend next dev(:5173) → http://localhost:5173
+./dev.sh    # backend(:8787) + traffic proxy(:8788) + frontend next dev(:5173)
 ```
 
 - Backend: `go run ./cmd/superartex` (without `-tags embedui`, the frontend is not embedded)
-- Frontend: `cd web && npm run dev` (`/api` is reverse-proxied to the backend, with hot reload)
+- Frontend: `cd web && npm run dev` (`/api` is reverse-proxied to the backend)
 - Tests: `go test ./...`
 - Mock preview (no backend): `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`
 
@@ -645,66 +445,19 @@ CGO_ENABLED=0 go build -tags embedui -o superartex ./cmd/superartex
 
 ## Architecture
 
-SUPERARTEX is an **LLM multi-agent-driven autonomous penetration testing system**: a Go monolithic
-backend (with the Next.js UI embedded) + PostgreSQL. Agent capabilities come from the
-[`norma`](https://github.com/Autumn-27/norma) SDK (`agentcore` / `tool` / `permission` / `harness` /
-`memory` / `transcript`). At its core is the **dual-graph architecture**, plus two autonomy
-mechanisms: **process-level information exchange between workers** and the **planner's multi-round
-shared todolist**.
-
-```mermaid
-flowchart TB
-  subgraph FE["Frontend Next.js (go:embed embedded single binary)"]
-    UI["Dashboard · Tasks · Assets · Coverage graph · Traffic · Workspace · System settings"]
-  end
-  subgraph SRV["server (Go net/http)"]
-    API["REST /api/*  JWT auth  SSE"]
-    ENG["engine scheduling loop"]
-    MGR["Manager  task/engine/store lifecycle"]
-  end
-  subgraph AG["agent (norma SDK)"]
-    GO["goals  goal decomposition + scope extraction"]
-    PL["planner  the planner (sole intent generator)"]
-    WK["worker  executor ×N"]
-    MA["mainagent  human-in-the-loop"]
-  end
-  subgraph DB["PostgreSQL"]
-    AGRAPH["Asset graph  assets / companies / task_scope"]
-    EGRAPH["Exploration graph  exploration_nodes / anchors / activity"]
-  end
-  subgraph SUB["Supporting subsystems"]
-    PROXY["Traffic recording proxy  MITM + CA tracing"]
-    GUARD["guard / intercept  tool approval gate"]
-    ENR["enrich  DNS / HTTP async enrichment"]
-    EXT["MCP · skills · memory · report"]
-  end
-
-  UI -->|HTTP| API
-  API --> MGR --> ENG
-  ENG --> PL
-  ENG --> WK
-  API --> MA
-  API --> GO
-  PL --> DB
-  WK --> DB
-  MA --> DB
-  GO --> DB
-  WK -->|"Bash / HTTP fully traced"| PROXY
-  WK --> GUARD
-  WK --> ENR
-  PL -.-> EXT
-  WK -.-> EXT
-  MA -.-> EXT
-```
+SuperArtex is a Go monolithic backend (Next.js UI embedded) + PostgreSQL. Agent capabilities come
+from the [`norma`](https://github.com/Autumn-27/norma) SDK (`agentcore` / `tool` / `permission` /
+`harness` / `memory` / `transcript`). At its core is the dual-graph architecture, plus
+process-level information exchange between workers and the planner's multi-round shared todolist.
 
 | Layer | Responsibility |
 | --- | --- |
-| **Frontend** | Next.js static export embedded via `go:embed`; tasks, assets, exploration and coverage graphs, traffic, human-in-the-loop chat |
+| **Frontend** | Next.js static export embedded via `go:embed`; tasks, assets, exploration and coverage graphs, traffic, processes, workflows, human-in-the-loop chat |
 | **server** | `net/http` routing, JWT auth, SSE; `Manager` owns tasks, engines and DB stores |
 | **engine** | One `plannerLoop` + N worker goroutines per task; intent claiming, timeout/pause/drain |
-| **agent** | goals / planner / worker / mainagent; `ToolSet` exposes the dual graphs as LLM tools |
+| **agent** | goals / planner / worker / mainagent / ctf / auto; `ToolSet` exposes the dual graphs as LLM tools |
 | **db** | PostgreSQL persistence (pgx); embedded schema and numbered migrations applied at startup |
-| **Supporting** | Recording MITM proxy, approval gate, async enrichment, MCP/skills/memory/report |
+| **Supporting** | Recording MITM proxy, approval gate, scan-job runner, async enrichment, MCP/skills/memory/report |
 
 ---
 
@@ -715,24 +468,13 @@ Please report vulnerabilities privately through GitHub Security Advisories; see
 
 Operational security properties:
 
-- **Secrets at rest**: LLM keys/proxies, MCP environment, task credentials, notification config,
-  search keys, proxies, custom-tool execution specs and traffic evidence snapshots are encrypted
-  with AES-256-GCM using `keys/secret.key` (or `SUPERARTEX_SECRET_KEY`). SUPERARTEX refuses to start when
-  encrypted data exists and no usable key is available.
+- **Secrets at rest**: AES-256-GCM with `keys/secret.key` (or `SUPERARTEX_SECRET_KEY`). SuperArtex
+  refuses to start when encrypted data exists and no usable key is available.
 - **First-run claim**: `/setup` requires a one-time token printed at startup; the UI binds to
   `127.0.0.1` by default.
-- **Login protection**: 10 attempts per minute per client IP, with `SUPERARTEX_TRUSTED_PROXIES` for
-  correct client attribution behind a reverse proxy.
-- **Untrusted tool output**: framed as data for every agent by default (prompt-injection boundary).
-- **Release integrity**: SHA-256 sums, CycloneDX SBOM and GitHub build provenance attestations for
-  release archives.
-
----
-
-## References and prior art
-
-- [Cairn](https://github.com/oritera/Cairn)
-- Approval-details UI inspired by [AegisHook](https://github.com/RuoJi6/AegisHook)
+- **Login protection**: 10 attempts per minute per client IP, with trusted-proxy attribution.
+- **Untrusted tool output**: framed as data for every agent by default (prompt-injection
+  boundary).
 
 ---
 
@@ -741,47 +483,31 @@ Operational security properties:
 ### Open source license
 
 This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**; see the
-[LICENSE](LICENSE) file for the full terms.
-
-Anyone may use, modify and distribute this project, but **derivative works must also be open-sourced
-under AGPL-3.0**; in particular, **if you modify this project and provide it to users over a
-network (for example as an online service), you must make the corresponding complete source code
-available to those users**.
+[LICENSE](LICENSE) file for the full terms. Derivative works must also be open-sourced under
+AGPL-3.0 — in particular, if you modify this project and provide it to users over a network, you
+must make the corresponding complete source code available to those users.
 
 > **Important**: the open source license does not restrict how the software is used. The usage
 > restrictions and disclaimer below are additional terms from the maintainers.
 
-**SUPERARTEX is an offensive-security tool. Use it only against systems you own, or that you are
-explicitly authorized to test (your own lab, your organization's assets, or a bug bounty /
-vulnerability disclosure program's targets within its published scope and rules of engagement).
-Any use without authorization violates these terms.**
+### Authorized use only
 
-### Permitted use
+**SuperArtex is an offensive-security tool. Use it only against systems you own, or that you are
+explicitly authorized to test** (your own lab, your organization's assets, or a bug bounty /
+vulnerability disclosure program's targets within their published scope and rules of engagement).
+Any use without authorization violates these terms.
 
-- Read, learn and study this project's source code;
-- Run it against systems you own or in isolated lab environments;
-- Run it against authorized bug bounty / vulnerability disclosure targets, within their published
-  scope and rules of engagement;
-- Academic research and code review.
+**Prohibited**: scanning, probing, exploiting or attacking any system without the explicit
+authorization of its owner; testing outside a program's published scope; illegal intrusion, data
+theft, extortion, denial of service, or any criminal activity.
 
-### Prohibited actions
-
-- Scanning, probing, exploiting or attacking any website, online service or networked system
-  without the explicit authorization of its owner;
-- Testing outside a program's published scope, or in violation of its rules of engagement;
-- Illegal intrusion, data theft, extortion, denial of service, or any destructive or criminal
-  activity;
-- Any use that violates the laws and regulations of your country or region.
-
-### Compliance responsibility
-
-Users must comply with all laws and regulations of their country or region regarding cybersecurity,
-data protection and computer crime. **All legal liability and consequences arising from the use of
-this tool are borne by the user.**
+Users must comply with all laws and regulations of their country or region regarding
+cybersecurity, data protection and computer crime. **All legal liability and consequences
+arising from the use of this tool are borne by the user.**
 
 ### Disclaimer
 
 This project is provided "as is", without any express or implied warranty. The authors and
 contributors are not liable for any direct or indirect loss, data loss, system damage or legal
-dispute caused by the use of this tool (whether used properly or not). **Downloading, installing or
-using this project means you have read, understood and agreed to all of the above terms.**
+dispute caused by the use of this tool (whether used properly or not). **Downloading, installing
+or using this project means you have read, understood and agreed to all of the above terms.**
