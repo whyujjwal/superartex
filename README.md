@@ -482,6 +482,13 @@ Operational security properties:
 
 ---
 
+## Acknowledgements
+
+SuperArtex is a derivative work of the [ARTEX](https://github.com/BaaRai/ARTEX) project
+(AGPL-3.0), which inspired this platform and formed the foundation of its codebase.
+
+---
+
 ## License and disclaimer
 
 ### Open source license

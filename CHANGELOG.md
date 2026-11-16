@@ -100,7 +100,7 @@ Machine-checked finding verification (S1), intercept decisions traced to their a
 ### Fixed
 
 - **Custom-tool proxy scheme**: `use_recording_proxy` produced `http://http://...`; a value with a scheme is now used as is and a bare `host:port` gets `http://` (#187).
-- **`list_task_credentials` schema**: it emitted `"required": [""]`, which strict providers reject, failing every worker; fixed, with a one-time heal of existing databases at startup. Reported and first fixed by @kiserufetch (#130).
+- **`list_task_credentials` schema**: it emitted `"required": [""]`, which strict providers reject, failing every worker; fixed, with a one-time heal of existing databases at startup. (#130).
 - **MCP protocol version**: the Streamable HTTP client negotiates the version (offers 2025-11-25, then 2025-06-18) and sends the negotiated one after `initialize` (#132, fixes #131).
 
 ### Build, Docker and tests
@@ -155,7 +155,7 @@ Ollama support, a setup token for the first-run claim, secret scrubbing for chil
 
 ### Added
 
-- **Ollama support**: an `ollama` LLM profile format for a local or LAN Ollama server. Keyless by design: no API key is needed, `OPENAI_API_KEY` is never inherited, the base URL defaults to `http://127.0.0.1:11434/v1` and is normalized to the `/v1` root, and the profile works in the failover pool, task LLM chains, model listing and connection tests. Contributed by @glauberportella (#128).
+- **Ollama support**: an `ollama` LLM profile format for a local or LAN Ollama server. Keyless by design: no API key is needed, `OPENAI_API_KEY` is never inherited, the base URL defaults to `http://127.0.0.1:11434/v1` and is normalized to the `/v1` root, and the profile works in the failover pool, task LLM chains, model listing and connection tests..
 - **Setup token for first-run setup**: while no admin password is set, the server generates a random 128-bit one-time token at startup and prints it to its log (`docker compose logs superartex | grep "Setup token"`). The `/setup` page has a field for it, `POST /api/auth/init` requires it (`setup_token`, compared in constant time, 403 when missing or wrong), and it is cleared once the password is stored (#137).
 - **`SUPERARTEX_BIND_ADDR`**: the address `docker-compose.yml` publishes the web UI on, default `127.0.0.1` (#137).
 
@@ -230,7 +230,7 @@ First release of this fork. The engine underneath is still upstream's, but this 
 
 ### Removed
 
-- **In-app self-update and the automatic version check**: the update source was hard-coded to a repository that no longer exists, and its checksums came from the same release. The `selfupdate` package, the `/api/update/*` endpoints, the top-bar update badge and the "Version & Updates" settings card are gone; `start.sh` / `start.bat` now only restart the process after a crash. Upgrade with `update.sh` or a release archive. (#125, contributed by @stevenAthompson)
+- **In-app self-update and the automatic version check**: the update source was hard-coded to a repository that no longer exists, and its checksums came from the same release. The `selfupdate` package, the `/api/update/*` endpoints, the top-bar update badge and the "Version & Updates" settings card are gone; `start.sh` / `start.bat` now only restart the process after a crash. Upgrade with `update.sh` or a release archive.
 
 ## [0.3.15] - 2026-10-07
 
@@ -327,9 +327,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 - **Set an upper bound on the connection pool**: `database/sql` by default does not limit how many connections the application itself may open — when the pool has no idle connection it unconditionally creates new ones, and is only rejected after hitting PostgreSQL's `max_connections` (default 100). Now capped at 32; excess queries wait for an idle connection, so the same load shows up as slower rather than errors; if `max_connections` was lowered, lower this accordingly.
 - **Improved connection reuse**: `MaxIdleConns` defaults to 2, so connections beyond 2 concurrent users are closed as soon as they finish, and the next request has to redo the TCP and PostgreSQL auth handshake. The idle cap is now raised to match the total cap, plus a 30-minute connection lifetime and 5-minute idle eviction, letting the pool naturally replace long-lived bad connections.
 
-### Contributors
-
-
 ## [0.3.14] - 2026-09-24
 
 ### Task list
@@ -351,9 +348,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Fixed
 
 - **After folding cold nodes, eliminated the reverse duplicate edges between digest and finding nodes in the exploration graph**.
-
-### Contributors
-
 
 ## [0.3.13] - 2026-09-19
 
@@ -390,9 +384,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 
 - **The project is now under the AGPL-3.0 open source license**, and the README's license and disclaimer sections were improved.
 - **Upgraded norma to v0.4.1**.
-
-### Contributors
-
 
 ## [0.3.12] - 2026-09-17
 
@@ -458,12 +449,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 
 - **Fixed the static-export task list page losing the global header**.
 - **Filled in the demo vulnerability details page's associated-traffic mock, fixing a white screen**.
-
-### Contributors
-
-- [@RuoJi6](https://github.com/RuoJi6)
-- [@dingpotian](https://github.com/dingpotian)
-
 ## [0.3.11] - 2026-09-15
 
 ### Operation review
@@ -513,11 +498,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Fixed
 
 - **Fixed the demo task details page crashing entirely**: in mock mode, the task details "Sessions" tab fetches `GET /api/tasks/<id>/side-questions` (side question history), but the mock handler has no such route, and the read fallback returned `[]` per "path ending in s means collection", leaving `data.items` as `undefined`; the side-question hook's `merge()` iterating over it threw `TypeError: t is not iterable`; the exception occurred in `setItems`' updater and was re-thrown by React deferred to the render phase, so the caller's `catch` could not catch it and the whole page was taken over by the error boundary showing "This page couldn't load". The mock handler now explicitly returns an empty side-question history, and `sideAPI.history` also normalizes the return value (any non-array `items` becomes `[]`) as defense in depth.
-
-### Contributors
-
-- [@RuoJi6](https://github.com/RuoJi6)
-
 ## [0.3.10] - 2026-09-13
 
 ### Network
@@ -552,9 +532,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Fixed
 
 - **Merged trigger sessions deduplicate task descriptions/goals per task**: when multiple tasks are merged into one trigger, the same task's description/goal is no longer repeatedly concatenated into the message, avoiding long goals stacking up and blowing up the context.
-
-### Contributors
-
 
 ## [0.3.9] - 2026-09-11
 
@@ -647,11 +624,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Changed
 
 - Upgraded norma to v0.3.7.
-
-### Contributors
-
-- [@RuoJi6](https://github.com/RuoJi6)
-
 ## [0.3.8] - 2026-09-09
 
 ### LLM
@@ -720,9 +692,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 
 - Upgraded norma to v0.3.4: MCP tool output gains truncation and disk spilling (see `651b961`); the later v0.3.6 supports in-place wall-clock wrap-up.
 
-### Contributors
-
-
 ## [0.3.7] - 2026-08-31
 
 ### LLM
@@ -780,12 +749,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 
 - Upgraded norma v0.3.2 → v0.3.3: adds `Config.MaxTokensField`, letting OpenAI Chat Completions' output limit be sent as `max_completion_tokens` instead (reasoning models only accept this key). The two keys are mutually exclusive — only one is sent, default still `max_tokens`.
 - Upgraded `golang.org/x/mod` v0.37.0 → v0.40.0, fixing two dependency security alerts.
-
-### Contributors
-
-- [@neouks](https://github.com/neouks)
-- [@begininvoke](https://github.com/begininvoke)
-
 ## [0.3.6] - 2026-08-27
 
 ### LLM
@@ -812,9 +775,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Changed
 
 - Upgraded norma v0.3.1 → v0.3.2: fixes silently dropped reasoning/refusal in OpenAI-family responses (Responses gains `reasoning_text`), dedup of the three reasoning field names, bounded retry of empty responses (zero content blocks), and gateway 400s caused by compression boundaries cutting tool pairings (also repairing existing orphans already baked into transcripts).
-
-### Contributors
-
 
 ## [0.3.5] - 2026-08-25
 
@@ -859,11 +819,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Added
 
 - Added `reset-password.sh` to reset the admin (username fixed as `SUPERARTEX`) password: supports both local / docker deployments; connection info can be specified explicitly or read automatically from `--dsn`/`$SUPERARTEX_PG_DSN`/`config.json`; uses `pgcrypto` in the database to generate a bcrypt hash compatible with backend login and writes it back to `settings.auth.password_hash`, no service restart needed after reset. The password is passed via an environment variable, never enters the process argv, and is escaped against injection.
-
-### Contributors
-
-- [@neouks](https://github.com/neouks)
-
 ## [0.3.4] - 2026-08-24
 
 ### UI
@@ -908,11 +863,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Changed
 
 - The `ip` field of `ip`, `service`, and `endpoint` assets no longer accepts hostnames: `insert_assets` and the asset API return per-item errors with `index`, and directly give the fix (use `type=subdomain` with `domain`, or resolve A/AAAA records first), so the agent can correct and reinsert on its own. Other assets in the same batch are unaffected and stored as usual.
-
-### Contributors
-
-- [@neouks](https://github.com/neouks)
-
 ## [0.3.3] - 2026-08-23
 
 ### Worker
@@ -1057,11 +1007,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 - `build.sh --release` builds Linux amd64/arm64, macOS amd64/arm64, and Windows amd64 in one go, generating zip release packages with `skills/`, a config example, and the README.
 - Uses the Go linker to strip debug info and generate zip release packages; UPX is now explicitly opt-in, avoiding segfaults at startup of its self-extracting ELF on some Linux environments.
 - The Release workflow runs a startup smoke test on the Linux amd64 binary and ships `SHA256SUMS` with the release packages.
-
-### Contributors
-
-- [@neouks](https://github.com/neouks)
-
 ## [0.3.2] - 2026-08-20
 
 ### Added
@@ -1097,11 +1042,6 @@ First release of this fork. The engine underneath is still upstream's, but this 
 - Added named termination reasons to all agent cancellation paths; activity details can show the canceller, final state, round count, elapsed time, token usage, and unreturned tool calls.
 - Fixed a race where the parent context could preemptively overwrite the named `shutdown` reason during backend shutdown, and garbled text caused by byte-wise truncation of Chinese activity summaries.
 - Fixed cancellation events with partial streaming output losing the real termination reason, while preserving content generated before cancellation.
-
-### Contributors
-
-- [@neouks](https://github.com/neouks)
-
 [Unreleased]: /compare/v0.6.0...HEAD
 [0.6.0]: /compare/v0.5.1...v0.6.0
 [0.5.1]: /compare/v0.5.0...v0.5.1
