@@ -43,6 +43,33 @@ justify it, and every autonomous action passes through scope rules, approval gat
 
 ---
 
+## How SuperArtex compares
+
+Frequently asked, so here it is in one place. Based on what each project's own
+documentation says it ships; no capability is claimed here that SuperArtex does
+not contain.
+
+| | SuperArtex | CyberStrikeAI | HexStrike AI |
+|---|---|---|---|
+| Autonomous multi-agent execution | ✅ planner + workers | ✅ Pi agents | ✅ MCP agents |
+| **One gated execution path for every tool call** | ✅ approval gate + scope check + audit on everything | ⚠️ governs agents; its docs warn to review its security model before enabling WebShell/C2 | ⚠️ its docs name weak scope enforcement as a known risk |
+| Findings bound to captured request/response evidence | ✅ POE levels, verified status, retests | ✅ evidence focus | ➖ not the design center |
+| Background scans with caching, concurrency caps, circuit breaker | ✅ | ✅ process management | ✅ |
+| Typed per-tool wrappers | ✅ ~25, recon/posture only | ✅ 100+ recipes | ✅ 150+ tool functions |
+| Workflows | ✅ ordered steps, form-based | ✅ visual graph flows | ➖ |
+| Burp Suite integration | ✅ traffic ingest extension | ✅ plugin | ➖ |
+| Browser traffic capture (authenticated) | ✅ | ➖ | ➖ |
+| C2 / WebShell | ❌ deliberately not shipped | ✅ (flagged high-risk in its own docs) | ⚠️ named as a risk in its own docs |
+| Notifications | 8 channels | chat platforms | chat platforms |
+| Self-hosted single binary + PostgreSQL | ✅ | ✅ | ✅ (MCP server) |
+
+The difference is not feature count — it's that SuperArtex refuses the second,
+looser execution path. If your work needs C2 and lateral-movement tooling, use a
+dedicated framework under your own supervision; SuperArtex will happily keep the
+evidence for that engagement.
+
+---
+
 ## Quick start
 
 ```bash
