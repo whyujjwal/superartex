@@ -253,6 +253,10 @@ never became formal facts are still reusable by the next worker.
   OTP, 2FA included), capture the session, and the requests/responses land in the same traffic
   store. Load it unpacked from `extension/`, set your SuperArtex URL and token in the popup, and
   press **Start capture** on the tab you are browsing.
+- **Burp Suite extension** (`extension-burp/`): pushes Burp Proxy traffic into the same ingest
+  endpoint, so Burp-driven manual testing becomes agent-visible evidence exactly like captured
+  browsing. Load `extension-burp/SuperArtexBurp.jar` under Extensions → Add → Java, configure
+  the URL and token in the SuperArtex tab, press Start.
 - **Verified findings**: a finding is `verified` only when a bound proof/response and verbatim
   evidence quotes support it; gzip/deflate bodies are decoded before the quote check.
 - **Vulnerability retest loop**: a dedicated `retester` agent re-runs a finding and records
