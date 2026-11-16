@@ -100,6 +100,7 @@ Shipped skills are playbooks. They do not add a second way to run commands. Each
 | `network-recon` | nmap, rustscan, masscan, arp-scan |
 | `web-fuzzing` | gobuster, ffuf, feroxbuster, dirsearch, httpx |
 | `vuln-scan` | nuclei, nikto, wpscan, wafw00f, dalfox |
+| `sqli-audit` | sqlmap: detect an injection on one in-scope parameter, prove access, stop |
 | `osint-recon` | subfinder, amass, theHarvester, sherlock |
 | `cloud-audit` | prowler, scout, trivy, kube-hunter, kube-bench |
 | `password-audit` | hashcat, john (offline, hashes the task holds), hydra (one in-scope service, rate-capped) |
