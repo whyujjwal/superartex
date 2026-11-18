@@ -59,7 +59,7 @@ Built-in deny rules ship enabled for the unrecoverable cases: `rm -rf`, deleting
 
 Findings bind to captured request/response snapshots tagged by role — `baseline`, `proof`, `verification`, `supporting`. A finding is marked **verified** only when the agent declared a proof level of 3 or higher **and** every evidence quote appears verbatim in a bound response. Gzip/deflate bodies are decoded first, quotes under 8 characters are ignored, and an unreadable or binary body fails closed (`not_assessed`) rather than guessing.
 
-Traffic reaches that store three ways: the recording MITM proxy (`:8788`, with its own generated CA) traces every Bash and HTTP call; a browser extension (`extension/`) captures authenticated sessions — captcha, email OTP, 2FA included; and a Burp Suite extension (`extension-burp/SuperArtexBurp.jar`) pushes Proxy traffic into the same ingest endpoint, so manual testing becomes agent-visible evidence.
+Traffic reaches that store three ways: the recording MITM proxy (`:8788`, with its own generated CA) traces every Bash and HTTP call; a browser extension (`extension/`) captures the current tab's traffic, so an authenticated session you log into by hand becomes agent-visible; and a Burp Suite extension (`extension-burp/SuperArtexBurp.jar`) pushes Proxy traffic into the same `/api/traffic/ingest` endpoint, so Burp-driven manual testing lands in the same store and stays bindable to findings.
 
 Retesting is operator-triggered: from the finding details or a task's Retests tab you start a separate session with the `retester` agent, which reads the original evidence and constraints, re-verifies against the live target, and records `Still reproducible` / `Fixed` / `Inconclusive` — without editing the original report. A `reproduced` or `fixed` verdict independently upgrades an unverified finding.
 
@@ -89,7 +89,7 @@ The gated surface is explicit and small. Knowing where it ends is more useful th
 |---|---|---|
 | `Bash`, `WebFetch`, `web_search`, `shell_open`, `shell_send`, `Write`, `Edit`, `MultiEdit` | **Gated** | Rules first (first match wins), then the optional model judge, then a human for `ask`. Unmatched calls pass unless you enable the judge. |
 | `Read`, `Grep`, `LS`, traffic and graph tools | **Not gated** | Read-only platform and target reads. |
-| `start_scan_job` + the 25 typed wrappers | **Not gated** | Argv-only, no shell, 28-binary allowlist, cache, 4 global / 2 per-tool caps, circuit breaker. Intercept rules do not see these calls. |
+| `start_scan_job` + the 25 typed wrappers | **Not gated** | Argv-only, no shell, 28-binary allowlist, cache, 4 global / 2 per-tool caps, circuit breaker. Outside the default intercept scope, so a rule does not see them unless you add the tool. |
 | Workflow runs | **Not gated** | Operator-started; each step is an ordinary scan job on the same runner. |
 | Target gate (host block rules + IP pins) | **Off** | Per-task opt-in, settable through the task API only; no UI toggle ships. |
 | Task scope | **Advisory** | A coverage denominator and prompt context, not an enforced network boundary. |
