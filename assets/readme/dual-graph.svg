@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">SuperArtex dual-graph architecture</title>
+  <desc id="desc">A shared asset graph connects a root domain to a subdomain, service, and endpoint. A separate graph for each task traces a goal through an intent, fact, follow-up intent, and finding. Dotted anchors connect the intents, fact, and finding to the assets they concern.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1120" y2="620" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#080A12"/><stop offset="1" stop-color="#141023"/>
+    </linearGradient>
+    <linearGradient id="anchor" x1="398" y1="0" x2="710" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7ED7DE" stop-opacity=".7"/><stop offset="1" stop-color="#B79AFF" stop-opacity=".7"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="#C4B5FD" stroke-opacity=".035"/>
+    </pattern>
+    <marker id="asset-arrow" markerWidth="7" markerHeight="7" refX="4" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m1 0 3 3-3 3" stroke="#7ED7DE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="exploration-arrow" markerWidth="7" markerHeight="7" refX="4" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m1 0 3 3-3 3" stroke="#B79AFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="620" rx="24" fill="url(#background)"/>
+  <rect width="1120" height="620" rx="24" fill="url(#grid)"/>
+  <rect x=".5" y=".5" width="1119" height="619" rx="23.5" stroke="#A78BFA" stroke-opacity=".18"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="40" y="61" fill="#FAF9FF" font-size="36" font-weight="700" letter-spacing="-1">Two graphs. One investigation.</text>
+    <text x="42" y="94" fill="#B7B3C9" font-size="20">Shared assets give each task’s reasoning a concrete place to land.</text>
+
+    <rect x="40" y="126" width="410" height="454" rx="18" fill="#101920" fill-opacity=".7" stroke="#7ED7DE" stroke-opacity=".21"/>
+    <rect x="670" y="126" width="410" height="454" rx="18" fill="#1A1427" fill-opacity=".7" stroke="#B79AFF" stroke-opacity=".24"/>
+
+    <circle cx="73" cy="161" r="4" fill="#7ED7DE"/>
+    <text x="88" y="172" fill="#F5FDFF" font-size="32" font-weight="650" letter-spacing="-.6">Asset graph</text>
+    <text x="66" y="200" fill="#8EAFB7" font-size="18">Shared across tasks</text>
+    <circle cx="703" cy="161" r="4" fill="#B79AFF"/>
+    <text x="718" y="172" fill="#FAF7FF" font-size="32" font-weight="650" letter-spacing="-.6">Exploration graph</text>
+    <text x="696" y="200" fill="#AC9ABD" font-size="18">A lineage for each task</text>
+
+    <g stroke="#7ED7DE" stroke-opacity=".65" stroke-width="1.7" marker-end="url(#asset-arrow)">
+      <path d="M238 284v26"/>
+      <path d="M238 374v26"/>
+      <path d="M238 464v26"/>
+    </g>
+    <g stroke="#B79AFF" stroke-opacity=".65" stroke-width="1.7" marker-end="url(#exploration-arrow)">
+      <path d="M875 270v16"/>
+      <path d="M875 342v16"/>
+      <path d="M875 414v16"/>
+      <path d="M875 486v16"/>
+    </g>
+    <g fill="#A896BD" font-size="16">
+      <text x="893" y="285">spawns</text>
+      <text x="893" y="357">yields</text>
+      <text x="893" y="429">derived_from</text>
+      <text x="893" y="501">proves</text>
+    </g>
+
+    <text x="560" y="264" text-anchor="middle" fill="#D3C4EE" font-size="22" font-weight="600">anchors</text>
+    <text x="560" y="289" text-anchor="middle" fill="#8D819F" font-size="16">reasoning → assets</text>
+    <g stroke="url(#anchor)" stroke-width="1.8" stroke-dasharray="3 8" stroke-linecap="round">
+      <path d="M710 316C590 316 518 344 398 344"/>
+      <path d="M710 388C590 388 518 434 398 434"/>
+      <path d="M710 460C590 460 518 518 398 518"/>
+      <path d="M710 532C590 532 518 540 398 540"/>
+    </g>
+    <g fill="#7ED7DE">
+      <circle cx="398" cy="344" r="3.5"/><circle cx="398" cy="434" r="3.5"/>
+      <circle cx="398" cy="518" r="3.5"/><circle cx="398" cy="540" r="3.5"/>
+    </g>
+    <g fill="#B79AFF">
+      <circle cx="710" cy="316" r="3.5"/><circle cx="710" cy="388" r="3.5"/>
+      <circle cx="710" cy="460" r="3.5"/><circle cx="710" cy="532" r="3.5"/>
+    </g>
+
+    <g>
+      <rect x="78" y="224" width="320" height="60" rx="12" fill="#12242C" stroke="#7ED7DE" stroke-opacity=".44"/>
+      <rect x="78" y="314" width="320" height="60" rx="12" fill="#12242C" stroke="#7ED7DE" stroke-opacity=".44"/>
+      <rect x="78" y="404" width="320" height="60" rx="12" fill="#12242C" stroke="#7ED7DE" stroke-opacity=".44"/>
+      <rect x="78" y="494" width="320" height="60" rx="12" fill="#12242C" stroke="#7ED7DE" stroke-opacity=".44"/>
+      <g fill="#F0FBFE" font-size="24" font-weight="600">
+        <text x="142" y="263">Domain</text>
+        <text x="142" y="353">Subdomain</text>
+        <text x="142" y="443">Service</text>
+        <text x="142" y="533">Endpoint</text>
+      </g>
+      <g stroke="#8EDCE2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="110" cy="254" r="13"/>
+        <ellipse cx="110" cy="254" rx="5" ry="13"/>
+        <path d="M98 249h24m-24 10h24"/>
+        <path d="M110 334v8m-12 0h24m-24 0v7m24-7v7"/>
+        <rect x="105" y="328" width="10" height="7" rx="2"/>
+        <rect x="93" y="349" width="10" height="8" rx="2"/>
+        <rect x="117" y="349" width="10" height="8" rx="2"/>
+        <rect x="97" y="422" width="26" height="10" rx="3"/>
+        <rect x="97" y="436" width="26" height="10" rx="3"/>
+        <path d="M102 427h1m-1 14h1m5-14h10m-10 14h10"/>
+        <path d="m103 515-8 9 8 9m14-18 8 9-8 9m-4-20-6 22"/>
+      </g>
+    </g>
+
+    <g>
+      <rect x="710" y="218" width="330" height="52" rx="12" fill="#251B35" stroke="#B79AFF" stroke-opacity=".48"/>
+      <rect x="710" y="290" width="330" height="52" rx="12" fill="#251B35" stroke="#B79AFF" stroke-opacity=".48"/>
+      <rect x="710" y="362" width="330" height="52" rx="12" fill="#251B35" stroke="#B79AFF" stroke-opacity=".48"/>
+      <rect x="710" y="434" width="330" height="52" rx="12" fill="#251B35" stroke="#B79AFF" stroke-opacity=".48"/>
+      <rect x="710" y="506" width="330" height="52" rx="12" fill="#302043" stroke="#B79AFF" stroke-opacity=".85"/>
+      <g fill="#F7F1FF" font-size="24" font-weight="600">
+        <text x="772" y="253">Goal</text>
+        <text x="772" y="325">Intent A</text>
+        <text x="772" y="397">Fact</text>
+        <text x="772" y="469">Intent B</text>
+        <text x="772" y="541">Finding</text>
+      </g>
+      <g stroke="#C7AFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M739 257v-25m0 1c7-6 13 6 20 0v15c-7 6-13-6-20 0"/>
+        <path d="M735 316h25m-8-8 8 8-8 8"/>
+        <path d="M739 375h15l5 5v21h-20Zm15 0v6h5"/>
+        <path d="m744 389 4 4 7-8"/>
+        <path d="M735 460h25m-8-8 8 8-8 8"/>
+        <path d="m747 519 12 5v9c0 7-6 11-12 14-6-3-12-7-12-14v-9Z"/>
+        <path d="m741 532 4 4 8-9"/>
+      </g>
+    </g>
+  </g>
+</svg>

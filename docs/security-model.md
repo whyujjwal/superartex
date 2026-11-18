@@ -16,6 +16,8 @@ Review **Approval Records** to see the operation, the actor who decided, and the
 
 ## Evidence and verification
 
+![Captured traffic is linked to evidence and reviewed against the finding](../assets/readme/evidence-pipeline.svg)
+
 Findings can bind captured request/response snapshots as `baseline`, `proof`, `verification`, or `supporting` evidence. Initial verification requires a declared proof level of at least 3 and at least one qualifying quote. Each qualifying quote must occur, case-sensitively after whitespace normalization, in a bound `proof` or `verification` response body. Baseline and supporting traffic cannot satisfy this check. Gzip and deflate bodies are decoded before matching; normalized quotes shorter than 8 Unicode characters are ignored. The verifier reads at most 4 MiB per body. Unreadable evidence returns `not_assessed`; binary or truncated bodies cannot establish a missing quote.
 
 A completed retest with a `reproduced` or `fixed` verdict can independently upgrade an unverified finding. A verified state records evidence assessment; review the report and reproduction steps before acting on a result.

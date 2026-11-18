@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="540" viewBox="0 0 1120 540" fill="none" role="img" aria-labelledby="evidence-title evidence-desc">
+  <title id="evidence-title">From captured traffic to a checkable finding</title>
+  <desc id="evidence-desc">A fictional lab request and response are captured, then bound to a finding manually or with opt-in automatic binding. Initial verification checks for proof level at least three and a qualifying quote that matches a bound proof or verification response after whitespace normalization. Passing checks can produce a verified finding with evidence to review and retest. Other results remain unverified or not assessed. Automatic traffic binding is off by default.</desc>
+  <defs>
+    <linearGradient id="evidence-background" x1="0" y1="0" x2="1120" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#080A12"/><stop offset="1" stop-color="#141023"/>
+    </linearGradient>
+    <radialGradient id="evidence-glow" cx="0" cy="0" r="1" gradientTransform="translate(560 300) scale(520 260)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" stop-opacity=".1"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="evidence-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="#C4B5FD" stroke-opacity=".035"/>
+    </pattern>
+    <linearGradient id="evidence-card" x1="402" y1="190" x2="700" y2="418" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#251B38"/><stop offset="1" stop-color="#171322"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1120" height="540" rx="24" fill="url(#evidence-background)"/>
+  <rect width="1120" height="540" rx="24" fill="url(#evidence-grid)"/>
+  <rect width="1120" height="540" rx="24" fill="url(#evidence-glow)"/>
+  <rect x=".5" y=".5" width="1119" height="539" rx="23.5" stroke="#A78BFA" stroke-opacity=".18"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="46" y="58" fill="#F7F5FF" font-size="34" font-weight="700" letter-spacing="-1">From captured traffic to a checkable finding.</text>
+    <text x="48" y="92" fill="#B7B3C9" font-size="18">A traceable path from the original exchange to the evidence behind a result.</text>
+
+    <g font-family="'SFMono-Regular', Consolas, monospace" font-size="12" letter-spacing="1.8" fill="#A894C9">
+      <text x="48" y="138">01 / CAPTURE</text>
+      <text x="402" y="138">02 / BIND + VERIFY</text>
+      <text x="784" y="138">03 / REVIEW + RETEST</text>
+    </g>
+    <g fill="#EEE8FB" font-size="24" font-weight="600" letter-spacing="-.4">
+      <text x="48" y="170">Captured traffic</text>
+      <text x="402" y="170">Bound evidence</text>
+      <text x="784" y="170">Finding + proof</text>
+    </g>
+
+    <!-- Original exchange: layered, immutable-looking receipts, with lab-only text. -->
+    <rect x="66" y="202" width="270" height="222" rx="13" fill="#151020" stroke="#49375F"/>
+    <rect x="57" y="195" width="270" height="222" rx="13" fill="#1A1427" stroke="#614877"/>
+    <rect x="48" y="188" width="270" height="222" rx="13" fill="#15131F" stroke="#8C72AE" stroke-opacity=".75"/>
+    <path d="M48 234H318M48 316H318" stroke="#A78BFA" stroke-opacity=".18"/>
+    <g stroke="#B79AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M69 216v-8h8M93 216v-8h-8M69 221v2h8M93 221v2h-8"/>
+      <path d="M77 215h8"/>
+    </g>
+    <text x="106" y="217" fill="#D4C8E6" font-family="'SFMono-Regular', Consolas, monospace" font-size="12" letter-spacing=".8">HTTP SNAPSHOT</text>
+    <g font-family="'SFMono-Regular', Consolas, monospace">
+      <text x="68" y="263" fill="#EFE9FA" font-size="17">GET /lab/account</text>
+      <text x="68" y="290" fill="#A99ABB" font-size="13">Host: lab.example.test</text>
+      <text x="68" y="345" fill="#E6DDF3" font-size="17">200 OK</text>
+      <rect x="65" y="358" width="220" height="28" rx="5" fill="#B79AFF" fill-opacity=".09"/>
+      <text x="73" y="377" fill="#C8B2F6" font-size="15">lab-account-ready</text>
+    </g>
+    <text x="48" y="452" fill="#AA9EBB" font-size="16">Request + response snapshots</text>
+
+    <!-- Directional connectors remain separate from the conditional success state. -->
+    <g stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M348 294H385M378 287l7 7-7 7"/>
+      <path d="M714 294H766M759 287l7 7-7 7"/>
+    </g>
+    <circle cx="348" cy="294" r="3" fill="#B79AFF"/>
+    <circle cx="714" cy="294" r="3" fill="#B79AFF"/>
+
+    <!-- Only proof and verification evidence may satisfy the initial check. -->
+    <rect x="402" y="188" width="298" height="222" rx="13" fill="url(#evidence-card)" stroke="#A78BFA" stroke-opacity=".65"/>
+    <g font-family="'SFMono-Regular', Consolas, monospace" font-size="12">
+      <rect x="422" y="206" width="72" height="26" rx="13" fill="#38254E" stroke="#A78BFA" stroke-opacity=".25"/>
+      <text x="458" y="223" text-anchor="middle" fill="#D8C5FB">proof</text>
+      <rect x="502" y="206" width="132" height="26" rx="13" fill="#38254E" stroke="#A78BFA" stroke-opacity=".25"/>
+      <text x="568" y="223" text-anchor="middle" fill="#D8C5FB">verification</text>
+    </g>
+    <path d="M422 248H680" stroke="#A78BFA" stroke-opacity=".18"/>
+    <text x="422" y="279" fill="#F0EAFB" font-size="22" font-weight="600" letter-spacing="-.3">Verification check</text>
+    <g stroke="#B79AFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M424 299h15v15h-15zM428 306h7"/>
+      <path d="M425 336v-5h5M439 336v-5h-5M425 342v5h5M439 342v5h-5M430 339h4"/>
+    </g>
+    <text x="451" y="314" fill="#E7DEF4" font-size="19" font-weight="500">POE ≥ 3</text>
+    <text x="451" y="344" fill="#E7DEF4" font-size="18">Qualifying quote matches</text>
+    <text x="451" y="367" fill="#E7DEF4" font-size="18">a bound response</text>
+    <text x="422" y="393" fill="#AFA0C3" font-size="13">Case-sensitive · whitespace normalized</text>
+
+    <path d="M551 411v17" stroke="#7B678F" stroke-width="1.5" stroke-dasharray="3 4"/>
+    <rect x="422" y="430" width="258" height="34" rx="17" fill="#15121E" stroke="#584766"/>
+    <circle cx="440" cy="447" r="3" fill="#9C8AAD"/>
+    <text x="454" y="453" fill="#B8AAC9" font-size="16">Unverified / not assessed</text>
+
+    <!-- Mint denotes the outcome only when the proof checks pass. -->
+    <rect x="784" y="188" width="288" height="222" rx="13" fill="#171824" stroke="#8EDCC0" stroke-opacity=".38"/>
+    <circle cx="819" cy="225" r="15" fill="#8EDCC0" fill-opacity=".1" stroke="#8EDCC0" stroke-opacity=".45"/>
+    <path d="m812 225 5 5 9-10" stroke="#A1E4CD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="845" y="232" fill="#D6F2E7" font-size="23" font-weight="600" letter-spacing="-.3">Verified finding</text>
+    <text x="804" y="266" fill="#A9BDB7" font-size="16">When proof checks pass</text>
+    <path d="M804 284H1052" stroke="#8EDCC0" stroke-opacity=".15"/>
+    <g stroke="#BDA5E5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m811 309 5-5a4 4 0 0 1 6 6l-4 4M817 311l-5 5a4 4 0 0 1-6-6l4-4"/>
+      <path d="M807 339h15M807 345h15M807 351h10"/>
+      <path d="M809 383a8 8 0 1 0 1-10M809 369v5h5"/>
+    </g>
+    <text x="837" y="316" fill="#E0D8EB" font-size="18">Bound snapshots</text>
+    <text x="837" y="351" fill="#E0D8EB" font-size="18">Reproduction steps</text>
+    <text x="837" y="386" fill="#E0D8EB" font-size="18">Review, then retest</text>
+    <text x="784" y="452" fill="#AA9EBB" font-size="16">Retest can update the verdict</text>
+
+    <path d="M48 484H1072" stroke="#A78BFA" stroke-opacity=".15"/>
+    <rect x="48" y="500" width="29" height="16" rx="8" fill="#241C31" stroke="#6C587F"/>
+    <circle cx="56" cy="508" r="4.5" fill="#9F8CB6"/>
+    <text x="90" y="514" fill="#D3C8E3" font-size="17">Auto binding is off by default.</text>
+    <text x="1072" y="514" text-anchor="end" fill="#A99ABB" font-size="16">Bind manually, or opt in through Settings.</text>
+  </g>
+</svg>
