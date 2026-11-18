@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="580" viewBox="0 0 1120 580" fill="none" role="img" aria-labelledby="operator-title operator-desc">
+  <title id="operator-title">A seat for the operator.</title>
+  <desc id="operator-desc">Conceptual illustration of a dimensional task console with Sessions, Tool calls, an exploration graph, Pause and Resume controls, a captured Traffic window, and a pending worker or chat approval. Review pending requests when rules ask. Approval coverage varies by agent role; planner and main-agent guards are narrower than worker and chat guards.</desc>
+  <defs>
+    <linearGradient id="op-bg" x1="0" y1="0" x2="1120" y2="580" gradientUnits="userSpaceOnUse"><stop stop-color="#080A12"/><stop offset="1" stop-color="#161025"/></linearGradient>
+    <radialGradient id="op-aura" cx="0" cy="0" r="1" gradientTransform="translate(627 332) rotate(90) scale(269 496)" gradientUnits="userSpaceOnUse"><stop stop-color="#8B5CF6" stop-opacity=".21"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="op-frame" x1="239" y1="139" x2="912" y2="440" gradientUnits="userSpaceOnUse"><stop stop-color="#70578D"/><stop offset=".42" stop-color="#34283F"/><stop offset="1" stop-color="#B79AFF"/></linearGradient>
+    <linearGradient id="op-glass" x1="231" y1="150" x2="943" y2="436" gradientUnits="userSpaceOnUse"><stop stop-color="#1D172D"/><stop offset="1" stop-color="#0D0E18"/></linearGradient>
+    <linearGradient id="op-base" x1="271" y1="434" x2="593" y2="507" gradientUnits="userSpaceOnUse"><stop stop-color="#30223F"/><stop offset=".46" stop-color="#483358"/><stop offset="1" stop-color="#171323"/></linearGradient>
+    <linearGradient id="op-card" x1="741" y1="300" x2="1014" y2="491" gradientUnits="userSpaceOnUse"><stop stop-color="#2A2038"/><stop offset="1" stop-color="#17121F"/></linearGradient>
+    <linearGradient id="op-lilac" x1="521" y1="388" x2="665" y2="426" gradientUnits="userSpaceOnUse"><stop stop-color="#BDA5FF"/><stop offset="1" stop-color="#9873EE"/></linearGradient>
+    <pattern id="op-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" stroke="#C4B5FD" stroke-opacity=".04"/></pattern>
+    <filter id="op-shadow" x="-25%" y="-30%" width="150%" height="170%" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="16" stdDeviation="15" flood-color="#03040A" flood-opacity=".65"/></filter>
+    <filter id="op-soft" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <rect width="1120" height="580" rx="24" fill="url(#op-bg)"/>
+  <rect width="1120" height="580" rx="24" fill="url(#op-grid)"/>
+  <rect width="1120" height="580" rx="24" fill="url(#op-aura)"/>
+  <rect x=".5" y=".5" width="1119" height="579" rx="23.5" stroke="#A78BFA" stroke-opacity=".18"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="48" y="61" fill="#F7F5FF" font-size="32" font-weight="700" letter-spacing="-.8">A seat for the operator.</text>
+    <text x="49" y="98" fill="#B7B3C9" font-size="22">Follow the run. Steer the next step.</text>
+    <text x="1070" y="58" text-anchor="end" fill="#9A8BAC" font-size="14" letter-spacing="1.6">CONCEPTUAL ILLUSTRATION</text>
+
+    <ellipse cx="591" cy="474" rx="374" ry="31" fill="#04050B" fill-opacity=".65"/>
+    <path d="m177 278-51-31 32-59m821 6 55 35-19 49" stroke="#69517F" stroke-width="1.5" stroke-dasharray="4 7"/>
+    <circle cx="157" cy="188" r="5" fill="#B79AFF"/>
+    <circle cx="1015" cy="279" r="5" fill="#8CE3C0"/>
+    <path d="m100 158 4 7 8 1-6 6 1 8-7-4-7 4 1-8-6-6 8-1Z" fill="#B79AFF" fill-opacity=".45"/>
+    <path d="M1020 357h18m-9-9v18" stroke="#B79AFF" stroke-opacity=".45" stroke-width="2"/>
+
+    <g transform="rotate(-3 579 314)">
+      <path d="m214 430 731 0 71 45-740 0Z" fill="url(#op-base)" stroke="#74578C" stroke-width="1.5"/>
+      <path d="M276 475h740v10l-740 1-62-44v-12Z" fill="#14111D"/>
+      <path d="m276 475 740 0" stroke="#C4A3F5" stroke-opacity=".46"/>
+      <path d="m420 447 352 0 20 13H438Z" fill="#100E19" stroke="#6A4E7C"/>
+      <g stroke="#9273AB" stroke-opacity=".4"><path d="m304 446 63 0m-44 7h63m450-6h59m-40 7h59"/></g>
+      <rect x="212" y="140" width="734" height="299" rx="20" fill="url(#op-frame)" filter="url(#op-shadow)"/>
+      <rect x="219" y="147" width="720" height="285" rx="15" fill="url(#op-glass)" stroke="#9E7BC0" stroke-opacity=".45"/>
+      <path d="M220 197h718" stroke="#574363"/>
+      <circle cx="244" cy="172" r="4" fill="#B79AFF"/><circle cx="260" cy="172" r="4" fill="#8B709F"/><circle cx="276" cy="172" r="4" fill="#574562"/>
+      <text x="306" y="180" fill="#F0E9FC" font-size="22" font-weight="600">Sessions</text>
+      <rect x="772" y="158" width="143" height="29" rx="14.5" fill="#1A2D2A" stroke="#6BB698" stroke-opacity=".55"/>
+      <circle cx="790" cy="172" r="4" fill="#8CE3C0"/><text x="807" y="179" fill="#A5EACD" font-size="18">Task view</text>
+
+      <rect x="238" y="215" width="282" height="156" rx="11" fill="#110F1C" stroke="#45364F"/>
+      <text x="258" y="247" fill="#DED5F0" font-size="22" font-weight="600">Tool calls</text>
+      <path d="M258 263h242" stroke="#3B2F46"/>
+      <circle cx="264" cy="286" r="4" fill="#8CE3C0"/><text x="281" y="293" fill="#B5A7C9" font-size="20">Read</text>
+      <path d="M386 283h93m-93 7h67" stroke="#534161" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="264" cy="321" r="4" fill="#B79AFF"/><text x="281" y="328" fill="#D7CAEB" font-size="20">WebFetch</text>
+      <path d="M414 318h65m-65 7h48" stroke="#534161" stroke-width="3" stroke-linecap="round"/>
+      <path d="M258 351h118m12 0h63" stroke="#392C45" stroke-width="3" stroke-linecap="round"/>
+
+      <rect x="536" y="215" width="379" height="156" rx="11" fill="#13101E" stroke="#45364F"/>
+      <path d="M557 339h337m-337-29h337m-337-29h337m-337-29h337" stroke="#A78BFA" stroke-opacity=".07"/>
+      <path d="m567 310 63-43 70 56 82-66 97 42m-249-32 44-28 108 18m-82 66 78 21 101-45" stroke="#B79AFF" stroke-opacity=".4" stroke-width="2"/>
+      <g fill="#302240" stroke="#B79AFF" stroke-width="2"><circle cx="567" cy="310" r="8"/><circle cx="630" cy="267" r="11"/><circle cx="700" cy="323" r="8"/><circle cx="782" cy="257" r="10"/><circle cx="879" cy="299" r="8"/></g>
+      <g fill="#152C28" stroke="#8CE3C0" stroke-width="2"><circle cx="674" cy="239" r="6"/><circle cx="778" cy="344" r="6"/></g>
+      <circle cx="782" cy="257" r="19" stroke="#B79AFF" stroke-opacity=".18" stroke-width="6"/>
+      <text x="557" y="362" fill="#A597B8" font-size="16">EXPLORATION GRAPH</text>
+
+      <rect x="403" y="387" width="139" height="34" rx="9" fill="#241A31" stroke="#8B6BA6"/>
+      <path d="M424 397v14m7-14v14" stroke="#D6C8E9" stroke-width="3"/>
+      <text x="447" y="412" fill="#E5DCF1" font-size="22">Pause</text>
+      <rect x="554" y="387" width="155" height="34" rx="9" fill="url(#op-lilac)"/>
+      <path d="m573 396 0 16 12-8Z" fill="#241737"/>
+      <text x="597" y="412" fill="#241737" font-size="22" font-weight="600">Resume</text>
+    </g>
+
+    <g transform="rotate(-5 218 408)" filter="url(#op-shadow)">
+      <rect x="55" y="325" width="326" height="164" rx="15" fill="#141B25" stroke="#6B9C94" stroke-opacity=".7"/>
+      <rect x="56" y="326" width="324" height="43" rx="14" fill="#19232D"/>
+      <path d="M56 368h324" stroke="#3B565B"/>
+      <rect x="76" y="339" width="18" height="16" rx="3" stroke="#8CE3C0" stroke-width="1.5"/>
+      <path d="M81 344h8m-8 5h5" stroke="#8CE3C0" stroke-width="1.5"/>
+      <text x="108" y="355" fill="#D7F4E9" font-size="22" font-weight="600">Traffic</text>
+      <text x="77" y="400" fill="#A0C4BA" font-size="22">request</text>
+      <path d="M169 394h39m-7-6 7 6-7 6" stroke="#8CE3C0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="221" y="400" fill="#A0C4BA" font-size="22">response</text>
+      <path d="M78 428h180m-180 12h113" stroke="#36534E" stroke-width="4" stroke-linecap="round"/>
+      <path d="m78 465 33-1 17-11 20 10 25-19 29 16 20-7 28 9 22-19 27 15 29-5 30 9" stroke="#8CE3C0" stroke-opacity=".75" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="272" cy="443" r="4" fill="#8CE3C0"/>
+    </g>
+
+    <g transform="rotate(3 882 400)" filter="url(#op-shadow)">
+      <rect x="705" y="300" width="359" height="205" rx="17" fill="url(#op-card)" stroke="#B39AC8" stroke-opacity=".8"/>
+      <path d="M706 355h357" stroke="#70506E" stroke-opacity=".65"/>
+      <rect x="725" y="317" width="25" height="25" rx="7" fill="#493524"/>
+      <path d="M737.5 322v9m0 4v1" stroke="#F4C47E" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="763" y="339" fill="#F5ECFB" font-size="24" font-weight="600">Approvals</text>
+      <circle cx="980" cy="328" r="4" fill="#F4C47E"/>
+      <text x="727" y="385" fill="#C1AECF" font-size="22">Worker / chat request</text>
+      <text x="727" y="420" fill="#F4C47E" font-size="22">Rule decision: ask</text>
+      <rect x="726" y="443" width="148" height="41" rx="10" fill="#A7E7CA"/>
+      <text x="800" y="471" text-anchor="middle" fill="#132A23" font-size="22" font-weight="600">Allow</text>
+      <rect x="886" y="443" width="156" height="41" rx="10" fill="#241A2D" stroke="#876B98"/>
+      <text x="964" y="471" text-anchor="middle" fill="#E0D2ED" font-size="22">Deny</text>
+    </g>
+
+    <circle cx="52" cy="542" r="4" fill="#F4C47E"/>
+    <text x="69" y="549" fill="#D7C9E6" font-size="22">Review pending requests when rules ask.</text>
+    <text x="1070" y="548" text-anchor="end" fill="#94859F" font-size="16">Guard scope varies by role.</text>
+  </g>
+</svg>

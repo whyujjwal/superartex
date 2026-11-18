@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="136" viewBox="0 0 240 136" fill="none" role="img" aria-labelledby="spot-planning-title spot-planning-desc">
+<title id="spot-planning-title">Plan with context</title>
+<desc id="spot-planning-desc">An illustrated constellation of observations around a central planning node.</desc>
+<ellipse cx="120" cy="72" rx="92" ry="42" transform="rotate(-12 120 72)" stroke="#8B5CF6" stroke-opacity=".35" stroke-dasharray="3 6"/>
+<path d="m53 92 66-46 64 44M119 46l8 67M53 92l74 21 56-23" stroke="#8B5CF6" stroke-width="2"/>
+<path d="m118 29 31 18-31 18-31-18z" fill="#382249" stroke="#B79AFF" stroke-width="2"/><path d="m87 47 31 18 31-18v24l-31 18-31-18z" fill="#20162F" stroke="#8B5CF6" stroke-width="2"/><path d="M118 65v24" stroke="#B79AFF" stroke-width="2"/>
+<g fill="#21162E" stroke="#A78BFA" stroke-width="2"><circle cx="53" cy="92" r="12"/><circle cx="183" cy="90" r="12"/><circle cx="127" cy="113" r="8"/></g><g fill="#B79AFF"><circle cx="53" cy="92" r="4"/><circle cx="183" cy="90" r="4"/></g><circle cx="202" cy="44" r="4" fill="#75C8D0"/>
+</svg>

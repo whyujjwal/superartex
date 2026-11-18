@@ -4,6 +4,8 @@
 
 ## Bundled capabilities
 
+![A visual inventory of the bundled tool categories](../assets/readme/toolkit-constellation.svg)
+
 SuperArtex includes a skills inventory, a background runner, and interfaces for reviewing tool execution and workflow history. The platform records job status and execution results in the workspace.
 
 ## Platform

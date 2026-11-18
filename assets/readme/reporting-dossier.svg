@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="568" viewBox="0 0 1120 568" fill="none" role="img" aria-labelledby="report-title report-desc">
+  <title id="report-title">From finding to follow-up</title>
+  <desc id="report-desc">An illustrated assessment dossier collects the affected asset, reproduction steps, bound evidence, and remediation. Operators can export findings as Markdown, JSON, CSV, or a ZIP, and start a separate retest session. Retest history preserves the original report.</desc>
+  <defs>
+    <linearGradient id="report-bg" x1="0" y1="0" x2="1120" y2="568" gradientUnits="userSpaceOnUse"><stop stop-color="#090B14"/><stop offset="1" stop-color="#181126"/></linearGradient>
+    <linearGradient id="report-paper" x1="124" y1="167" x2="456" y2="479" gradientUnits="userSpaceOnUse"><stop stop-color="#342349"/><stop offset="1" stop-color="#1A1425"/></linearGradient>
+    <linearGradient id="report-folder" x1="70" y1="409" x2="501" y2="475" gradientUnits="userSpaceOnUse"><stop stop-color="#483060"/><stop offset="1" stop-color="#21172F"/></linearGradient>
+    <radialGradient id="report-glow" cx="0" cy="0" r="1" gradientTransform="translate(310 337) scale(290 225)" gradientUnits="userSpaceOnUse"><stop stop-color="#7C3AED" stop-opacity=".2"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/></radialGradient>
+    <pattern id="report-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" stroke="#C4B5FD" stroke-opacity=".035"/></pattern>
+  </defs>
+  <rect width="1120" height="568" rx="24" fill="url(#report-bg)"/>
+  <rect width="1120" height="568" rx="24" fill="url(#report-grid)"/>
+  <rect width="1120" height="568" rx="24" fill="url(#report-glow)"/>
+  <rect x=".5" y=".5" width="1119" height="567" rx="23.5" stroke="#B79AFF" stroke-opacity=".2"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="44" y="58" fill="#F6F2FC" font-size="35" font-weight="700" letter-spacing="-.9">From finding to follow-up.</text>
+    <text x="46" y="94" fill="#B1A8C1" font-size="19">Review the evidence. Share the result. Verify the fix.</text>
+
+    <ellipse cx="299" cy="501" rx="224" ry="22" fill="#05070D" fill-opacity=".6"/>
+    <path d="M80 310h110l28 25h257v132L91 491Z" fill="#191322" stroke="#5C4479"/>
+    <rect x="165" y="150" width="296" height="310" rx="14" transform="rotate(7 165 150)" fill="#171321" stroke="#5C4479"/>
+    <rect x="104" y="181" width="296" height="310" rx="14" transform="rotate(-7 104 181)" fill="#22192F" stroke="#755593"/>
+    <rect x="130" y="153" width="302" height="326" rx="14" fill="url(#report-paper)" stroke="#B79AFF" stroke-opacity=".7"/>
+    <path d="M130 215h302" stroke="#B79AFF" stroke-opacity=".22"/>
+    <rect x="151" y="171" width="41" height="28" rx="7" fill="#B79AFF" fill-opacity=".12"/>
+    <path d="m164 180 8-3 8 3v7c0 5-4 8-8 10-4-2-8-5-8-10Z" stroke="#CBB5F5" stroke-width="1.7" stroke-linejoin="round"/>
+    <text x="207" y="192" fill="#DCCCF4" font-size="17" font-weight="600" letter-spacing="1.1">FINDING DOSSIER</text>
+    <g fill="#EEE7F8" font-size="22" font-weight="550">
+      <text x="178" y="257">Affected asset</text>
+      <text x="178" y="306">Reproduction</text>
+      <text x="178" y="355">Bound evidence</text>
+      <text x="178" y="404">Remediation</text>
+    </g>
+    <g stroke="#BDA1EF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="157" cy="249" r="7"/><path d="M150 249h14m-7-7c-4 4-4 10 0 14m0-14c4 4 4 10 0 14"/>
+      <path d="m151 292 10 7-10 7m-1 2h14"/>
+      <path d="m153 345 5-4a4 4 0 0 1 5 6l-5 4m-2-4-5 4a4 4 0 0 0 5 6l4-3"/>
+      <path d="m150 396 5 5 10-11"/>
+    </g>
+    <path d="M72 415h157l20 17h251l-29 70H96Z" fill="url(#report-folder)" stroke="#9B74CA" stroke-opacity=".65" stroke-linejoin="round"/>
+    <path d="m95 482 365-3" stroke="#B79AFF" stroke-opacity=".22"/>
+    <text x="259" y="467" fill="#D4BDEC" font-family="'SFMono-Regular', Consolas, monospace" font-size="13" letter-spacing="2.4">ASSESSMENT RECORD</text>
+
+    <g stroke="#B79AFF" stroke-opacity=".6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M449 269h87q18 0 18-18v-35q0-18 18-18h40m-8-6 8 6-8 6"/>
+      <path d="M449 358h78q27 0 27 27v5q0 22 22 22h36m-8-6 8 6-8 6"/>
+    </g>
+
+    <rect x="628" y="150" width="444" height="164" rx="18" fill="#171320" stroke="#4A355F"/>
+    <g stroke="#BCA1F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M657 176v20m-7-7 7 7 7-7M648 202h18"/>
+    </g>
+    <text x="685" y="194" fill="#F1E9FA" font-size="26" font-weight="600">Export the results</text>
+    <text x="650" y="227" fill="#B1A4C1" font-size="17">Choose a format for review or handoff.</text>
+    <g font-family="'SFMono-Regular', Consolas, monospace" font-size="14" fill="#D3BDF1" text-anchor="middle">
+      <rect x="650" y="248" width="132" height="40" rx="8" fill="#2A1D3A" stroke="#62457F"/><text x="716" y="273">Markdown</text>
+      <rect x="794" y="248" width="76" height="40" rx="8" fill="#2A1D3A" stroke="#62457F"/><text x="832" y="273">JSON</text>
+      <rect x="882" y="248" width="76" height="40" rx="8" fill="#2A1D3A" stroke="#62457F"/><text x="920" y="273">CSV</text>
+      <rect x="970" y="248" width="80" height="40" rx="8" fill="#2A1D3A" stroke="#62457F"/><text x="1010" y="273">ZIP</text>
+    </g>
+
+    <rect x="628" y="342" width="444" height="160" rx="18" fill="#121C23" stroke="#3C635E"/>
+    <g stroke="#8CDECA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M650 379a10 10 0 1 0 3-8m-3-4v7h7"/></g>
+    <text x="685" y="385" fill="#E5F6EE" font-size="26" font-weight="600">Retest after the fix</text>
+    <text x="650" y="420" fill="#A3BEB6" font-size="18">Start a separate session when you're ready.</text>
+    <path d="M650 438h400" stroke="#8CDECA" stroke-opacity=".18"/>
+    <g font-size="16" fill="#B9D4CC">
+      <circle cx="654" cy="466" r="3" fill="#A994CF"/><text x="665" y="472">Still reproducible</text>
+      <circle cx="815" cy="466" r="3" fill="#8CDECA"/><text x="826" y="472">Fixed</text>
+      <circle cx="892" cy="466" r="3" fill="#C6B78F"/><text x="903" y="472">Inconclusive</text>
+    </g>
+    <text x="46" y="543" fill="#AFA0C1" font-size="16">Operator-triggered retests keep their own history and preserve the original report.</text>
+  </g>
+</svg>

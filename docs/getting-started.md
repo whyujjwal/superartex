@@ -4,6 +4,8 @@
 
 This guide takes a fresh checkout to a signed-in instance.
 
+![The self-hosted application, database, persistent files, and browser](../assets/readme/deployment-illustration.svg)
+
 ## Prerequisites
 
 For Docker Compose, install Git and Docker with the Compose v2 plugin, and start the Docker daemon. Compose builds the application from this checkout and runs PostgreSQL 16 alongside it; no local Go or Node installation is required. The first build also downloads the image's security tools and browsers, so allow time and network access for those downloads.

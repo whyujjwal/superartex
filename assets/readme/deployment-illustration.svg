@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" fill="none" role="img" aria-labelledby="deployment-title deployment-desc">
+  <title id="deployment-title">SuperArtex on your infrastructure</title>
+  <desc id="deployment-desc">An operator opens the SuperArtex UI and API through the default Compose host loopback address, 127.0.0.1:8787. A cutaway server contains Go, the embedded Next.js UI, the planner, parallel workers, and a toolbox. PostgreSQL stays inside the Compose network. Database records persist in pgdata, with runtime files in ./data and keys in ./keys. The application connects to a chosen Anthropic, OpenAI-compatible, or Ollama model endpoint, which may be a provider or a reachable local server.</desc>
+  <defs>
+    <linearGradient id="deployment-bg" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#080A12"/><stop offset="1" stop-color="#141023"/>
+    </linearGradient>
+    <linearGradient id="deployment-server" x1="350" y1="235" x2="730" y2="530" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2A2040"/><stop offset="1" stop-color="#191426"/>
+    </linearGradient>
+    <linearGradient id="deployment-db" x1="783" y1="365" x2="922" y2="490" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#35274D"/><stop offset=".55" stop-color="#201A32"/><stop offset="1" stop-color="#30243F"/>
+    </linearGradient>
+    <linearGradient id="deployment-base" x1="310" y1="556" x2="934" y2="625" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D2142"/><stop offset="1" stop-color="#1A1628"/>
+    </linearGradient>
+    <radialGradient id="deployment-glow" cx="0" cy="0" r="1" gradientTransform="translate(648 370) scale(495 325)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" stop-opacity=".15"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="deployment-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" stroke="#C4B5FD" stroke-opacity=".04"/>
+    </pattern>
+    <marker id="deployment-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="m1 1 6 3.5L1 8" stroke="#7DD3DF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="720" rx="24" fill="url(#deployment-bg)"/>
+  <rect width="1280" height="720" rx="24" fill="url(#deployment-grid)"/>
+  <rect width="1280" height="720" rx="24" fill="url(#deployment-glow)"/>
+  <rect x=".5" y=".5" width="1279" height="719" rx="23.5" stroke="#A78BFA" stroke-opacity=".18"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="48" y="65" fill="#F7F5FF" font-size="36" font-weight="700" letter-spacing="-1">Your infrastructure. Your model endpoint.</text>
+    <text x="49" y="104" fill="#B7B3C9" font-size="22">A self-hosted application with a model connection you control.</text>
+
+    <!-- A deployment boundary is a location cue, not a network-isolation claim. -->
+    <rect x="283" y="141" width="683" height="508" rx="24" fill="#161222" fill-opacity=".46" stroke="#A78BFA" stroke-opacity=".34" stroke-dasharray="6 9"/>
+    <circle cx="313" cy="174" r="5" fill="#B79AFF"/>
+    <text x="329" y="182" fill="#BDA5FF" font-size="22" font-weight="600" letter-spacing="1">SELF-HOSTED · COMPOSE DEFAULTS</text>
+
+    <!-- An isometric platform carries the application and database. -->
+    <ellipse cx="623" cy="621" rx="298" ry="27" fill="#06070E" fill-opacity=".55"/>
+    <path d="m310 550 505 0 119 56-505 0Z" fill="url(#deployment-base)" stroke="#65517C"/>
+    <path d="m310 550 119 56v25l-119-57Z" fill="#191423" stroke="#4A3B5C"/>
+    <path d="M429 606h505v25H429Z" fill="#14111F" stroke="#4A3B5C"/>
+    <path d="M446 618h86m16 0h16m16 0h16" stroke="#A78BFA" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="910" cy="618" r="4" fill="#75D5D7"/>
+
+    <!-- Operator workstation. -->
+    <text x="49" y="241" fill="#E7DFFB" font-size="25" font-weight="600">Operator</text>
+    <path d="M43 274a12 12 0 0 1 12-12h174a12 12 0 0 1 12 12v143H43Z" fill="#171522" stroke="#84729D" stroke-width="1.5"/>
+    <path d="M43 293h198" stroke="#5D4D71"/>
+    <circle cx="58" cy="278" r="3" fill="#B79AFF"/><circle cx="70" cy="278" r="3" fill="#6D5A83"/><circle cx="82" cy="278" r="3" fill="#6D5A83"/>
+    <rect x="58" y="308" width="32" height="93" rx="4" fill="#231B33"/>
+    <path d="M67 323h14m-14 15h14m-14 15h9" stroke="#A78BFA" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/>
+    <rect x="102" y="308" width="123" height="30" rx="4" fill="#322343" stroke="#8B6BB4" stroke-opacity=".65"/>
+    <path d="M114 322h57m-57 5h37" stroke="#C4B5FD" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+    <rect x="102" y="350" width="54" height="51" rx="4" fill="#221B31"/>
+    <rect x="167" y="350" width="58" height="51" rx="4" fill="#221B31"/>
+    <path d="m113 385 8-10 9 4 14-18m34 23 8-12 10 7 15-16" stroke="#7DD3DF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M43 417h198v10a8 8 0 0 1-8 8H51a8 8 0 0 1-8-8Z" fill="#242032" stroke="#84729D" stroke-width="1.5"/>
+    <path d="M129 435v18m26-18v18m-48 0h70" stroke="#84729D" stroke-width="3" stroke-linecap="round"/>
+    <text x="45" y="492" fill="#E7DFFB" font-size="23" font-weight="600">UI / API</text>
+    <text x="45" y="524" fill="#7DD3DF" font-family="'SFMono-Regular', Consolas, monospace" font-size="22">127.0.0.1:8787</text>
+    <text x="45" y="555" fill="#A79BB8" font-size="22">Host loopback</text>
+
+    <!-- Connection enters the application server. -->
+    <path d="M244 339h104" stroke="#7DD3DF" stroke-width="2.5" marker-end="url(#deployment-arrow)"/>
+    <circle cx="268" cy="339" r="4" fill="#7DD3DF"/>
+
+    <!-- A cutaway chassis with visible execution layers. -->
+    <path d="m310 211 380 0 40 26-380 0Z" fill="#3C2D52" stroke="#9475BC" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="m310 211 40 26v292l-40-27Z" fill="#201A2E" stroke="#6C5486" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M350 237h380v292H350Z" fill="url(#deployment-server)" stroke="#A78BFA" stroke-width="1.5"/>
+    <path d="m328 235 10 7v19l-10-7Zm0 42 10 7v19l-10-7Zm0 42 10 7v19l-10-7Z" fill="#6D5489" fill-opacity=".55"/>
+    <path d="m332 220 176 0m18 0h48" stroke="#C4B5FD" stroke-opacity=".45" stroke-width="2"/>
+    <text x="373" y="276" fill="#F1ECFF" font-size="25" font-weight="650">SuperArtex</text>
+    <circle cx="704" cy="267" r="5" fill="#75D5D7"/>
+    <text x="373" y="308" fill="#C6B8DB" font-size="22">Go + embedded Next.js</text>
+    <path d="M372 321h336" stroke="#6D5489" stroke-opacity=".65"/>
+
+    <rect x="372" y="337" width="336" height="46" rx="7" fill="#30213F" stroke="#9E7BCB" stroke-opacity=".75"/>
+    <path d="M389 360h21m-10-10v20" stroke="#C4B5FD" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="400" cy="360" r="5" fill="#30213F" stroke="#C4B5FD" stroke-width="2"/>
+    <text x="430" y="368" fill="#E9E1F9" font-size="24" font-weight="600">Planner</text>
+
+    <rect x="372" y="394" width="336" height="46" rx="7" fill="#221B32" stroke="#6E5589"/>
+    <path d="m389 409 7-4 7 4v8l-7 4-7-4Zm13 10 7-4 7 4v8l-7 4-7-4Z" stroke="#B79AFF" stroke-width="1.5" stroke-linejoin="round"/>
+    <text x="430" y="425" fill="#E9E1F9" font-size="24" font-weight="600">Parallel workers</text>
+
+    <rect x="372" y="451" width="336" height="46" rx="7" fill="#221B32" stroke="#6E5589"/>
+    <path d="M390 467h23v17h-23Zm6 0v-5h11v5m-17 6h23" stroke="#B79AFF" stroke-width="1.7" stroke-linejoin="round"/>
+    <text x="430" y="482" fill="#E9E1F9" font-size="24" font-weight="600">Toolbox</text>
+    <path d="M374 515h15m8 0h15m8 0h15m8 0h15" stroke="#8E6BB3" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Application-to-database connection remains within the depicted stack. -->
+    <path d="M731 461h25q12 0 12-12v-14h22" stroke="#B79AFF" stroke-width="2" marker-end="url(#deployment-arrow)"/>
+
+    <!-- A separate cylindrical database, with a persisted-volume pedestal. -->
+    <ellipse cx="851" cy="541" rx="69" ry="20" fill="#15121F" stroke="#65517C"/>
+    <path d="M782 529v12c0 11 31 20 69 20s69-9 69-20v-12" fill="#22192F" stroke="#65517C"/>
+    <ellipse cx="851" cy="529" rx="69" ry="20" fill="#30243E" stroke="#80629F"/>
+    <path d="M786 367v119c0 16 29 29 65 29s65-13 65-29V367" fill="url(#deployment-db)" stroke="#A78BFA" stroke-width="1.5"/>
+    <path d="M786 406c0 16 29 29 65 29s65-13 65-29m-130 40c0 16 29 29 65 29s65-13 65-29" stroke="#9A7AC0" stroke-opacity=".6" stroke-width="1.5"/>
+    <ellipse cx="851" cy="367" rx="65" ry="27" fill="#44315B" stroke="#C4B5FD" stroke-width="1.5"/>
+    <ellipse cx="851" cy="365" rx="44" ry="15" fill="#332645" stroke="#A78BFA" stroke-opacity=".35"/>
+    <path d="M803 390v14m0 26v14m0 26v14" stroke="#D1BEF5" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="896" cy="483" r="4" fill="#75D5D7"/>
+    <text x="851" y="328" text-anchor="middle" fill="#E9E1F9" font-size="24" font-weight="600">PostgreSQL</text>
+    <text x="851" y="594" text-anchor="middle" fill="#C6B8DB" font-family="'SFMono-Regular', Consolas, monospace" font-size="22">pgdata</text>
+
+    <!-- Host-mounted runtime files and keys have a distinct storage shape. -->
+    <path d="M366 550h104l13 11h208v39H366Z" fill="#20192D" stroke="#7F629F" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M384 579h14m-7-7v14" stroke="#B79AFF" stroke-width="2" stroke-linecap="round"/>
+    <text x="414" y="586" fill="#D5C7E8" font-family="'SFMono-Regular', Consolas, monospace" font-size="22">./data · ./keys</text>
+
+    <!-- A model endpoint may be a provider or a separately reachable local server. -->
+    <text x="1002" y="203" fill="#E9E1F9" font-size="25" font-weight="600">Model endpoint</text>
+    <path d="M1040 316c-24 0-41-15-41-35 0-18 13-32 30-35 6-23 25-38 49-38 22 0 40 12 48 30 6-3 12-4 19-4 25 0 45 18 47 42 19 0 33 9 33 24 0 16-14 27-33 27h-152Z" transform="translate(0 15)" fill="#151D2C" stroke="#6BA6B6" stroke-width="1.5"/>
+    <path d="m1084 267 20 12v24l-20 12-20-12v-24Zm0 0v24m-20-12 20 12 20-12m-20 12v24" stroke="#7DD3DF" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="1131" cy="277" r="4" fill="#B79AFF"/><circle cx="1147" cy="290" r="4" fill="#7DD3DF"/>
+    <path d="m1110 288 17-9m-17 17 32-5" stroke="#7DD3DF" stroke-opacity=".6" stroke-width="1.5"/>
+    <text x="1002" y="383" fill="#C6B8DB" font-size="22">Anthropic</text>
+    <text x="1002" y="420" fill="#C6B8DB" font-size="22">OpenAI-compatible</text>
+    <text x="1002" y="457" fill="#C6B8DB" font-size="22">Ollama / local</text>
+    <path d="M730 285h249q10 0 20 9" stroke="#7DD3DF" stroke-width="2" stroke-dasharray="6 7" marker-end="url(#deployment-arrow)"/>
+    <circle cx="756" cy="285" r="4" fill="#7DD3DF"/>
+    <text x="1002" y="513" fill="#8EA5B5" font-size="22">Provider or local</text>
+    <text x="1002" y="543" fill="#8EA5B5" font-size="22">server you choose</text>
+
+    <text x="49" y="687" fill="#A79BB8" font-size="22">Compose persists your files and keys. PostgreSQL is not published to the host.</text>
+  </g>
+</svg>

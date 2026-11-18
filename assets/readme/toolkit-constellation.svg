@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600" fill="none" role="img" aria-labelledby="toolkit-title toolkit-desc">
+  <title id="toolkit-title">SuperArtex toolkit constellation</title>
+  <desc id="toolkit-desc">An isometric SuperArtex terminal sits on a layered workbench, surrounded by four linked tool panels. Recon includes nmap and subfinder; web discovery includes httpx, katana, and ffuf; validation includes nuclei and dalfox; lab and browser includes sqlmap and Playwright. These tools are bundled in the Docker image.</desc>
+  <defs>
+    <linearGradient id="tk-background" x1="0" y1="0" x2="1120" y2="600" gradientUnits="userSpaceOnUse"><stop stop-color="#080A12"/><stop offset="1" stop-color="#141023"/></linearGradient>
+    <radialGradient id="tk-halo" cx="0" cy="0" r="1" gradientTransform="translate(558 352) scale(390 258)" gradientUnits="userSpaceOnUse"><stop stop-color="#8B5CF6" stop-opacity=".17"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="tk-surface" x1="419" y1="371" x2="650" y2="482" gradientUnits="userSpaceOnUse"><stop stop-color="#352345"/><stop offset="1" stop-color="#1D172C"/></linearGradient>
+    <linearGradient id="tk-monitor" x1="430" y1="231" x2="661" y2="394" gradientUnits="userSpaceOnUse"><stop stop-color="#30223F"/><stop offset="1" stop-color="#181322"/></linearGradient>
+    <linearGradient id="tk-screen" x1="448" y1="250" x2="636" y2="362" gradientUnits="userSpaceOnUse"><stop stop-color="#151424"/><stop offset="1" stop-color="#0A111B"/></linearGradient>
+    <linearGradient id="tk-orbit" x1="269" y1="221" x2="875" y2="480" gradientUnits="userSpaceOnUse"><stop stop-color="#B79AFF" stop-opacity=".7"/><stop offset=".5" stop-color="#91DBE9" stop-opacity=".25"/><stop offset="1" stop-color="#B79AFF" stop-opacity=".7"/></linearGradient>
+    <pattern id="tk-dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#C4B5FD" fill-opacity=".07"/></pattern>
+    <filter id="tk-soft-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="tk-shadow" x="-20%" y="-25%" width="140%" height="165%"><feDropShadow dx="0" dy="12" stdDeviation="13" flood-color="#03040A" flood-opacity=".6"/></filter>
+  </defs>
+
+  <rect width="1120" height="600" rx="24" fill="url(#tk-background)"/>
+  <rect width="1120" height="600" rx="24" fill="url(#tk-dots)"/>
+  <rect width="1120" height="600" rx="24" fill="url(#tk-halo)"/>
+  <rect x=".5" y=".5" width="1119" height="599" rx="23.5" stroke="#A78BFA" stroke-opacity=".18"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="48" y="61" fill="#F7F5FF" font-size="38" font-weight="700" letter-spacing="-1">The tools, within reach.</text>
+    <text x="50" y="94" fill="#B7B3C9" font-size="21">Bundled in the Docker image</text>
+
+    <g aria-hidden="true">
+      <path d="M929 55h24l11 11h44m-55-11 11-11h44m-5 22h22" stroke="#B79AFF" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="929" cy="55" r="4" fill="#B79AFF"/><circle cx="1010" cy="44" r="3" fill="#91DBE9"/><circle cx="1028" cy="66" r="3" fill="#A5DFCB"/>
+
+      <ellipse cx="560" cy="351" rx="383" ry="151" transform="rotate(-13 560 351)" stroke="#B79AFF" stroke-opacity=".1" stroke-width="12" filter="url(#tk-soft-glow)"/>
+      <ellipse cx="560" cy="351" rx="383" ry="151" transform="rotate(-13 560 351)" stroke="url(#tk-orbit)" stroke-width="1.5"/>
+      <ellipse cx="560" cy="351" rx="277" ry="205" transform="rotate(28 560 351)" stroke="#B79AFF" stroke-opacity=".18" stroke-width="1.5" stroke-dasharray="3 9"/>
+      <path d="M297 248C358 222 389 217 432 235M678 259C729 232 744 220 787 213M327 459C369 465 394 448 426 426M700 426C736 440 753 450 788 467" stroke="#B79AFF" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+      <path d="M297 248C358 222 389 217 432 235M678 259C729 232 744 220 787 213M327 459C369 465 394 448 426 426M700 426C736 440 753 450 788 467" stroke="#B79AFF" stroke-opacity=".15" stroke-width="7" filter="url(#tk-soft-glow)"/>
+
+      <circle cx="375" cy="193" r="5" fill="#B79AFF"/><circle cx="375" cy="193" r="12" stroke="#B79AFF" stroke-opacity=".2"/>
+      <circle cx="738" cy="332" r="5" fill="#91DBE9"/><circle cx="738" cy="332" r="12" stroke="#91DBE9" stroke-opacity=".2"/>
+      <circle cx="437" cy="535" r="4" fill="#A5DFCB"/><circle cx="437" cy="535" r="11" stroke="#A5DFCB" stroke-opacity=".2"/>
+      <circle cx="664" cy="155" r="3" fill="#B79AFF"/>
+      <circle cx="887" cy="346" r="3" fill="#A5DFCB"/>
+      <circle cx="195" cy="339" r="3" fill="#91DBE9"/>
+      <path d="M451 155v12m-6-6h12M988 351v12m-6-6h12M370 344v10m-5-5h10M637 552v10m-5-5h10" stroke="#B79AFF" stroke-opacity=".4" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Layered isometric workbench and terminal. -->
+    <g aria-hidden="true" filter="url(#tk-shadow)" stroke-linejoin="round">
+      <ellipse cx="560" cy="494" rx="178" ry="34" fill="#05060D" fill-opacity=".55"/>
+      <path d="m397 445 164-82 164 82v22l-164 82-164-82Z" fill="#141020" stroke="#544064"/>
+      <path d="m397 445 164 82 164-82M561 527v22" stroke="#77608F" stroke-opacity=".5"/>
+      <path d="m407 422 154-77 154 77v19l-154 77-154-77Z" fill="#241A33" stroke="#8D6EB1" stroke-opacity=".7"/>
+      <path d="m407 422 154-77 154 77-154 77Z" fill="url(#tk-surface)" stroke="#B79AFF" stroke-opacity=".65"/>
+      <path d="m407 422 154 77 154-77M561 499v19" stroke="#B79AFF" stroke-opacity=".4"/>
+      <path d="m428 424 35-17m193 36 33-16m-132 56 13-7" stroke="#91DBE9" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
+      <path d="m487 379 94 8 24 34-99-9Z" fill="#20172D" stroke="#9A7ABC"/>
+      <path d="m506 412 99 9 11 5-99-8Z" fill="#3B2A4D" stroke="#9A7ABC" stroke-opacity=".7"/>
+      <path d="m432 227 19-10 219 18-19 10Z" fill="#49315C" stroke="#A88BCC"/>
+      <path d="m651 245 19-10v147l-19 12Z" fill="#21182E" stroke="#9A7ABC"/>
+      <path d="m432 227 219 18v149l-219-18Z" fill="url(#tk-monitor)" stroke="#B79AFF" stroke-width="1.5"/>
+      <path d="m447 249 189 15v98l-189-15Z" fill="url(#tk-screen)" stroke="#6C5488"/>
+      <path d="m455 257 172 14" stroke="#B79AFF" stroke-opacity=".12"/>
+      <path d="m528 375 29 2" stroke="#B79AFF" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="625" cy="380" r="2.5" fill="#A5DFCB"/>
+      <path d="m487 432 61-29 72 35-61 29Z" fill="#0D0D18" stroke="#75608E"/>
+      <path d="m500 432 49-23 57 28-48 23Zm12 6 48-23m-35 29 47-24m-35 30 47-24m-62-24 56 28m-68-22 57 28" stroke="#85699F" stroke-opacity=".6"/>
+      <path d="m647 385 25 12-24 12-25-12Z" fill="#3C2C4E" stroke="#9A7ABC"/>
+      <path d="m640 397 8-4 8 4-8 4Z" fill="#91DBE9" fill-opacity=".75"/>
+    </g>
+    <g transform="matrix(1 .08 0 1 0 -36)">
+      <text x="466" y="325" fill="#F7F5FF" font-size="27" font-weight="650" letter-spacing="-.7">SuperArtex</text>
+      <path d="m467 344 9 7-9 7m18 0h15" stroke="#A5DFCB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M516 350h64" stroke="#B79AFF" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>
+      <path d="M516 361h38" stroke="#B79AFF" stroke-opacity=".2" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Tool satellites use the same terminal language as the central bench. -->
+    <g transform="rotate(-3 195 218)" filter="url(#tk-shadow)">
+      <rect x="48" y="150" width="294" height="132" rx="17" fill="#151321" stroke="#B79AFF" stroke-opacity=".65"/>
+      <path d="M48 178h294" stroke="#B79AFF" stroke-opacity=".18"/>
+      <g fill="#B79AFF"><circle cx="65" cy="164" r="3"/><circle cx="77" cy="164" r="3" fill-opacity=".5"/><circle cx="89" cy="164" r="3" fill-opacity=".25"/></g>
+      <text x="69" y="214" fill="#EEE7FF" font-size="27" font-weight="650">Recon</text>
+      <text x="69" y="254" fill="#B9ADCF" font-family="'SFMono-Regular', Consolas, monospace" font-size="24" letter-spacing="-1.2">nmap · subfinder</text>
+      <circle cx="305" cy="208" r="16" stroke="#B79AFF" stroke-opacity=".5"/>
+      <circle cx="305" cy="208" r="8" stroke="#B79AFF" stroke-opacity=".35"/>
+      <path d="m305 208 11-11m-11-6v5m-17 12h5m12 12v5m12-17h5" stroke="#B79AFF" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <g transform="rotate(3 925 214)" filter="url(#tk-shadow)">
+      <rect x="778" y="141" width="294" height="146" rx="17" fill="#121822" stroke="#91DBE9" stroke-opacity=".55"/>
+      <path d="M778 169h294" stroke="#91DBE9" stroke-opacity=".16"/>
+      <g fill="#91DBE9"><circle cx="795" cy="155" r="3"/><circle cx="807" cy="155" r="3" fill-opacity=".5"/><circle cx="819" cy="155" r="3" fill-opacity=".25"/></g>
+      <text x="799" y="207" fill="#E0F3F7" font-size="27" font-weight="650" letter-spacing="-.5">Web discovery</text>
+      <text x="799" y="248" fill="#A9C4CE" font-family="'SFMono-Regular', Consolas, monospace" font-size="24" letter-spacing="-.8">httpx · katana</text>
+      <text x="799" y="276" fill="#A9C4CE" font-family="'SFMono-Regular', Consolas, monospace" font-size="24">ffuf</text>
+      <path d="m1036 246 7-6 7 6m-7-6v19m-7 0h14" stroke="#91DBE9" stroke-opacity=".7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <g transform="rotate(2 211 469)" filter="url(#tk-shadow)">
+      <rect x="65" y="404" width="292" height="132" rx="17" fill="#121B21" stroke="#A5DFCB" stroke-opacity=".55"/>
+      <path d="M65 432h292" stroke="#A5DFCB" stroke-opacity=".16"/>
+      <g fill="#A5DFCB"><circle cx="82" cy="418" r="3"/><circle cx="94" cy="418" r="3" fill-opacity=".5"/><circle cx="106" cy="418" r="3" fill-opacity=".25"/></g>
+      <text x="86" y="469" fill="#E6F5EF" font-size="27" font-weight="650">Validation</text>
+      <text x="86" y="509" fill="#ABCABE" font-family="'SFMono-Regular', Consolas, monospace" font-size="24" letter-spacing="-1">nuclei · dalfox</text>
+      <path d="m319 448 12 5v10c0 8-5 13-12 17-7-4-12-9-12-17v-10Z" stroke="#A5DFCB" stroke-opacity=".7" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="m313 464 4 4 8-9" stroke="#A5DFCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <g transform="rotate(-3 926 475)" filter="url(#tk-shadow)">
+      <rect x="779" y="407" width="294" height="146" rx="17" fill="#1B1528" stroke="#B79AFF" stroke-opacity=".6"/>
+      <path d="M779 435h294" stroke="#B79AFF" stroke-opacity=".18"/>
+      <g fill="#B79AFF"><circle cx="796" cy="421" r="3"/><circle cx="808" cy="421" r="3" fill-opacity=".5"/><circle cx="820" cy="421" r="3" fill-opacity=".25"/></g>
+      <text x="800" y="472" fill="#EEE7FF" font-size="27" font-weight="650" letter-spacing="-.5">Lab + browser</text>
+      <text x="800" y="510" fill="#B9ADCF" font-family="'SFMono-Regular', Consolas, monospace" font-size="24">sqlmap</text>
+      <text x="800" y="539" fill="#B9ADCF" font-family="'SFMono-Regular', Consolas, monospace" font-size="24">Playwright</text>
+      <rect x="1023" y="498" width="28" height="27" rx="4" stroke="#B79AFF" stroke-opacity=".6" stroke-width="1.5"/>
+      <path d="M1023 506h28m-20 8 5 4-5 4m10 0h5" stroke="#B79AFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

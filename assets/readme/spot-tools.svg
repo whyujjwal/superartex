@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="136" viewBox="0 0 240 136" fill="none" role="img" aria-labelledby="spot-tools-title spot-tools-desc">
+<title id="spot-tools-title">Run real tools</title>
+<desc id="spot-tools-desc">A layered terminal workbench with a prompt and linked execution node.</desc>
+<path d="m23 109 114-25 83 29-115 18z" fill="#382249" stroke="#8B5CF6" stroke-width="1.7"/><rect x="62" y="16" width="132" height="81" rx="9" fill="#241A32" stroke="#75519C" stroke-width="2"/><rect x="43" y="32" width="132" height="81" rx="9" fill="#171320" stroke="#A78BFA" stroke-width="2"/><path d="M43 53h132" stroke="#6C488F" stroke-width="1.5"/><g fill="#B79AFF"><circle cx="54" cy="43" r="2.5"/><circle cx="63" cy="43" r="2.5"/><circle cx="72" cy="43" r="2.5"/></g><path d="m61 70 11 9-11 9m19 0h30M61 99h58" stroke="#C3A6F5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="184" cy="99" r="21" fill="#241A32" stroke="#75C8D0" stroke-width="2"/><path d="m175 99 7 6 11-14" stroke="#8EE0D1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -28,12 +28,16 @@ SuperArtex brings the assessment into one workspace: planning, tool execution, a
 <tr>
 <td width="50%" valign="top">
 
+<img src="assets/readme/spot-planning.svg" width="160" alt="A planning constellation with linked observations" />
+
 ### 01 · Plan with context
 
 A planner breaks the goal into intents. Parallel workers test them, share observations, and write results into connected asset and exploration graphs.
 
 </td>
 <td width="50%" valign="top">
+
+<img src="assets/readme/spot-tools.svg" width="160" alt="A terminal workbench with a completed execution" />
 
 ### 02 · Run real tools
 
@@ -44,12 +48,16 @@ Inspect execution history, tool results, and background job status from the UI.
 <tr>
 <td width="50%" valign="top">
 
+<img src="assets/readme/spot-evidence.svg" width="160" alt="Stacked evidence receipts with a proof check" />
+
 ### 03 · Inspect the evidence
 
 Connect findings to captured requests and responses. Follow their lineage, review proof, export reports, and launch a separate retest after a fix.
 
 </td>
 <td width="50%" valign="top">
+
+<img src="assets/readme/spot-operator.svg" width="160" alt="Operator controls with adjustable settings and a pause button" />
 
 ### 04 · Stay in the loop
 
@@ -92,6 +100,10 @@ The first image build downloads the toolkit and may take a while. Both published
 ## Inside the workspace
 
 <p align="center">
+  <a href="assets/readme/operator-console.svg"><img src="assets/readme/operator-console.svg" width="100%" alt="An illustrated operator console with sessions, tool history, traffic, and approval records" /></a>
+</p>
+
+<p align="center">
   <img src="assets/readme/ui-findings.png" width="100%" alt="Findings workspace with severity totals, task and asset filters, verification states, evidence counts, and retest actions" />
   <br/>
   <sub><strong>Findings with context.</strong> Move from severity and asset to the evidence behind a result.</sub>
@@ -125,6 +137,14 @@ The first image build downloads the toolkit and may take a while. Both published
 
 Use the workspace to inspect recorded approvals, captured traffic, and findings. Review the evidence behind a finding before sharing its report.
 
+<p align="center">
+  <a href="assets/readme/evidence-pipeline.svg"><img src="assets/readme/evidence-pipeline.svg" width="100%" alt="Captured traffic is linked to a finding and checked against its evidence" /></a>
+</p>
+
+<p align="center">
+  <a href="assets/readme/reporting-dossier.svg"><img src="assets/readme/reporting-dossier.svg" width="100%" alt="An illustrated finding dossier links evidence, remediation, and report exports" /></a>
+</p>
+
 **[Review and export existing results →](docs/usage.md)**
 
 ## Documentation
@@ -141,6 +161,10 @@ Start with [the documentation hub](docs/README.md), or jump straight to the task
 
 ## Toolkit
 
+<p align="center">
+  <a href="assets/readme/toolkit-constellation.svg"><img src="assets/readme/toolkit-constellation.svg" width="100%" alt="An illustrated inventory of the bundled tool categories" /></a>
+</p>
+
 The Docker image includes `nmap`, `nuclei`, `httpx`, `subfinder`, `katana`, `ffuf`, `dalfox`, `sqlmap`, `bbot`, and Playwright with Chromium, plus everyday shell utilities.
 
 - **Skills** teach agents how to use a tool.
@@ -152,23 +176,19 @@ See the [toolkit reference](docs/toolkit.md) for the full inventory, default gra
 
 ## How it works
 
-```mermaid
-flowchart LR
-    Goal["Your goal + scope"] --> Planner["Planner"]
-    Planner --> Workers["Parallel workers"]
-    Workers --> Tools["Real tools"]
-    Tools --> Evidence["Traffic + observations"]
-    Evidence --> Graphs["Asset + exploration graphs"]
-    Graphs --> Planner
-    Graphs --> Findings["Findings + evidence"]
-    Findings --> Review["Review · export · retest"]
-```
+<p align="center">
+  <a href="assets/readme/dual-graph.svg"><img src="assets/readme/dual-graph.svg" width="100%" alt="Shared assets are anchored to the per-task exploration graph" /></a>
+</p>
 
 The shared **asset graph** records what exists. Each task's **exploration graph** records what was tried and what it produced. Anchors connect the two, so a finding has both an affected asset and a traceable path through the assessment.
 
 The application is a **Go service with an embedded Next.js UI**, backed by **PostgreSQL**. Read the [architecture guide](docs/architecture.md) for the engine loop and source layout.
 
 ## Installation
+
+<p align="center">
+  <a href="assets/readme/deployment-illustration.svg"><img src="assets/readme/deployment-illustration.svg" width="100%" alt="A self-hosted deployment with the web UI, database, runtime files, and keys" /></a>
+</p>
 
 Docker Compose is the quickest path. For the interactive installer, native builds, Windows startup, and cross-platform archives, see [installation options](docs/getting-started.md#other-installation-options).
 

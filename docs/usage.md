@@ -6,6 +6,8 @@ Review recorded decisions, captured evidence, and existing findings in the works
 
 ## Review approval records
 
+![An operator console shows approval records and tool execution history](../assets/readme/operator-console.svg)
+
 Open the task's **Interception approval** tab for its records, or **System → Approval Records** for the global view. Expand an existing record to see its decision, actor, and linked execution result when available.
 
 ## Review findings and their evidence
@@ -23,6 +25,8 @@ Finding status and verification are separate. A high severity or a manually conf
 The automated receipt check uses linked responses and stored evidence to assess the finding.
 
 ## Copy a report or export findings
+
+![A finding dossier links evidence and remediation to report exports](../assets/readme/reporting-dossier.svg)
 
 The task's **Report** tab renders a **Penetration test report (Markdown)** from the task's current data. Choose **Copy** to copy the Markdown and save it to a `.md` file. Reopen the tab to load the latest report after further task activity.
 

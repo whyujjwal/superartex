@@ -12,11 +12,13 @@ The platform separates recorded evidence, protected credentials, and execution r
 
 ## Approval records
 
+![An operator console shows approval records alongside task history and captured traffic](../assets/readme/operator-console.svg)
+
 Review **Approval Records** to see the operation, the actor who decided, and the execution result when linked. A settled approval records the decision source as human, rule, model, or system.
 
 ## Evidence and verification
 
-![Captured traffic is linked to evidence and reviewed against the finding](../assets/readme/evidence-pipeline.svg)
+![Captured traffic becomes bound evidence and is checked against the finding’s evidence quotes](../assets/readme/evidence-pipeline.svg)
 
 Findings can bind captured request/response snapshots as `baseline`, `proof`, `verification`, or `supporting` evidence. Initial verification requires a declared proof level of at least 3 and at least one qualifying quote. Each qualifying quote must occur, case-sensitively after whitespace normalization, in a bound `proof` or `verification` response body. Baseline and supporting traffic cannot satisfy this check. Gzip and deflate bodies are decoded before matching; normalized quotes shorter than 8 Unicode characters are ignored. The verifier reads at most 4 MiB per body. Unreadable evidence returns `not_assessed`; binary or truncated bodies cannot establish a missing quote.
 

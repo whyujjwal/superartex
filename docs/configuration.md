@@ -46,6 +46,8 @@ Compose builds its DSN from `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_
 
 ## Listeners, files, and keys
 
+![The application connects its UI, PostgreSQL, persistent files, and keys](../assets/readme/deployment-illustration.svg)
+
 Native defaults are UI/API `127.0.0.1:8787`, recording proxy `127.0.0.1:8788`, and runtime files in `data/` beside the executable. Override them with:
 
 ```bash

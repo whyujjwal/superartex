@@ -16,9 +16,12 @@ A Go monolith (Next.js UI embedded) plus PostgreSQL. Agent capabilities come fro
 
 ## Dual-graph architecture
 
-![Shared asset graph and per-task exploration graph connected by anchors](../assets/readme/dual-graph.svg)
+![Shared asset graph and per-task exploration graph connected by anchors on intents, facts, and findings](../assets/readme/dual-graph.svg)
 
 The **asset graph** is shared across tasks: one source of truth for `root_domain / subdomain / ip / service / app / endpoint`, owned by companies. Parent-child relationships and deduplication keys are computed by the program; agents only submit raw observations. The **exploration graph** is per task: `goal / intent / fact / finding / hint` nodes joined by `spawns / derived_from / yields / proves` into a lineage chain. **Anchors** (`exploration_anchors(node_id, asset_id)`) tie intents, facts and findings to concrete assets — which assets a direction touched, which intents tested a given asset — and also power asset test coverage.
+
+<details>
+<summary><strong>View the graph as a Mermaid diagram</strong></summary>
 
 ```mermaid
 flowchart LR
@@ -47,6 +50,8 @@ flowchart LR
   I2 -. anchor .-> EP
   FD -. anchor .-> EP
 ```
+
+</details>
 
 The planner reads the exploration graph, judges goals, and dispatches intents only when there is an uncovered direction. A worker claims one intent, executes it, writes assets/facts/findings back into both graphs, then stops.
 

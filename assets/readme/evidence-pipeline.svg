@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="540" viewBox="0 0 1120 540" fill="none" role="img" aria-labelledby="evidence-title evidence-desc">
   <title id="evidence-title">From captured traffic to a checkable finding</title>
-  <desc id="evidence-desc">A fictional lab request and response are captured, then bound to a finding manually or with opt-in automatic binding. Initial verification checks for proof level at least three and a qualifying quote that matches a bound proof or verification response after whitespace normalization. Passing checks can produce a verified finding with evidence to review and retest. Other results remain unverified or not assessed. Automatic traffic binding is off by default.</desc>
+  <desc id="evidence-desc">A fictional lab request and response are captured, then bound to a finding manually or with opt-in automatic binding. Initial verification checks for proof level at least three and requires every qualifying quote to match a bound proof or verification response after whitespace normalization. Passing checks can produce a verified finding with evidence to review and retest. Other results remain unverified or not assessed. Automatic traffic binding is off by default.</desc>
   <defs>
     <linearGradient id="evidence-background" x1="0" y1="0" x2="1120" y2="540" gradientUnits="userSpaceOnUse">
       <stop stop-color="#080A12"/><stop offset="1" stop-color="#141023"/>
@@ -78,8 +78,8 @@
       <path d="M425 336v-5h5M439 336v-5h-5M425 342v5h5M439 342v5h-5M430 339h4"/>
     </g>
     <text x="451" y="314" fill="#E7DEF4" font-size="19" font-weight="500">POE ≥ 3</text>
-    <text x="451" y="344" fill="#E7DEF4" font-size="18">Qualifying quote matches</text>
-    <text x="451" y="367" fill="#E7DEF4" font-size="18">a bound response</text>
+    <text x="451" y="344" fill="#E7DEF4" font-size="18">Evidence quotes match</text>
+    <text x="451" y="367" fill="#E7DEF4" font-size="18">bound responses</text>
     <text x="422" y="393" fill="#AFA0C3" font-size="13">Case-sensitive · whitespace normalized</text>
 
     <path d="M551 411v17" stroke="#7B678F" stroke-width="1.5" stroke-dasharray="3 4"/>
