@@ -13,8 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "@/lib/api";
 
 export function ChangePasswordDialog({
@@ -72,9 +72,9 @@ export function ChangePasswordDialog({
           <div className="flex flex-col gap-3 py-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="cp-old">Current password</Label>
-              <Input
+              <PasswordInput
                 id="cp-old"
-                type="password"
+                passwordLabel="current password"
                 autoComplete="current-password"
                 value={oldPassword}
                 disabled={saving}
@@ -83,9 +83,9 @@ export function ChangePasswordDialog({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="cp-new">New password</Label>
-              <Input
+              <PasswordInput
                 id="cp-new"
-                type="password"
+                passwordLabel="new password"
                 autoComplete="new-password"
                 value={newPassword}
                 disabled={saving}
@@ -94,9 +94,9 @@ export function ChangePasswordDialog({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="cp-confirm">Confirm new password</Label>
-              <Input
+              <PasswordInput
                 id="cp-confirm"
-                type="password"
+                passwordLabel="new password confirmation"
                 autoComplete="new-password"
                 value={confirmPassword}
                 disabled={saving}

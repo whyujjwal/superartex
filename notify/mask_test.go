@@ -384,23 +384,35 @@ func TestDestinationKeysDeclaredForEveryKind(t *testing.T) {
 	}
 }
 
-func TestSecretKeysDeclaredForEveryKind(t *testing.T) {
-	// The compiler already forces every channel to implement SecretKeys; this
-	// double-checks that "no channel turns in a blank sheet on masking" — a
-	// channel returning an empty slice means its credentials would be echoed to
-	// the browser in plaintext.
-	expect := map[string]bool{
-		KindDingTalk: true, KindFeishu: true, KindWeCom: true,
-		KindWebhook: true, KindTelegram: true, KindEmail: true,
+func TestMaskConfigMasksCredentialsForEveryKind(t *testing.T) {
+	const credential = "synthetic-credential-123456"
+	fixtures := map[string]map[string]any{
+		KindDingTalk: {"webhook": credential, "secret": credential},
+		KindDiscord:  {"webhook_url": "https://discord.com/api/webhooks/123/" + credential},
+		KindEmail:    {"password": credential},
+		KindFeishu:   {"webhook": credential, "secret": credential},
+		KindSlack:    {"webhook_url": "https://hooks.slack.com/services/T000/B000/" + credential},
+		KindTelegram: {"bot_token": credential},
+		KindWebhook:  {"url": credential, "headers": map[string]any{"Authorization": credential}},
+		KindWeCom:    {"webhook": credential},
 	}
-	for kind, ch := range registry {
-		if !expect[kind] {
-			t.Errorf("channel %s is not registered with a masking expectation in the test", kind)
-			continue
-		}
-		if len(ch.SecretKeys()) == 0 {
-			t.Errorf("channel %s declares no credential fields; its configuration would be echoed in plaintext", kind)
-		}
+	for _, kind := range Kinds() {
+		t.Run(kind, func(t *testing.T) {
+			cfg := fixtures[kind]
+			if len(cfg) == 0 {
+				t.Fatal("no credential masking fixture for this channel")
+			}
+			masked := MaskConfig(kind, cfg)
+			for key, value := range cfg {
+				want := MaskedPrefix
+				if _, ok := value.(string); ok {
+					want += ":…123456"
+				}
+				if masked[key] != want {
+					t.Errorf("credential field %q was not replaced by its expected mask", key)
+				}
+			}
+		})
 	}
 }
 

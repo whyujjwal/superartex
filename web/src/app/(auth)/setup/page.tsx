@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
 
@@ -106,9 +107,9 @@ export default function SetupPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="password">New password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
+                  passwordLabel="new password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 12 characters"
@@ -117,9 +118,9 @@ export default function SetupPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="confirm">Confirm password</Label>
-                <Input
+                <PasswordInput
                   id="confirm"
-                  type="password"
+                  passwordLabel="password confirmation"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   placeholder="Enter the password again"

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"path"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/whyujjwal/superartex/db"
 )
@@ -20,9 +20,9 @@ import (
 // sortFindingsForExport sorts by severity descending, then by time descending, consistent with the summary report's grouping.
 func sortFindingsForExport(fs []*db.DBFinding) {
 	sort.SliceStable(fs, func(i, j int) bool {
-		ri, rj := sevRank[fs[i].Severity], sevRank[fs[j].Severity]
+		ri, rj := severityRank(fs[i].Severity), severityRank(fs[j].Severity)
 		if ri != rj {
-			return ri < rj // smaller sevRank means more severe
+			return ri < rj // a lower severity rank means a more severe finding
 		}
 		return fs[i].CreatedAt.After(fs[j].CreatedAt)
 	})
@@ -51,10 +51,16 @@ func FindingsMarkdown(fs []*db.DBFinding, generatedAt time.Time) string {
 	}
 	b.WriteString("## Summary\n\n")
 	b.WriteString("| Severity | Count |\n| --- | --- |\n")
+	other := len(items)
 	for _, s := range []struct{ key, label string }{
 		{"critical", "Critical"}, {"high", "High"}, {"medium", "Medium"}, {"low", "Low"},
 	} {
-		fmt.Fprintf(&b, "| %s | %d |\n", s.label, counts[s.key])
+		count := counts[s.key]
+		fmt.Fprintf(&b, "| %s | %d |\n", s.label, count)
+		other -= count
+	}
+	if other > 0 {
+		fmt.Fprintf(&b, "| Info / other | %d |\n", other)
 	}
 	b.WriteString("\n")
 
@@ -123,22 +129,24 @@ func SingleFindingMarkdown(f *db.DBFinding, generatedAt time.Time) string {
 var unsafeFilenameChars = regexp.MustCompile(`[^\p{Han}\p{L}\p{N}._-]+`)
 
 // FindingFilename generates a safe .md filename for "one file per vulnerability", e.g.
-// `critical_SQL_injection_#123.md`. Strips path separators and control characters to avoid illegal paths inside the zip.
+// `critical_SQL_injection__123.md`. The finding ID stays intact when the title is shortened.
 func FindingFilename(f *db.DBFinding) string {
 	sev := nz(f.Severity, "info")
 	title := findingTitle(f)
-	name := fmt.Sprintf("%s_%s_#%d", sev, title, f.ID)
-	name = unsafeFilenameChars.ReplaceAllString(name, "_")
-	name = strings.Trim(name, "._")
-	if name == "" {
-		name = fmt.Sprintf("finding_%d", f.ID)
+	stem := unsafeFilenameChars.ReplaceAllString(sev+"_"+title, "_")
+	stem = strings.TrimLeft(stem, "._")
+	id := fmt.Sprint(f.ID)
+	if stem == "" {
+		return id + ".md"
 	}
-	// Defensive: strip one more path layer to rule out zip slip.
-	name = path.Base(name)
-	if len(name) > 120 {
-		name = name[:120]
+	suffix := "__" + id
+	if end := 120 - len(suffix); len(stem) > end {
+		for !utf8.RuneStart(stem[end]) {
+			end--
+		}
+		stem = stem[:end]
 	}
-	return name + ".md"
+	return stem + suffix + ".md"
 }
 
 // FindingsCSV renders a batch of findings as CSV (with a UTF-8 BOM so Excel detects the encoding correctly).

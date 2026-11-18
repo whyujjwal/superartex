@@ -363,7 +363,7 @@ Stored secrets (LLM keys, MCP env, task credentials, notification config, search
 
 - Backend: `go run ./cmd/superartex` (without `-tags embedui` the frontend is not embedded)
 - Frontend: `cd web && npm run dev` (`/api` is reverse-proxied to the backend)
-- Tests: `go test ./...`
+- Tests: `go test ./...` (backend) and `npm --prefix web test` (frontend, Node.js 22.18+)
 - Mock preview (no backend): `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`
 
 ---

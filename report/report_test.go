@@ -1,11 +1,99 @@
 package report
 
 import (
+	"encoding/csv"
+	"slices"
 	"strings"
 	"testing"
+	"time"
+	"unicode/utf8"
 
 	"github.com/whyujjwal/superartex/db"
 )
+
+func TestFindingFilenamePreservesShortNameFormat(t *testing.T) {
+	finding := &db.DBFinding{ID: 101, Name: "Status/report", Severity: "high"}
+	if got, want := FindingFilename(finding), "high_Status_report__101.md"; got != want {
+		t.Errorf("filename = %q, want %q", got, want)
+	}
+}
+
+func TestFindingFilenamePreservesUnicodeAndIDWhenShortened(t *testing.T) {
+	title := strings.Repeat("報", 70)
+	first := FindingFilename(&db.DBFinding{ID: 101, Name: title, Severity: "high"})
+	second := FindingFilename(&db.DBFinding{ID: 102, Name: title, Severity: "high"})
+
+	if !utf8.ValidString(first) || !strings.HasPrefix(first, "high_報") {
+		t.Errorf("filename did not preserve its Unicode title: %q", first)
+	}
+	if len(first) > 124 {
+		t.Errorf("filename length = %d bytes, want at most 124", len(first))
+	}
+	if first == second || !strings.HasSuffix(first, "__101.md") || !strings.HasSuffix(second, "__102.md") {
+		t.Errorf("filenames lost their distinct IDs: %q and %q", first, second)
+	}
+}
+
+func TestFindingExportsOrderUnrankedSeveritiesAfterLow(t *testing.T) {
+	older := time.Unix(1, 0)
+	newer := time.Unix(2, 0)
+	ranked := []*db.DBFinding{
+		{Name: "Low", Severity: "low", CreatedAt: older},
+		{Name: "Critical", Severity: "critical", CreatedAt: older},
+	}
+	findings := append([]*db.DBFinding{
+		{Name: "Info", Severity: "info", CreatedAt: newer},
+		{Name: "Unrated", CreatedAt: older},
+		{Name: "Unrecognized", Severity: "legacy", CreatedAt: newer},
+	}, ranked...)
+	want := []string{"Critical", "Low", "Info", "Unrecognized", "Unrated"}
+	t.Run("Markdown", func(t *testing.T) {
+		markdown := FindingsMarkdown(findings, newer)
+		assertFindingHeadingOrder(t, markdown, want)
+		if !strings.Contains(markdown, "| Info / other | 3 |") {
+			t.Error("Markdown severity summary is missing the three unranked findings")
+		}
+		if strings.Contains(FindingsMarkdown(ranked, newer), "| Info / other |") {
+			t.Error("Markdown severity summary shows an unused Info / other row")
+		}
+	})
+	t.Run("CSV", func(t *testing.T) {
+		data := strings.TrimPrefix(string(FindingsCSV(findings)), "\uFEFF")
+		rows, err := csv.NewReader(strings.NewReader(data)).ReadAll()
+		if err != nil {
+			t.Fatal(err)
+		}
+		var names []string
+		for _, row := range rows[1:] {
+			names = append(names, row[1])
+		}
+		if !slices.Equal(names, want) {
+			t.Errorf("CSV finding order = %v, want %v", names, want)
+		}
+	})
+}
+
+func TestTaskMarkdownPreservesUnrankedFindingOrder(t *testing.T) {
+	findings := []*db.Node{
+		{Payload: []byte(`{"name":"Info","severity":"info"}`)},
+		{Payload: []byte(`{"name":"Unrated"}`)},
+		{Payload: []byte(`{"name":"Unrecognized","severity":"legacy"}`)},
+		{Payload: []byte(`{"name":"Low","severity":"low"}`)},
+	}
+	assertFindingHeadingOrder(t, Markdown(Input{Findings: findings}), []string{"Low", "Info", "Unrated", "Unrecognized"})
+}
+
+func assertFindingHeadingOrder(t *testing.T, markdown string, titles []string) {
+	t.Helper()
+	previous := -1
+	for _, title := range titles {
+		position := strings.Index(markdown, "] "+title+"\n")
+		if position <= previous {
+			t.Fatalf("want headings in order %v, got:\n%s", titles, markdown)
+		}
+		previous = position
+	}
+}
 
 // The exported report carries the coverage gaps and the completeness caveat;
 // nothing is added when the task's coverage feature is off (nil ledger).

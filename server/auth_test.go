@@ -2,12 +2,15 @@ package server
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // jwtKeyDirs returns fresh key, data and legacy base dirs and points
@@ -293,6 +296,73 @@ func TestAuthInitRequiresSetupToken(t *testing.T) {
 	clearPassword()
 	if w := post(ok); w.Code != 403 {
 		t.Fatalf("reused setup token: status=%d want 403; body=%s", w.Code, w.Body.String())
+	}
+}
+
+func TestAuthChangePasswordSeparatesSessionAndPasswordFailures(t *testing.T) {
+	skipWithoutDSN(t)
+	m, err := NewManager(t.TempDir(), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close()
+
+	original, existed, err := m.pg.GetSetting(authPassKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte("current test password"), bcrypt.MinCost)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := m.pg.SetSetting(authPassKey, string(hash)); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		var err error
+		if existed {
+			err = m.pg.SetSetting(authPassKey, original)
+		} else {
+			_, err = m.pg.Exec(`DELETE FROM settings WHERE key=$1`, authPassKey)
+		}
+		if err != nil {
+			t.Errorf("restore password setting: %v", err)
+		}
+	}()
+
+	s := &Server{m: m, jwtKey: []byte("0123456789abcdef0123456789abcdef")}
+	session, err := signJWT(s.jwtKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name, token, password, message string
+		status                         int
+	}{
+		{"valid session and wrong password", session, "mistyped password", "Current password is wrong", http.StatusForbidden},
+		{"invalid session and correct password", "invalid-token", "current test password", "Unauthorized", http.StatusUnauthorized},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body, err := json.Marshal(map[string]string{"old_password": tc.password, "new_password": "new test password"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			r := httptest.NewRequest(http.MethodPost, "/api/auth/change-password", strings.NewReader(string(body)))
+			r.Header.Set("Authorization", "Bearer "+tc.token)
+			w := httptest.NewRecorder()
+			s.authChangePassword(w, r)
+
+			var payload struct{ Error string }
+			if err := json.Unmarshal(w.Body.Bytes(), &payload); err != nil {
+				t.Fatal(err)
+			}
+			if w.Code != tc.status || payload.Error != tc.message {
+				t.Fatalf("status=%d message=%q, want %d %q", w.Code, payload.Error, tc.status, tc.message)
+			}
+			if got, ok, err := m.pg.GetSetting(authPassKey); err != nil || !ok || got != string(hash) {
+				t.Fatalf("rejected request changed the password setting (err=%v)", err)
+			}
+		})
 	}
 }
 

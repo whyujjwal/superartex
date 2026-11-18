@@ -9,6 +9,7 @@ import (
 	"mime"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -481,12 +482,10 @@ func TestEmailSMTPErrorClassification(t *testing.T) {
 }
 
 func TestRegistryCoversAllKinds(t *testing.T) {
-	// All six channels are required — a missing one would silently vanish from
-	// the UI dropdown.
-	want := []string{KindDingTalk, KindEmail, KindFeishu, KindTelegram, KindWebhook, KindWeCom}
-	got := Kinds()
-	if len(got) != len(want) {
-		t.Fatalf("channel count should be %d, got %d: %v", len(want), len(got), got)
+	// The UI dropdown uses this registry's sorted channel names.
+	want := []string{KindDingTalk, KindDiscord, KindEmail, KindFeishu, KindSlack, KindTelegram, KindWebhook, KindWeCom}
+	if got := Kinds(); !slices.Equal(got, want) {
+		t.Fatalf("Kinds() = %v, want %v", got, want)
 	}
 	for _, k := range want {
 		if !ValidKind(k) {
