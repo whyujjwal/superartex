@@ -134,18 +134,20 @@ export function SearchDialog() {
     <>
       <Button
         onClick={() => handleOpenChange(true)}
-        variant="link"
-        className="px-0! font-normal text-muted-foreground hover:no-underline"
+        variant="outline"
+        size="sm"
+        aria-label="Search pages"
+        className="justify-start gap-2 bg-background/50 font-normal text-muted-foreground shadow-none sm:min-w-44"
       >
         <Search data-icon="inline-start" />
-        Search
-        <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium text-[10px]">
-          <span className="text-xs">⌘</span>J
+        <span className="hidden sm:inline">Search pages</span>
+        <kbd className="ml-auto hidden select-none rounded-sm border bg-card px-1.5 font-mono text-[10px] sm:inline">
+          ⌘ J
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command>
-          <CommandInput placeholder="Search dashboards, users, and more…" value={query} onValueChange={setQuery} />
+          <CommandInput placeholder="Search pages…" value={query} onValueChange={setQuery} />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             {query ? renderGroups(searchItems) : renderGroups(recommendations)}

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { AlertTriangle, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowRight, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
+
+import styles from "../auth.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -81,73 +83,66 @@ export default function LoginPage() {
 
   if (checking) {
     return (
-      <div role="status" className="flex min-h-dvh items-center justify-center text-muted-foreground">
+      <p role="status" className="text-muted-foreground text-sm">
         Checking login state…
-      </div>
+      </p>
     );
   }
 
   return (
-    <div className="flex h-dvh">
-      {/* Left panel */}
-      <div className="hidden flex-col items-center justify-center bg-primary p-12 text-center lg:flex lg:w-1/3">
-        <div className="relative flex items-center justify-center">
-          <div className="absolute size-80 rounded-full border border-primary-foreground/10" />
-          <div className="absolute size-60 rounded-full border border-primary-foreground/15" />
-          <div className="absolute size-40 rounded-full border border-primary-foreground/20" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="SUPERARTEX" width={160} height={160} className="relative brightness-0 invert" />
+    <>
+      <header className={styles.intro}>
+        <h1 className={styles.title}>Sign in</h1>
+      </header>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input id="username" value="SUPERARTEX" readOnly className="h-11 bg-muted font-mono text-muted-foreground" />
         </div>
-      </div>
-
-      {/* Right panel */}
-      <div className="flex w-full items-center justify-center bg-background p-8 lg:w-2/3">
-        <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
-          <div className="space-y-4 text-center">
-            <h2 className="text-2xl font-medium tracking-tight">Sign in</h2>
-            <p className="mx-auto max-w-xl text-muted-foreground">Welcome back — enter your password to continue using SUPERARTEX</p>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            autoFocus
+            autoComplete="current-password"
+            className="h-11 bg-card"
+          />
+        </div>
+        <div className="flex items-start gap-2.5 border-t border-b py-3">
+          <Checkbox
+            id="agree-terms"
+            aria-labelledby="agree-terms-label agree-terms-link"
+            checked={agreed}
+            onCheckedChange={(v) => setAgreed(v === true)}
+            className="mt-0.5"
+          />
+          <div className="text-muted-foreground text-sm leading-5">
+            <Label id="agree-terms-label" htmlFor="agree-terms" className="inline font-normal leading-5">
+              I have read and agree to
+            </Label>{" "}
+            <button
+              id="agree-terms-link"
+              type="button"
+              onClick={() => setTermsOpen(true)}
+              className="cursor-pointer font-medium text-primary underline decoration-primary/45 underline-offset-4 hover:decoration-primary"
+            >
+              Terms of Use
+            </button>
           </div>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" value="SUPERARTEX" readOnly className="bg-muted text-muted-foreground" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
-              <PasswordInput
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                autoFocus
-                autoComplete="current-password"
-              />
-            </div>
-            <div className="flex items-start gap-2">
-              <Checkbox
-                id="agree-terms"
-                checked={agreed}
-                onCheckedChange={(v) => setAgreed(v === true)}
-                className="mt-0.5"
-              />
-              <Label htmlFor="agree-terms" className="text-sm font-normal leading-relaxed text-muted-foreground">
-                I have read and agree to
-                <button
-                  type="button"
-                  onClick={() => setTermsOpen(true)}
-                  className="mx-0.5 font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  Terms of Use
-                </button>
-              </Label>
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading || !password || !agreed}>
-              {loading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
         </div>
-      </div>
+        {error && (
+          <p role="alert" className="text-destructive text-sm">
+            {error}
+          </p>
+        )}
+        <Button type="submit" className="h-11 w-full justify-between px-4" disabled={loading || !password || !agreed}>
+          {loading ? "Signing in..." : "Sign in"}
+          <ArrowRight aria-hidden="true" />
+        </Button>
+      </form>
 
       <Dialog open={termsOpen} onOpenChange={setTermsOpen}>
         <DialogContent className="gap-0 p-0 sm:max-w-2xl">
@@ -307,6 +302,6 @@ export default function LoginPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

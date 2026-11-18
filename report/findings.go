@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/whyujjwal/superartex/db"
@@ -162,18 +163,33 @@ func FindingsCSV(fs []*db.DBFinding) []byte {
 	for _, f := range items {
 		_ = w.Write([]string{
 			fmt.Sprintf("%d", f.ID),
-			findingTitle(f),
-			f.VulnClass,
-			nz(f.Severity, "info"),
-			nz(f.Status, "pending"),
-			f.TaskDescription,
+			spreadsheetText(findingTitle(f)),
+			spreadsheetText(f.VulnClass),
+			spreadsheetText(nz(f.Severity, "info")),
+			spreadsheetText(nz(f.Status, "pending")),
+			spreadsheetText(f.TaskDescription),
 			f.CreatedAt.Format("2006-01-02 15:04:05"),
-			strings.TrimSpace(f.Summary),
+			spreadsheetText(strings.TrimSpace(f.Summary)),
 			fmt.Sprint(len(f.TrafficBindings)), findingTrafficIDs(f),
 		})
 	}
 	w.Flush()
 	return buf.Bytes()
+}
+
+// spreadsheetText marks formula-like text as literal for spreadsheet imports.
+// The CSV writer still handles field quoting and delimiters.
+func spreadsheetText(value string) string {
+	for _, r := range value {
+		switch r {
+		case '=', '+', '-', '@', '＝', '＋', '－', '＠', '\t', '\r', '\n', 0:
+			return "'" + value
+		}
+		if !unicode.IsSpace(r) && !unicode.Is(unicode.Cf, r) {
+			break
+		}
+	}
+	return value
 }
 
 func findingTrafficIDs(f *db.DBFinding) string {

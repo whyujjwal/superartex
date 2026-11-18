@@ -4,10 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ChevronRight, MailIcon, PlusCircleIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
 
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -94,14 +93,14 @@ export function NavMain({ items }: NavMainProps) {
     } catch {
       return rawPath;
     }
-  })();
+  })().replace(/\/+$/, "");
 
   const isItemActive = (item: NavMainItem) => {
     if (hasSubItems(item)) {
       return item.subItems.some((sub) => path.startsWith(sub.url));
     }
 
-    return path === item.url;
+    return path === item.url || path === `${item.url}/detail`;
   };
 
   const isSubItemActive = (url: string) => {
@@ -115,9 +114,9 @@ export function NavMain({ items }: NavMainProps) {
   return (
     <>
       {items.map((group) => (
-        <SidebarGroup key={group.id}>
+        <SidebarGroup key={group.id} className="border-sidebar-border px-2 py-2.5 not-first:border-t">
           {group.label && (
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:pointer-events-none">
+            <SidebarGroupLabel className="h-6 rounded-none px-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-sidebar-foreground/75 group-data-[collapsible=icon]:pointer-events-none">
               {group.label}
             </SidebarGroupLabel>
           )}
@@ -174,7 +173,7 @@ function InterceptPendingBadge() {
         if (live) setCount(list.length);
       } catch { /* ignore */ }
     }
-    poll();
+    void poll();
     const stopPolling = setVisibleInterval(poll, 5000);
     return () => { live = false; stopPolling(); };
   }, []);
@@ -187,14 +186,24 @@ function InterceptPendingBadge() {
 }
 
 function NavLinkItem({ item, isActive, showIconFallback }: NavLinkItemProps) {
+  const { isMobile, setOpenMobile } = useSidebar();
+
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild aria-disabled={item.disabled} tooltip={item.title} isActive={isActive}>
+      <SidebarMenuButton
+        asChild
+        aria-disabled={item.disabled}
+        tooltip={item.title}
+        isActive={isActive}
+        className="relative h-8 gap-2.5 rounded-none px-2.5 text-[13px] data-active:before:absolute data-active:before:inset-y-0 data-active:before:left-0 data-active:before:w-0.5 data-active:before:bg-sidebar-primary [&>svg]:opacity-80 data-active:[&>svg]:text-sidebar-primary data-active:[&>svg]:opacity-100"
+      >
         <Link
           prefetch={false}
           href={item.url}
+          aria-current={isActive ? "location" : undefined}
           target={item.newTab ? "_blank" : undefined}
           rel={item.newTab ? "noreferrer" : undefined}
+          onNavigate={isMobile ? () => setOpenMobile(false) : undefined}
         >
           <NavLinkIcon item={item} showFallback={showIconFallback} />
           <span>{item.title}</span>

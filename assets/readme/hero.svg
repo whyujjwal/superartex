@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="580" viewBox="0 0 1600 580" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">SuperArtex — autonomous pentesting, with evidence.</title>
+  <desc id="desc">A purple exploration graph connects a goal to a planner, parallel workers, recorded traffic, and an evidence-backed finding.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1600" y2="580" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#080A12"/><stop offset="1" stop-color="#141023"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="900" y1="110" x2="1490" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B79AFF"/><stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1200 290) scale(420 310)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" stop-opacity=".17"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="#C4B5FD" stroke-opacity=".045"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="580" rx="24" fill="url(#background)"/>
+  <rect width="1600" height="580" rx="24" fill="url(#grid)"/>
+  <rect width="1600" height="580" rx="24" fill="url(#glow)"/>
+  <rect x=".5" y=".5" width="1599" height="579" rx="23.5" stroke="#A78BFA" stroke-opacity=".18"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <g transform="translate(72 56)">
+      <path d="M23 0 44 8V31C44 43 36 53 23 59 10 53 2 43 2 31V8Z" stroke="#A78BFA" stroke-width="3" stroke-linejoin="round"/>
+      <path d="m15 22 8 12 8-12M23 34v9" stroke="#A78BFA" stroke-width="2.5"/>
+      <g fill="#A78BFA"><circle cx="15" cy="22" r="3.5"/><circle cx="31" cy="22" r="3.5"/><circle cx="23" cy="35" r="3.5"/><circle cx="23" cy="45" r="3.5"/></g>
+      <text x="62" y="37" fill="#F7F5FF" font-size="30" font-weight="700" letter-spacing="-.8">SuperArtex</text>
+    </g>
+
+    <text x="74" y="175" fill="#BDA5FF" font-family="'SFMono-Regular', Consolas, monospace" font-size="13" letter-spacing="3">SELF-HOSTED OFFENSIVE SECURITY</text>
+    <text x="68" y="258" fill="#FAF9FF" font-size="66" font-weight="750" letter-spacing="-3">Follow the goal.</text>
+    <text x="68" y="335" fill="#B79AFF" font-size="66" font-weight="750" letter-spacing="-3">Keep the proof.</text>
+    <text x="74" y="392" fill="#B7B3C9" font-size="21">A planner. Parallel workers. Real tools.</text>
+    <text x="74" y="425" fill="#B7B3C9" font-size="21">Findings tied to the traffic that proves them.</text>
+
+    <g transform="translate(74 483)" font-family="'SFMono-Regular', Consolas, monospace" font-size="12" letter-spacing="1.3">
+      <circle cx="5" cy="0" r="4" fill="#B79AFF"/>
+      <text x="20" y="4" fill="#DDD6EE">YOUR INFRASTRUCTURE</text>
+      <circle cx="230" cy="0" r="2" fill="#635775"/>
+      <text x="250" y="4" fill="#DDD6EE">YOUR MODELS</text>
+      <circle cx="392" cy="0" r="2" fill="#635775"/>
+      <text x="412" y="4" fill="#DDD6EE">YOUR EVIDENCE</text>
+    </g>
+
+    <g stroke="#A78BFA" stroke-opacity=".4" stroke-width="2">
+      <path d="M1160 157v41M1160 252v31M1160 283H974v35M1160 283v35M1160 283h186v35M974 372v33h372v-33M1160 405v39"/>
+      <path d="M882 224h-37v260h154" stroke-dasharray="4 7" stroke-opacity=".23"/>
+    </g>
+    <g font-family="'SFMono-Regular', Consolas, monospace" font-size="12">
+      <rect x="1060" y="109" width="200" height="48" rx="24" fill="#171224" stroke="#7E689F"/>
+      <circle cx="1085" cy="133" r="4" fill="#B79AFF"/>
+      <text x="1103" y="138" fill="#E7DFFB" letter-spacing="1">DEFINED GOAL</text>
+    </g>
+
+    <rect x="1010" y="198" width="300" height="54" rx="12" fill="#221832" stroke="#A78BFA" stroke-opacity=".7"/>
+    <circle cx="1038" cy="225" r="5" fill="#B79AFF"/>
+    <text x="1057" y="231" fill="#F1ECFF" font-size="17" font-weight="600">Planner</text>
+    <text x="1289" y="230" text-anchor="end" fill="#AD9BBF" font-family="'SFMono-Regular', Consolas, monospace" font-size="11">DECOMPOSE</text>
+
+    <g font-size="15" font-weight="600" text-anchor="middle">
+      <rect x="892" y="318" width="164" height="54" rx="12" fill="#171322" stroke="#635075"/>
+      <rect x="1078" y="318" width="164" height="54" rx="12" fill="#171322" stroke="#635075"/>
+      <rect x="1264" y="318" width="164" height="54" rx="12" fill="#171322" stroke="#635075"/>
+      <text x="974" y="351" fill="#DED4F0">Worker 01</text>
+      <text x="1160" y="351" fill="#DED4F0">Worker 02</text>
+      <text x="1346" y="351" fill="#DED4F0">Worker 03</text>
+    </g>
+
+    <rect x="999" y="444" width="322" height="80" rx="14" fill="#211633" stroke="url(#purple)"/>
+    <rect x="1015" y="461" width="42" height="46" rx="8" fill="#302044"/>
+    <path d="m1026 485 7 7 12-15" stroke="#C4B5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1073" y="479" fill="#F1ECFF" font-size="16" font-weight="600">Evidence-backed finding</text>
+    <text x="1073" y="502" fill="#B5A5C8" font-family="'SFMono-Regular', Consolas, monospace" font-size="11">request + response + lineage</text>
+    <text x="1160" y="430" text-anchor="middle" fill="#9B89B3" font-family="'SFMono-Regular', Consolas, monospace" font-size="10" letter-spacing="1.5">CAPTURE · BIND · VERIFY</text>
+  </g>
+</svg>

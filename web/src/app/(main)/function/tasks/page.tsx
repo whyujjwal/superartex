@@ -518,7 +518,14 @@ export default function TasksPage() {
 
   // Only tick every second when there really is a running task — otherwise "duration" is static, and an idle tick would
   // re-render the whole table for nothing.
-  const hasRunning = React.useMemo(() => tasks.some((t) => t.status === "running"), [tasks]);
+  const taskCounts = React.useMemo(() => {
+    const counts = { running: 0, queued: 0, done: 0 };
+    for (const { status } of tasks) {
+      if (status === "running" || status === "queued" || status === "done") counts[status]++;
+    }
+    return counts;
+  }, [tasks]);
+  const hasRunning = taskCounts.running > 0;
 
   // tick every second so running tasks' duration counts up live.
   React.useEffect(() => {
@@ -781,22 +788,56 @@ export default function TasksPage() {
   );
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
-      <TabsList className="mx-4 lg:mx-6">
-        <TabsTrigger value="current">Current tasks</TabsTrigger>
-        <TabsTrigger value="archived">Archived</TabsTrigger>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="min-w-0 gap-0">
+      <header className="page-heading grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5 gap-y-4 xl:grid-cols-[minmax(0,1fr)_auto_auto]">
+        <h1 className="page-title">Tasks</h1>
+        {activeTab === "current" && (
+          <div className="col-start-2 row-start-1 xl:col-start-3">
+            <CreateTaskSheet
+              tasks={tasks}
+              categories={categories}
+              onCreated={refreshCategoriesAndTasks}
+              onCategoriesChanged={refreshCategoriesAndTasks}
+            />
+          </div>
+        )}
+        {activeTab === "current" && tasks.length > 0 && (
+          <dl className="col-span-2 row-start-2 flex flex-wrap items-center gap-y-2 divide-x divide-border text-xs xl:col-span-1 xl:col-start-2 xl:row-start-1 xl:border-r xl:pr-1">
+            {[
+              { label: "Running", count: taskCounts.running, color: "text-chart-1" },
+              { label: "Queued", count: taskCounts.queued, color: "text-chart-2" },
+              { label: "Completed", count: taskCounts.done, color: "text-chart-5" },
+            ].map(({ label, count, color }) => (
+              <div key={label} className="flex flex-col gap-0.5 px-3 first:pl-0 sm:px-4">
+                <dt className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">{label}</dt>
+                <dd className={cn("font-mono text-lg leading-none tabular-nums", count ? color : "text-muted-foreground")}>
+                  {count}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </header>
+      <TabsList variant="line" className="mb-4 h-10 w-full justify-start gap-4 border-b p-0">
+        <TabsTrigger value="current" className="flex-none px-1 after:bottom-[-2px] after:bg-primary">
+          Current tasks
+        </TabsTrigger>
+        <TabsTrigger value="archived" className="flex-none px-1 after:bottom-[-2px] after:bg-primary">
+          Archived
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="current">
-        <Card>
-          <CardContent className="flex flex-col gap-4 px-0 pt-6">
-            <div className="flex flex-wrap items-center gap-2 px-4 lg:px-6">
+        <Card className="rounded-md border py-0 ring-0">
+          <CardContent className="flex flex-col gap-0 px-0">
+            <div className="flex flex-wrap items-center gap-2 p-3 sm:px-4">
               <div className="relative w-full sm:max-w-xs">
                 <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
                 <Input
-                  placeholder="Search description / goal / ID"
+                  aria-label="Search tasks"
+                  placeholder="Search tasks"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="pl-8"
+                  className="pr-8 pl-8"
                 />
                 {query && (
                   <button
@@ -810,7 +851,7 @@ export default function TasksPage() {
                 )}
               </div>
               <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as TaskStatus | "all")}>
-                <SelectTrigger className="w-36">
+                <SelectTrigger aria-label="Filter by status" className="min-w-28 flex-1 sm:w-36 sm:flex-none">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -825,7 +866,7 @@ export default function TasksPage() {
                 </SelectContent>
               </Select>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger aria-label="Filter by category" className="min-w-32 flex-1 sm:w-40 sm:flex-none">
                   <SelectValue placeholder="Task category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -840,8 +881,8 @@ export default function TasksPage() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <span className="text-muted-foreground text-xs tabular-nums">
-                {filtered.length}/{tasks.length} tasks
+              <span className="whitespace-nowrap font-mono text-xs text-muted-foreground tabular-nums">
+                {filtered.length === tasks.length ? `${tasks.length} tasks` : `${filtered.length} of ${tasks.length} tasks`}
               </span>
               {selectedIds.size > 0 && (
                 <>
@@ -907,25 +948,19 @@ export default function TasksPage() {
                 onChanged={refreshCategoriesAndTasks}
                 onTaskMoved={applyTaskCategoryMove}
               />
-              <CreateTaskSheet
-                tasks={tasks}
-                categories={categories}
-                onCreated={refreshCategoriesAndTasks}
-                onCategoriesChanged={refreshCategoriesAndTasks}
-              />
             </div>
 
             {tasks.length === 0 ? (
-              <div className="text-muted-foreground mx-4 flex items-center justify-center rounded-lg border border-dashed py-20 text-sm lg:mx-6">
-                No tasks yet. Click "New task" at the top right to start.
+              <div className="flex min-h-44 items-center justify-center border-t px-4 py-12 text-center text-sm text-muted-foreground">
+                No tasks yet. Select New task to get started.
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-muted-foreground mx-4 flex items-center justify-center rounded-lg border border-dashed py-20 text-sm lg:mx-6">
+              <div className="flex min-h-44 items-center justify-center border-t px-4 py-12 text-center text-sm text-muted-foreground">
                 No matching tasks.
               </div>
             ) : (
-              <Table className="**:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4">
-                <TableHeader className="[&_tr]:border-t">
+              <Table className="**:data-[slot='table-cell']:px-2.5 **:data-[slot='table-head']:px-2.5">
+                <TableHeader className="bg-muted [&_th]:font-mono [&_th]:text-[11px] [&_th]:text-muted-foreground [&_tr]:border-t">
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
@@ -934,17 +969,7 @@ export default function TasksPage() {
                         aria-label="Select all tasks on this page"
                       />
                     </TableHead>
-                    <SortableTaskHead
-                      field="id"
-                      label="ID"
-                      activeField={sortField}
-                      direction={sortDirection}
-                      className="font-mono"
-                      onSort={sortTasksBy}
-                    />
-                    <TableHead>Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Goal</TableHead>
+                    <TableHead>Task</TableHead>
                     <SortableTaskHead
                       field="status"
                       label="Status"
@@ -952,14 +977,19 @@ export default function TasksPage() {
                       direction={sortDirection}
                       onSort={sortTasksBy}
                     />
-                    <TableHead className="text-center">Goal progress</TableHead>
-                    <TableHead className="text-center" title="Critical / High / Medium / Low">
-                      Findings <span className="text-muted-foreground font-normal">C/H/M/L</span>
-                    </TableHead>
-                    <TableHead className="text-center">Running workers</TableHead>
+                    <SortableTaskHead
+                      field="id"
+                      label="ID"
+                      activeField={sortField}
+                      direction={sortDirection}
+                      onSort={sortTasksBy}
+                    />
+                    <TableHead>Goal progress</TableHead>
+                    <TableHead className="text-center" title="Critical / High / Medium / Low">Findings</TableHead>
+                    <TableHead className="text-center" title="Running workers">Workers</TableHead>
                     <SortableTaskHead
                       field="created"
-                      label="Created at"
+                      label="Created"
                       activeField={sortField}
                       direction={sortDirection}
                       align="right"
@@ -973,8 +1003,8 @@ export default function TasksPage() {
                       align="right"
                       onSort={sortTasksBy}
                     />
-                    <TableHead className="text-right">Token</TableHead>
-                    <TableHead className="sticky right-0 z-10 bg-card text-right shadow-[-1px_0_0_0_hsl(var(--border))]">
+                    <TableHead className="text-right">Tokens</TableHead>
+                    <TableHead className="bg-muted text-right xl:sticky xl:right-0 xl:z-10 xl:border-l">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -1180,6 +1210,9 @@ const TaskRow = React.memo(function TaskRow({
   selected: boolean;
   onSelectedChange: (id: string, checked: boolean) => void;
 }) {
+  const goalsMet = task.goals_met ?? 0;
+  const totalGoals = task.goals_total ?? 0;
+
   return (
     <TableRow className="group border-border/60" data-state={selected ? "selected" : undefined}>
       <TableCell>
@@ -1189,36 +1222,42 @@ const TaskRow = React.memo(function TaskRow({
           aria-label={`Select task ${task.id}`}
         />
       </TableCell>
-      <TableCell>
-        <code className="bg-muted rounded px-1.5 py-0.5 font-mono text-xs">{task.id}</code>
-      </TableCell>
-      <TableCell className="font-medium">
-        <div className="flex max-w-xs items-center gap-2">
+      <TableCell className="min-w-36 max-w-48 font-medium lg:max-w-52">
+        <div className="flex items-center gap-1">
           <TaskNameEditor task={task} onRename={onRename} />
           {task.active && <StarIcon className="size-4 shrink-0 fill-amber-400 text-amber-400" />}
           {taskIsPinned(task) && <PinIcon className="text-primary size-4 shrink-0" aria-label="Pinned" />}
         </div>
-      </TableCell>
-      <TableCell className="text-muted-foreground max-w-40">
         <Link
           href={`/function/tasks/detail?id=${encodeURIComponent(task.id)}`}
-          className="block truncate rounded-sm hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="block truncate rounded-sm text-xs font-normal text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title={task.description}
         >
           {task.description}
         </Link>
       </TableCell>
-      <TableCell className="text-muted-foreground max-w-40 truncate" title={task.goal}>
-        {task.goal}
-      </TableCell>
       <TableCell>
         <StatusBadge domain="task" value={task.status} dot />
       </TableCell>
-      <TableCell className="text-muted-foreground text-center text-xs tabular-nums">
-        {typeof task.goals_total === "number" && task.goals_total > 0 ? (
-          `${task.goals_met}/${task.goals_total}`
+      <TableCell>
+        <code className="font-mono text-xs text-muted-foreground">{task.id}</code>
+      </TableCell>
+      <TableCell className="max-w-28">
+        <div className="truncate text-xs text-muted-foreground" title={task.goal}>
+          {task.goal}
+        </div>
+        {totalGoals > 0 ? (
+          <div className="mt-1 flex items-center gap-2 font-mono text-xs tabular-nums">
+            <span>{goalsMet}/{totalGoals}</span>
+            <span aria-hidden="true" className="h-0.5 w-10 bg-border">
+              <span
+                className="block h-full bg-chart-1"
+                style={{ width: `${Math.min(100, Math.max(0, (goalsMet / totalGoals) * 100))}%` }}
+              />
+            </span>
+          </div>
         ) : (
-          <span className="text-muted-foreground">—</span>
+          <span className="text-xs text-muted-foreground">—</span>
         )}
       </TableCell>
       <TableCell className="text-center text-xs tabular-nums">
@@ -1274,17 +1313,17 @@ const TaskRow = React.memo(function TaskRow({
         {task.tokens ? (
           <span className="text-muted-foreground">
             In <span className="text-foreground">{fmtTokens(task.tokens.input_tokens)}</span>
-            {" · Cache "}
-            <span className="text-foreground">{fmtTokens(task.tokens.cache_read_tokens)}</span>
             {" · Out "}
             <span className="text-foreground">{fmtTokens(task.tokens.output_tokens)}</span>
+            <br />
+            Cache <span className="text-foreground">{fmtTokens(task.tokens.cache_read_tokens)}</span>
           </span>
         ) : (
           "—"
         )}
       </TableCell>
-      <TableCell className="sticky right-0 z-10 bg-card text-right shadow-[-1px_0_0_0_hsl(var(--border))] group-hover:bg-muted/50">
-        <div className="flex items-center justify-end gap-0.5">
+      <TableCell className="bg-card text-right group-hover:bg-muted xl:sticky xl:right-0 xl:z-10 xl:border-l">
+        <div className="flex items-center justify-end [&_a]:size-[26px] [&_button]:size-[26px]">
           <Button size="icon" variant="ghost" asChild aria-label="View task details" title="View task details">
             <Link href={`/function/tasks/detail?id=${encodeURIComponent(task.id)}`}>
               <EyeIcon />
@@ -1790,9 +1829,9 @@ function TaskArchivesPanel({ onChanged }: { onChanged: () => void }) {
   }
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-4 px-0 pt-6">
-        <div className="flex flex-wrap items-center gap-2 px-4 lg:px-6">
+    <Card className="rounded-md border py-0 ring-0">
+      <CardContent className="flex flex-col gap-0 px-0">
+        <div className="flex flex-wrap items-center gap-2 p-3 sm:px-4">
           <div className="relative w-full sm:max-w-xs">
             <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -1801,7 +1840,8 @@ function TaskArchivesPanel({ onChanged }: { onChanged: () => void }) {
                 setQuery(event.target.value);
                 setPage(1);
               }}
-              placeholder="Search task name / description / ID"
+              aria-label="Search archives"
+              placeholder="Search archives"
               className="pl-8"
             />
           </div>
@@ -1812,7 +1852,7 @@ function TaskArchivesPanel({ onChanged }: { onChanged: () => void }) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-36">
+            <SelectTrigger aria-label="Filter archives by status" className="w-36">
               <SelectValue placeholder="State" />
             </SelectTrigger>
             <SelectContent>
@@ -1831,7 +1871,7 @@ function TaskArchivesPanel({ onChanged }: { onChanged: () => void }) {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <span className="text-muted-foreground text-xs tabular-nums">{total} archives</span>
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">{total} archives</span>
           {selectedArchives.length > 0 && (
             <>
               <span className="text-xs tabular-nums">{selectedArchives.length} selected</span>
@@ -1857,19 +1897,19 @@ function TaskArchivesPanel({ onChanged }: { onChanged: () => void }) {
           )}
         </div>
         {loading ? (
-          <div className="flex justify-center py-20">
+          <div className="flex justify-center border-t py-20">
             <Spinner />
           </div>
         ) : archives.length === 0 ? (
-          <Empty className="mx-4 border border-dashed lg:mx-6">
+          <Empty className="min-h-44 rounded-none border-t">
             <EmptyHeader>
               <EmptyTitle>No task archives</EmptyTitle>
               <EmptyDescription>Paused or terminal tasks can be archived from the current task list.</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
-          <Table className="**:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4">
-            <TableHeader className="[&_tr]:border-t">
+          <Table className="**:data-[slot='table-cell']:px-3 **:data-[slot='table-head']:px-3">
+            <TableHeader className="bg-muted [&_th]:font-mono [&_th]:text-[11px] [&_th]:text-muted-foreground [&_tr]:border-t">
               <TableRow>
                 <TableHead className="w-10">
                   <Checkbox
@@ -3193,7 +3233,7 @@ function CreateTaskSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button size="sm">
+        <Button>
           <PlusIcon /> New task
         </Button>
       </SheetTrigger>

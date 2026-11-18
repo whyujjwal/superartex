@@ -65,24 +65,30 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    label: "Functions",
+    label: "Workspace",
     items: [
       { id: "dashboard", title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { id: "chat", title: "Chat", url: "/chat", icon: MessageSquare },
       { id: "tasks", title: "Tasks", url: "/function/tasks", icon: Target },
       { id: "findings", title: "Findings", url: "/function/findings", icon: Bug },
+      { id: "assets", title: "Assets", url: "/function/assets", icon: Network },
+      { id: "chat", title: "Chat", url: "/chat", icon: MessageSquare },
+      { id: "workspace", title: "Files", url: "/function/workspace", icon: FolderOpen },
+    ],
+  },
+  {
+    id: 2,
+    label: "Activity",
+    items: [
       { id: "traffic", title: "Traffic", url: "/function/traffic", icon: Activity },
       { id: "commands", title: "Tool Execution", url: "/function/commands", icon: Terminal },
       { id: "processes", title: "Processes", url: "/function/processes", icon: Activity },
       { id: "workflows", title: "Workflows", url: "/function/workflows", icon: Workflow as LucideIcon },
       { id: "llm-records", title: "LLM Recording", url: "/function/llm-records", icon: Radio },
-      { id: "assets", title: "Assets", url: "/function/assets", icon: Network },
       { id: "sync", title: "Asset Sync", url: "/function/sync", icon: FolderSync },
-      { id: "workspace", title: "Workspace", url: "/function/workspace", icon: FolderOpen },
     ],
   },
   {
-    id: 2,
+    id: 3,
     label: "System",
     items: [
       { id: "llm", title: "LLM", url: "/system/llm", icon: Brain },

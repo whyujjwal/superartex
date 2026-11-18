@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { ArrowRight } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
+
+import styles from "../auth.module.css";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -59,86 +63,85 @@ export default function SetupPage() {
     }
   }
 
-  if (checking) return null;
+  if (checking) {
+    return (
+      <p role="status" className="text-muted-foreground text-sm">
+        Checking setup state…
+      </p>
+    );
+  }
 
   return (
-    <div className="flex h-dvh">
-      {/* Left panel */}
-      <div className="hidden flex-col items-center justify-center bg-primary p-12 text-center lg:flex lg:w-1/3">
-        <div className="relative flex items-center justify-center">
-          <div className="absolute size-80 rounded-full border border-primary-foreground/10" />
-          <div className="absolute size-60 rounded-full border border-primary-foreground/15" />
-          <div className="absolute size-40 rounded-full border border-primary-foreground/20" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="SUPERARTEX" width={160} height={160} className="relative brightness-0 invert" />
-        </div>
-      </div>
-
-      {/* Right panel */}
-      <div className="flex w-full items-center justify-center bg-background p-8 lg:w-2/3">
-        <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
-          <div className="space-y-4 text-center">
-            <h2 className="text-2xl font-medium tracking-tight">{unavailable ? "Cannot confirm initialization state" : "Set initial password"}</h2>
-            <p className="mx-auto max-w-xl text-muted-foreground">
-              {unavailable
-                ? "The backend or database is temporarily unavailable. To avoid overwriting a password already set on this instance, setup is temporarily closed — restore the service and try again."
-                : "First time using SUPERARTEX? Enter the setup token from the server log, then set a login password for the account (at least 12 characters)"}
+    <>
+      <header className={styles.intro}>
+        <h1 className={styles.title}>{unavailable ? "Cannot confirm initialization state" : "Set initial password"}</h1>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          {unavailable
+            ? "The backend or database is temporarily unavailable. To avoid overwriting a password already set on this instance, setup is temporarily closed — restore the service and try again."
+            : "Use the setup token from the server log and choose a password of at least 12 characters."}
+        </p>
+      </header>
+      {unavailable ? (
+        <div className="flex flex-col gap-5">
+          {error && (
+            <p role="alert" className="text-destructive text-sm">
+              {error}
             </p>
-          </div>
-          {unavailable ? (
-            <div className="flex flex-col gap-4">
-              {error && <p className="text-center text-sm text-destructive">{error}</p>}
-              <Button type="button" className="w-full" onClick={() => window.location.reload()}>
-                Retry
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="setup-token">Setup token</Label>
-                <Input
-                  id="setup-token"
-                  value={setupToken}
-                  onChange={(e) => setSetupToken(e.target.value)}
-                  placeholder="Printed in the server log at startup"
-                  autoFocus
-                  autoComplete="off"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">New password</Label>
-                <PasswordInput
-                  id="password"
-                  passwordLabel="new password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 12 characters"
-                  autoComplete="new-password"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="confirm">Confirm password</Label>
-                <PasswordInput
-                  id="confirm"
-                  passwordLabel="password confirmation"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="Enter the password again"
-                  autoComplete="new-password"
-                />
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading || !setupToken.trim() || !password || !confirm}
-              >
-                {loading ? "Saving..." : "Set password and sign in"}
-              </Button>
-            </form>
           )}
+          <Button type="button" className="h-11 w-full" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
         </div>
-      </div>
-    </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="space-y-2">
+            <Label htmlFor="setup-token">Setup token</Label>
+            <Input
+              id="setup-token"
+              value={setupToken}
+              onChange={(e) => setSetupToken(e.target.value)}
+              autoFocus
+              autoComplete="off"
+              className="h-11 bg-card"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">New password</Label>
+            <PasswordInput
+              id="password"
+              passwordLabel="new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              className="h-11 bg-card"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm">Confirm password</Label>
+            <PasswordInput
+              id="confirm"
+              passwordLabel="password confirmation"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete="new-password"
+              className="h-11 bg-card"
+            />
+          </div>
+          {error && (
+            <p role="alert" className="text-destructive text-sm">
+              {error}
+            </p>
+          )}
+          <Button
+            type="submit"
+            className="h-11 w-full justify-between px-4"
+            disabled={loading || !setupToken.trim() || !password || !confirm}
+          >
+            {loading ? "Saving..." : "Set password and sign in"}
+            <ArrowRight aria-hidden="true" />
+          </Button>
+        </form>
+      )}
+    </>
   );
 }

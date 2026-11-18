@@ -73,6 +73,33 @@ func TestFindingExportsOrderUnrankedSeveritiesAfterLow(t *testing.T) {
 	})
 }
 
+func TestFindingsCSVExportsFormulaLikeValuesAsText(t *testing.T) {
+	at := time.Date(2026, 11, 18, 9, 30, 0, 0, time.UTC)
+	findings := []*db.DBFinding{
+		{
+			ID: 12, Name: "Routine, \"quoted\" title", VulnClass: "class", Severity: "low",
+			CreatedAt: at, Summary: "First line\nSecond line",
+		},
+		{
+			ID: 18, Name: "=1+1", VulnClass: "+class", Severity: "-legacy", Status: " @status",
+			TaskDescription: "\tWorkspace", CreatedAt: at, Summary: "＝1+1",
+			TrafficBindings: []db.FindingTrafficBinding{{ID: 7}, {ID: 8}},
+		},
+	}
+	data := strings.TrimPrefix(string(FindingsCSV(findings)), "\uFEFF")
+	rows, err := csv.NewReader(strings.NewReader(data)).ReadAll()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := [][]string{
+		{"12", "Routine, \"quoted\" title", "class", "low", "pending", "", "2026-11-18 09:30:00", "First line\nSecond line", "0", ""},
+		{"18", "'=1+1", "'+class", "'-legacy", "' @status", "'\tWorkspace", "2026-11-18 09:30:00", "'＝1+1", "2", "7,8"},
+	}
+	if !slices.EqualFunc(rows[1:], want, slices.Equal[[]string]) {
+		t.Errorf("CSV data rows = %q, want %q", rows[1:], want)
+	}
+}
+
 func TestTaskMarkdownPreservesUnrankedFindingOrder(t *testing.T) {
 	findings := []*db.Node{
 		{Payload: []byte(`{"name":"Info","severity":"info"}`)},

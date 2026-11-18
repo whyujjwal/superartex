@@ -1,21 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SuperArtex">
-  <defs>
-    <linearGradient id="sa" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#8b5cf6"/>
-      <stop offset="1" stop-color="#5b21b6"/>
-    </linearGradient>
-  </defs>
   <!-- shield -->
   <path d="M256 96 L378 138 V286 C378 344 332 392 256 424 C180 392 134 344 134 286 V138 Z"
-        fill="none" stroke="url(#sa)" stroke-width="26" stroke-linejoin="round" stroke-linecap="round"/>
+        fill="none" stroke="#db6d37" stroke-width="26" stroke-linejoin="round" stroke-linecap="round"/>
   <!-- exploration graph: two intents converge into a fact, which proves a finding -->
-  <g stroke="url(#sa)" stroke-width="14" stroke-linecap="round">
+  <g stroke="#db6d37" stroke-width="14" stroke-linecap="round">
     <path d="M206 212 L247 273"/>
     <path d="M306 212 L265 273"/>
     <path d="M256 311 L256 333"/>
   </g>
-  <circle cx="206" cy="212" r="16" fill="url(#sa)"/>
-  <circle cx="306" cy="212" r="16" fill="url(#sa)"/>
-  <circle cx="256" cy="290" r="21" fill="url(#sa)"/>
-  <circle cx="256" cy="360" r="27" fill="#a78bfa" stroke="url(#sa)" stroke-width="10"/>
+  <circle cx="206" cy="212" r="16" fill="#db6d37"/>
+  <circle cx="306" cy="212" r="16" fill="#db6d37"/>
+  <circle cx="256" cy="290" r="21" fill="#db6d37"/>
+  <circle cx="256" cy="360" r="27" fill="#ffba8f" stroke="#db6d37" stroke-width="10"/>
 </svg>

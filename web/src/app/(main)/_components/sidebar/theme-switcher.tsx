@@ -21,7 +21,13 @@ export function ThemeSwitcher() {
   };
 
   return (
-    <Button size="icon" onClick={cycleTheme} aria-label={`Current theme: ${themeMode}. Click to cycle themes`}>
+    <Button
+      size="icon"
+      variant="ghost"
+      className="text-muted-foreground"
+      onClick={cycleTheme}
+      aria-label={`Current theme: ${themeMode}. Click to cycle themes`}
+    >
       {/* SYSTEM */}
       <Monitor className="hidden [html[data-theme-mode=system]_&]:block" />
 

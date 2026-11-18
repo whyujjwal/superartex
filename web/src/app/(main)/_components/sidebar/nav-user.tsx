@@ -47,13 +47,15 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="size-7 rounded-md group-data-[collapsible=icon]:size-4">
                 <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                <AvatarFallback className="rounded-lg">{getInitials(user.name)}</AvatarFallback>
+                <AvatarFallback className="rounded-md bg-sidebar-accent text-xs text-sidebar-accent-foreground group-data-[collapsible=icon]:text-[9px]">
+                  {getInitials(user.name)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-muted-foreground text-xs">{user.email}</span>
+                {user.email && <span className="truncate text-xs text-sidebar-foreground">{user.email}</span>}
               </div>
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>

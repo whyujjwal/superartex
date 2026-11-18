@@ -24,8 +24,16 @@ web/next-env.d.ts
 *.swp
 *.swo
 
-# docs
-/docs/
+# Keep the public handbook; ignore other local documentation artifacts.
+/docs/*
+!/docs/README.md
+!/docs/getting-started.md
+!/docs/usage.md
+!/docs/configuration.md
+!/docs/toolkit.md
+!/docs/operations.md
+!/docs/architecture.md
+!/docs/security-model.md
 
 # os
 .DS_Store

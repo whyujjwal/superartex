@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 
 import { X } from "lucide-react";
 
-import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { api } from "@/lib/api";
@@ -92,22 +91,20 @@ export function MainContent({ children }: { children: ReactNode }) {
       {updateBanner}
       <header
         className={cn(
-          "flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
-          "[html[data-navbar-style=sticky]_&]:sticky [html[data-navbar-style=sticky]_&]:top-0 [html[data-navbar-style=sticky]_&]:z-50 [html[data-navbar-style=sticky]_&]:overflow-hidden [html[data-navbar-style=sticky]_&]:rounded-t-[inherit] [html[data-navbar-style=sticky]_&]:bg-background/50 [html[data-navbar-style=sticky]_&]:backdrop-blur-md",
+          "flex h-14 shrink-0 items-center border-b bg-card",
+          "[html[data-navbar-style=sticky]_&]:sticky [html[data-navbar-style=sticky]_&]:top-0 [html[data-navbar-style=sticky]_&]:z-40 [html[data-navbar-style=sticky]_&]:rounded-t-[inherit]",
         )}
       >
-        <div className="flex w-full items-center justify-between px-4 lg:px-6">
-          <div className="flex items-center gap-1 lg:gap-2">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mx-2 data-[orientation=vertical]:h-4 data-[orientation=vertical]:self-center"
-            />
+        <div className="flex w-full items-center justify-between gap-2 px-4 md:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
             <SearchDialog />
           </div>
           <div className="flex items-center gap-2">
             {version && (
-              <span className="font-medium text-muted-foreground text-xs tabular-nums">Version · {version}</span>
+              <span className="mr-2 hidden font-mono text-xs text-muted-foreground sm:inline">
+                <span className="sr-only">Version </span>v{version}
+              </span>
             )}
             <LayoutControls />
             <ThemeSwitcher />
@@ -115,7 +112,7 @@ export function MainContent({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden p-4 has-data-[content-padding=false]:p-0 md:p-6 md:has-data-[content-padding=false]:p-0">
+      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden p-4 has-data-[content-padding=false]:p-0 md:p-6 md:has-data-[content-padding=false]:p-0 lg:px-8">
         {children}
       </div>
     </>

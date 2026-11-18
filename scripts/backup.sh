@@ -45,6 +45,8 @@ fi
 PGUSER_NAME="${POSTGRES_USER:-superartex}"
 PGDATABASE_NAME="${POSTGRES_DB:-superartex}"
 
+# Database dumps and data archives can contain sensitive records.
+umask 077
 mkdir -p "$OUTPUT_DIR"
 TS=$(date -u +%Y%m%dT%H%M%SZ)
 DB_OUT="$OUTPUT_DIR/superartex-db-$TS.sql.gz"
