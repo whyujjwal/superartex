@@ -9,9 +9,46 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func TestJWTValidation(t *testing.T) {
+	key := []byte("0123456789abcdef0123456789abcdef")
+	now := time.Now()
+	future := jwt.NewNumericDate(now.Add(time.Hour))
+	past := jwt.NewNumericDate(now.Add(-time.Hour))
+	for _, tt := range []struct {
+		name        string
+		method      jwt.SigningMethod
+		expiresAt   *jwt.NumericDate
+		wantValid   bool
+		wantSubject string
+	}{
+		{"valid", jwt.SigningMethodHS256, future, true, "SUPERARTEX"},
+		{"unexpected algorithm", jwt.SigningMethodHS384, future, false, ""},
+		{"missing expiration", jwt.SigningMethodHS256, nil, false, ""},
+		{"expired", jwt.SigningMethodHS256, past, false, ""},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			token, err := jwt.NewWithClaims(tt.method, jwt.RegisteredClaims{
+				Subject:   "SUPERARTEX",
+				ExpiresAt: tt.expiresAt,
+			}).SignedString(key)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := verifyJWT(token, key); got != tt.wantValid {
+				t.Errorf("verifyJWT() = %v, want %v", got, tt.wantValid)
+			}
+			if got := jwtSubject(token, key); got != tt.wantSubject {
+				t.Errorf("jwtSubject() = %q, want %q", got, tt.wantSubject)
+			}
+		})
+	}
+}
 
 // jwtKeyDirs returns fresh key, data and legacy base dirs and points
 // jwtLegacyBaseDir at the latter for the duration of the test. keyDir does not

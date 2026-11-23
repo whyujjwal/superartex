@@ -169,29 +169,27 @@ func signJWT(key []byte) (string, error) {
 
 // verifyJWT returns true when tokenStr is a valid, non-expired HS256 token.
 func verifyJWT(tokenStr string, key []byte) bool {
-	t, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return key, nil
-	})
-	return err == nil && t.Valid
+	return parseJWTClaims(tokenStr, key) != nil
 }
 
 // jwtSubject returns the subject of tokenStr when it is a valid, non-expired
 // HS256 token, and "" otherwise.
 func jwtSubject(tokenStr string, key []byte) string {
-	var claims jwt.RegisteredClaims
-	t, err := jwt.ParseWithClaims(tokenStr, &claims, func(t *jwt.Token) (any, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return key, nil
-	})
-	if err != nil || !t.Valid {
-		return ""
+	if claims := parseJWTClaims(tokenStr, key); claims != nil {
+		return claims.Subject
 	}
-	return claims.Subject
+	return ""
+}
+
+func parseJWTClaims(tokenStr string, key []byte) *jwt.RegisteredClaims {
+	var claims jwt.RegisteredClaims
+	token, err := jwt.ParseWithClaims(tokenStr, &claims, func(*jwt.Token) (any, error) {
+		return key, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}), jwt.WithExpirationRequired())
+	if err != nil || !token.Valid {
+		return nil
+	}
+	return &claims
 }
 
 // approver is who a human decision is recorded for: the subject of the
