@@ -11,80 +11,95 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
 import { copyText } from "@/lib/utils";
 
+type ReportState = { status: "loading" | "error" } | { status: "ready"; text: string };
+
 export function ReportTab({ taskId }: { taskId: string }) {
-  const [report, setReport] = React.useState<string>("");
-  const [loading, setLoading] = React.useState(true);
+  return <TaskReport key={taskId} taskId={taskId} />;
+}
+
+function TaskReport({ taskId }: { taskId: string }) {
+  const [state, setState] = React.useState<ReportState>({ status: "loading" });
   const [copied, setCopied] = React.useState(false);
+  const mounted = React.useRef(false);
+  const copyTimeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const loading = state.status === "loading";
+  const report = state.status === "ready" ? state.text : "";
 
   React.useEffect(() => {
+    if (!loading) return;
     let active = true;
-    setLoading(true);
-    api
-      .report(taskId)
-      .then((text) => {
-        if (active) setReport(text);
-      })
-      .catch(() => {
-        if (active) setReport("");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+    api.report(taskId).then(
+      (text) => {
+        if (active) setState({ status: "ready", text });
+      },
+      () => {
+        if (active) setState({ status: "error" });
+      },
+    );
     return () => {
       active = false;
     };
-  }, [taskId]);
+  }, [taskId, loading]);
+
+  React.useLayoutEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(copyTimeout.current);
+    };
+  }, []);
 
   async function copy() {
-    if (!report) return;
+    if (!report || !mounted.current) return;
     const ok = await copyText(report);
+    if (!mounted.current) return;
     if (ok) {
       setCopied(true);
       toast.success("Markdown copied");
-      setTimeout(() => setCopied(false), 1500);
+      clearTimeout(copyTimeout.current);
+      copyTimeout.current = setTimeout(() => setCopied(false), 1500);
     } else {
       toast.error("Copy failed; please select the text and copy it manually");
     }
-  }
-
-  let content: React.ReactNode;
-  if (loading) {
-    content = (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
-        <FileTextIcon className="size-8 opacity-40" />
-        Loading…
-      </div>
-    );
-  } else if (report) {
-    content = (
-      <div className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4">
-        <Markdown text={report} />
-      </div>
-    );
-  } else {
-    content = (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
-        <FileTextIcon className="size-8 opacity-40" />
-        No report yet
-      </div>
-    );
   }
 
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <FileTextIcon className="size-4" /> Penetration test report (Markdown)
+          <FileTextIcon aria-hidden="true" className="size-4" /> Penetration test report (Markdown)
         </CardTitle>
         <div className="flex gap-2">
           {report && (
-            <Button size="sm" variant="outline" onClick={copy}>
-              {copied ? <CheckIcon /> : <CopyIcon />} Copy
+            <Button type="button" size="sm" variant="outline" onClick={copy}>
+              {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} Copy
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent>{content}</CardContent>
+      <CardContent>
+        {report ? (
+          <div className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4">
+            <Markdown text={report} />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
+            <FileTextIcon aria-hidden="true" className="size-8 opacity-40" />
+            {loading && <p role="status">Loading…</p>}
+            {state.status === "error" && (
+              <>
+                <p role="alert" className="text-destructive">
+                  Unable to load the report
+                </p>
+                <Button type="button" size="sm" variant="outline" onClick={() => setState({ status: "loading" })}>
+                  Try again
+                </Button>
+              </>
+            )}
+            {state.status === "ready" && <p>No report yet</p>}
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
