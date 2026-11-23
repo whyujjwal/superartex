@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { CheckIcon, CopyIcon, FileTextIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, DownloadIcon, FileTextIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Markdown } from "@/components/markdown";
@@ -63,19 +63,39 @@ function TaskReport({ taskId }: { taskId: string }) {
     }
   }
 
+  function download() {
+    if (!report || !mounted.current) return;
+
+    const safeTaskId = taskId.replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 80) || "unknown";
+    const url = URL.createObjectURL(new Blob([report], { type: "text/markdown;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `task-${safeTaskId}-report.md`;
+    try {
+      document.body.appendChild(link);
+      link.click();
+    } finally {
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  }
+
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between">
+      <CardHeader className="items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <FileTextIcon aria-hidden="true" className="size-4" /> Penetration test report (Markdown)
+          <FileTextIcon aria-hidden="true" className="size-4 shrink-0" /> Penetration test report (Markdown)
         </CardTitle>
-        <div className="flex gap-2">
-          {report && (
+        {report && (
+          <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" variant="outline" onClick={copy}>
               {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} Copy
             </Button>
-          )}
-        </div>
+            <Button type="button" size="sm" variant="outline" onClick={download}>
+              <DownloadIcon aria-hidden="true" /> Download
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {report ? (
