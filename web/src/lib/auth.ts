@@ -1,6 +1,10 @@
 const TOKEN_KEY = "superartex_token";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days (seconds)
 
+function clearTokenCookie(): void {
+  document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`;
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -25,7 +29,26 @@ export const auth = {
 
   clearToken(): void {
     localStorage.removeItem(TOKEN_KEY);
-    document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`;
+    clearTokenCookie();
+  },
+
+  onCrossTabSignOut(onSignOut: () => void): () => void {
+    function unsubscribe() {
+      window.removeEventListener("storage", handleStorage);
+    }
+
+    function handleStorage(event: StorageEvent) {
+      if (event.storageArea !== window.localStorage || (event.key !== null && event.key !== TOKEN_KEY)) return;
+      // A more recent login may have replaced the token before this event was delivered.
+      if (auth.getToken()) return;
+
+      unsubscribe();
+      clearTokenCookie();
+      onSignOut();
+    }
+
+    window.addEventListener("storage", handleStorage);
+    return unsubscribe;
   },
 
   // Parse the current user from the JWT payload's sub field; display only, no signature verification.
