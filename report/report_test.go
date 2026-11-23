@@ -2,6 +2,7 @@ package report
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"slices"
 	"strings"
 	"testing"
@@ -108,6 +109,68 @@ func TestTaskMarkdownPreservesUnrankedFindingOrder(t *testing.T) {
 		{Payload: []byte(`{"name":"Low","severity":"low"}`)},
 	}
 	assertFindingHeadingOrder(t, Markdown(Input{Findings: findings}), []string{"Low", "Info", "Unrated", "Unrecognized"})
+}
+
+func TestMarkdownEvidenceStaysInOneCodeBlock(t *testing.T) {
+	cases := []struct {
+		name          string
+		evidence      string
+		taskBlock     string
+		findingsBlock string
+	}{
+		{
+			name:          "literal backtick fences",
+			evidence:      "alpha\n```\ninside\n`````\nomega",
+			taskBlock:     "``````\nalpha\n```\ninside\n`````\nomega\n``````\n\n",
+			findingsBlock: "``````\nalpha\n```\ninside\n`````\nomega\n``````\n\n",
+		},
+		{
+			name:          "plain text keeps existing whitespace",
+			evidence:      "\n  ordinary evidence \n\n",
+			taskBlock:     "```\n\n  ordinary evidence \n\n\n```\n\n",
+			findingsBlock: "```\nordinary evidence\n```\n\n",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			payload, err := json.Marshal(map[string]any{
+				"name":     "Example",
+				"severity": "high",
+				"evidence": map[string]string{"poc": tc.evidence},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			finding := &db.DBFinding{Evidence: tc.evidence, Report: "Follow-up details."}
+			formats := []struct{ name, markdown, want string }{
+				{
+					"task report",
+					Markdown(Input{Findings: []*db.Node{
+						{Payload: payload},
+						{Payload: []byte(`{"name":"Follow-up","severity":"low"}`)},
+					}}),
+					"**PoC / Evidence:**\n\n" + tc.taskBlock + "### 2. [LOW] Follow-up\n",
+				},
+				{
+					"batch findings report",
+					FindingsMarkdown([]*db.DBFinding{finding}, time.Time{}),
+					"**Evidence:**\n\n" + tc.findingsBlock + "**Detailed report:**\n",
+				},
+				{
+					"single finding report",
+					SingleFindingMarkdown(finding, time.Time{}),
+					"## Evidence\n\n" + tc.findingsBlock + "## Detailed Report\n",
+				},
+			}
+			for _, format := range formats {
+				t.Run(format.name, func(t *testing.T) {
+					if !strings.Contains(format.markdown, format.want) {
+						t.Errorf("want evidence and the following section in:\n%s\nwant excerpt:\n%s", format.markdown, format.want)
+					}
+				})
+			}
+		})
+	}
 }
 
 func assertFindingHeadingOrder(t *testing.T, markdown string, titles []string) {

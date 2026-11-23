@@ -100,7 +100,8 @@ func Markdown(in Input) string {
 			fmt.Fprintf(&b, "### %d. [%s] %s\n\n", i+1, strings.ToUpper(nz(f.Severity, "info")), nz(f.Name, nz(f.VulnClass, "Uncategorized")))
 			fmt.Fprintf(&b, "%s\n\n", nz(f.Summary, ""))
 			if f.PoC != "" {
-				fmt.Fprintf(&b, "**PoC / Evidence:**\n\n```\n%s\n```\n\n", f.PoC)
+				b.WriteString("**PoC / Evidence:**\n\n")
+				writeMarkdownCodeBlock(&b, f.PoC)
 			}
 		}
 	}
@@ -122,6 +123,21 @@ func Markdown(in Input) string {
 	}
 
 	return b.String()
+}
+
+func writeMarkdownCodeBlock(b *strings.Builder, content string) {
+	// A closing Markdown fence may be as long as the opening fence or longer.
+	fenceLength, runLength := 3, 0
+	for _, r := range content {
+		if r == '`' {
+			runLength++
+			fenceLength = max(fenceLength, runLength+1)
+		} else {
+			runLength = 0
+		}
+	}
+	fence := strings.Repeat("`", fenceLength)
+	fmt.Fprintf(b, "%s\n%s\n%s\n\n", fence, content, fence)
 }
 
 func nz(s, d string) string {
