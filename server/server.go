@@ -4127,18 +4127,34 @@ func (s *Server) getReport(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 404, "no active task")
 		return
 	}
-	findings, _ := t.Store.ListByKind(db.KindFinding, 1000) // pure vulnerabilities (facts are a separate KindFact and never enter the report)
-	counts := map[string]int{}
-	for _, ty := range []string{"root_domain", "ip", "subdomain", "app", "service", "endpoint"} {
-		ns, _ := s.m.Assets().QueryByType(ty, 100000, 0)
-		if len(ns) > 0 {
-			counts[ty] = len(ns)
-		}
+	const reportError = "could not generate report"
+	taskID, err := strconv.ParseInt(t.ID, 10, 64)
+	if err != nil {
+		log.Printf("[report] invalid task ID %q: %v", t.ID, err)
+		writeErr(w, http.StatusInternalServerError, reportError)
+		return
+	}
+	findings, err := t.Store.ListByKind(db.KindFinding, 1000) // pure vulnerabilities (facts are a separate KindFact and never enter the report)
+	if err != nil {
+		log.Printf("[report] findings query failed for task %d: %v", taskID, err)
+		writeErr(w, http.StatusInternalServerError, reportError)
+		return
+	}
+	assets := s.m.Assets()
+	counts, err := assets.CountsByTypeForTask(taskID)
+	if err != nil {
+		log.Printf("[report] asset counts query failed for task %d: %v", taskID, err)
+		writeErr(w, http.StatusInternalServerError, reportError)
+		return
 	}
 	var ledger *db.CoverageLedger
 	if t.CoverageEnabled {
-		taskID, _ := strconv.ParseInt(t.ID, 10, 64)
-		ledger, _ = s.m.Assets().CoverageLedger(taskID)
+		ledger, err = assets.CoverageLedger(taskID)
+		if err != nil {
+			log.Printf("[report] coverage ledger query failed for task %d: %v", taskID, err)
+			writeErr(w, http.StatusInternalServerError, reportError)
+			return
+		}
 	}
 	md := report.Markdown(report.Input{
 		Title: t.Description, Goal: t.Goal, GeneratedAt: time.Now(),
