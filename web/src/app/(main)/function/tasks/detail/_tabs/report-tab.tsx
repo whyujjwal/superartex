@@ -100,7 +100,7 @@ function TaskReport({ taskId }: { taskId: string }) {
       <CardContent>
         {report ? (
           <div className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4">
-            <Markdown text={report} />
+            <Markdown text={report} allowImages={false} />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
