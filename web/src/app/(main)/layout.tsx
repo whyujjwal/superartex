@@ -68,8 +68,16 @@ export default function Layout({ children }: Readonly<{ children: ReactNode }>) 
         } as React.CSSProperties
       }
     >
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:font-medium focus:text-primary-foreground focus:text-sm focus:outline-2 focus:outline-ring focus:outline-offset-2"
+      >
+        Skip to main content
+      </a>
       <AppSidebar variant={variant} collapsible={collapsible} />
       <SidebarInset
+        id="main-content"
+        tabIndex={-1}
         className={cn(
           "[html[data-content-layout=centered]_&>*]:mx-auto",
           "[html[data-content-layout=centered]_&>*]:w-full",
