@@ -8,13 +8,21 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { type FontKey, fontOptions } from "@/lib/fonts/registry";
-import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } from "@/lib/preferences/layout";
+import {
+  type ContentLayout,
+  type NavbarStyle,
+  type SidebarCollapsible,
+  type SidebarVariant,
+  UI_SCALE_OPTIONS,
+  type UiScale,
+} from "@/lib/preferences/layout";
 import {
   applyContentLayout,
   applyFont,
   applyNavbarStyle,
   applySidebarCollapsible,
   applySidebarVariant,
+  applyUiScale,
 } from "@/lib/preferences/layout-utils";
 import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { persistPreference } from "@/lib/preferences/preferences-storage";
@@ -38,6 +46,8 @@ export function LayoutControls() {
   const setSidebarCollapsible = usePreferencesStore((s) => s.setSidebarCollapsible);
   const font = usePreferencesStore((s) => s.font);
   const setFont = usePreferencesStore((s) => s.setFont);
+  const uiScale = usePreferencesStore((s) => s.uiScale);
+  const setUiScale = usePreferencesStore((s) => s.setUiScale);
 
   const onThemePresetChange = (preset: ThemePreset) => {
     applyThemePreset(preset);
@@ -86,6 +96,13 @@ export function LayoutControls() {
     void persistPreference("font", value);
   };
 
+  const onUiScaleChange = (scale: UiScale | "") => {
+    if (!scale) return;
+    applyUiScale(scale);
+    setUiScale(scale);
+    void persistPreference("ui_scale", scale);
+  };
+
   const handleRestore = () => {
     onThemePresetChange(PREFERENCE_DEFAULTS.theme_preset);
     onThemeModeChange(PREFERENCE_DEFAULTS.theme_mode);
@@ -94,6 +111,7 @@ export function LayoutControls() {
     onSidebarStyleChange(PREFERENCE_DEFAULTS.sidebar_variant);
     onSidebarCollapseModeChange(PREFERENCE_DEFAULTS.sidebar_collapsible);
     onFontChange(PREFERENCE_DEFAULTS.font);
+    onUiScaleChange(PREFERENCE_DEFAULTS.ui_scale);
   };
 
   return (
@@ -103,7 +121,11 @@ export function LayoutControls() {
           <Settings />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end">
+      <PopoverContent
+        align="end"
+        collisionPadding={8}
+        className="max-h-(--radix-popover-content-available-height) max-w-(--radix-popover-content-available-width) overflow-y-auto"
+      >
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
             <h4 className="font-medium text-sm leading-none">Preferences</h4>
@@ -151,6 +173,27 @@ export function LayoutControls() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label id="ui-scale-label" className="font-medium text-xs">
+                UI Scale
+              </Label>
+              <ToggleGroup
+                aria-labelledby="ui-scale-label"
+                size="sm"
+                spacing={0}
+                variant="outline"
+                type="single"
+                value={uiScale}
+                onValueChange={onUiScaleChange}
+              >
+                {UI_SCALE_OPTIONS.map(({ label, value }) => (
+                  <ToggleGroupItem key={value} value={value}>
+                    {label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
 
             <div className="space-y-1">

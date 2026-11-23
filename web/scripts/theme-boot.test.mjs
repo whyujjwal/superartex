@@ -75,3 +75,15 @@ test("system appearance still follows the browser color scheme", () => {
   assert.equal(dark, true);
   assert.equal(colorScheme, "dark");
 });
+
+test("a saved UI scale is applied before hydration", () => {
+  const { attributes } = loadAppearance("ui_scale=large; navbar_style=scroll");
+
+  assert.equal(attributes["data-ui-scale"], "large");
+  assert.equal(attributes["data-navbar-style"], "scroll");
+});
+
+test("missing or unsupported UI scale uses the standard size", () => {
+  assert.equal(loadAppearance("").attributes["data-ui-scale"], "standard");
+  assert.equal(loadAppearance("ui_scale=huge").attributes["data-ui-scale"], "standard");
+});

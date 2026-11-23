@@ -12,6 +12,7 @@ import {
   NAVBAR_STYLE_VALUES,
   SIDEBAR_COLLAPSIBLE_VALUES,
   SIDEBAR_VARIANT_VALUES,
+  UI_SCALE_VALUES,
 } from "@/lib/preferences/layout";
 import { PREFERENCE_DEFAULTS, PREFERENCE_PERSISTENCE, type PreferenceKey } from "@/lib/preferences/preferences-config";
 import { THEME_MODE_VALUES, THEME_PRESET_VALUES } from "@/lib/preferences/theme";
@@ -20,6 +21,7 @@ const allowedValues = {
   theme_mode: THEME_MODE_VALUES,
   theme_preset: THEME_PRESET_VALUES,
   font: Object.keys(fontRegistry),
+  ui_scale: UI_SCALE_VALUES,
   content_layout: CONTENT_LAYOUT_VALUES,
   navbar_style: NAVBAR_STYLE_VALUES,
   sidebar_variant: SIDEBAR_VARIANT_VALUES,
@@ -80,6 +82,7 @@ export function ThemeBootScript() {
         root.setAttribute("data-theme-mode", mode);
         root.setAttribute("data-theme-preset", readPreference("theme_preset"));
         root.setAttribute("data-font", readPreference("font"));
+        root.setAttribute("data-ui-scale", readPreference("ui_scale"));
         root.setAttribute("data-content-layout", readPreference("content_layout"));
         root.setAttribute("data-navbar-style", readPreference("navbar_style"));
         root.setAttribute("data-sidebar-variant", readPreference("sidebar_variant"));

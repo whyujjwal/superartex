@@ -30,3 +30,11 @@ export const NAVBAR_STYLE_OPTIONS = [
 ] as const;
 export const NAVBAR_STYLE_VALUES = NAVBAR_STYLE_OPTIONS.map((v) => v.value);
 export type NavbarStyle = (typeof NAVBAR_STYLE_VALUES)[number];
+
+export const UI_SCALE_OPTIONS = [
+  { label: "100%", value: "standard" },
+  { label: "112.5%", value: "large" },
+  { label: "125%", value: "extra-large" },
+] as const;
+export const UI_SCALE_VALUES = UI_SCALE_OPTIONS.map((option) => option.value);
+export type UiScale = (typeof UI_SCALE_VALUES)[number];
