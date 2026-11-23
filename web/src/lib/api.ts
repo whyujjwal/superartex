@@ -117,7 +117,11 @@ function getToken(): string | null {
   return localStorage.getItem("superartex_token");
 }
 
-export async function http<T>(path: string, init?: RequestInit): Promise<T> {
+export async function http<T>(
+  path: string,
+  init?: RequestInit,
+  errorForResponse?: (response: Response) => Error,
+): Promise<T> {
   if (MOCK) return mockHandle<T>(init?.method ?? "GET", path, init?.body ?? null);
   const token = getToken();
   const r = await fetch(`/api${path}`, {
@@ -128,6 +132,7 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
       ...(init?.headers as Record<string, string> | undefined),
     },
   });
+  if (!r.ok && errorForResponse) throw errorForResponse(r);
   if (r.status === 401) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("superartex_token");
@@ -204,14 +209,28 @@ export function sseUrl(path: string): string {
 }
 
 const get = <T>(p: string) => http<T>(p);
-const post = <T>(p: string, body?: unknown) =>
-  http<T>(p, { method: "POST", body: body ? JSON.stringify(body) : undefined });
+const post = <T>(p: string, body?: unknown, errorForResponse?: (response: Response) => Error) =>
+  http<T>(p, { method: "POST", body: body ? JSON.stringify(body) : undefined }, errorForResponse);
 const put = <T>(p: string, body?: unknown) =>
   http<T>(p, { method: "PUT", body: body ? JSON.stringify(body) : undefined });
 const patch = <T>(p: string, body?: unknown) =>
   http<T>(p, { method: "PATCH", body: body ? JSON.stringify(body) : undefined });
 const del = <T>(p: string, body?: unknown) =>
   http<T>(p, { method: "DELETE", body: body ? JSON.stringify(body) : undefined });
+
+export class LoginError extends Error {}
+
+function loginResponseError(response: Response): LoginError {
+  if (response.status === 401) return new LoginError("Incorrect username or password");
+  if (response.status === 429) {
+    const retryAfter = response.headers.get("Retry-After");
+    const seconds = retryAfter && /^\d+$/.test(retryAfter) ? Number(retryAfter) : 0;
+    const retry = Number.isSafeInteger(seconds) && seconds > 0 ? `in ${seconds} seconds` : "later";
+    return new LoginError(`Too many login attempts, try again ${retry}`);
+  }
+  if (response.status === 503) return new LoginError("Data source temporarily unavailable, please retry later");
+  return new LoginError("Unable to sign in, please retry later");
+}
 
 // Go serializes nil slices as JSON null — coerce to [].
 const arr = <T>(x: T[] | null | undefined): T[] => x ?? [];
@@ -246,7 +265,8 @@ export const api = {
 
   // ---- auth ----
   authStatus: () => get<{ initialized: boolean }>("/auth/status"),
-  login: (username: string, password: string) => post<{ token: string }>("/auth/login", { username, password }),
+  login: (username: string, password: string) =>
+    post<{ token: string }>("/auth/login", { username, password }, loginResponseError),
   initPassword: (password: string, setupToken: string) =>
     post<{ token: string }>("/auth/init", { password, setup_token: setupToken }),
   changePassword: (oldPassword: string, newPassword: string) =>

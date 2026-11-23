@@ -12,7 +12,7 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { api } from "@/lib/api";
+import { api, LoginError } from "@/lib/api";
 import { auth } from "@/lib/auth";
 
 import styles from "../auth.module.css";
@@ -74,8 +74,8 @@ export default function LoginPage() {
       const { token } = await api.login("SUPERARTEX", password);
       auth.setToken(token);
       window.location.replace("/function/tasks");
-    } catch {
-      setError("Incorrect username or password");
+    } catch (error) {
+      setError(error instanceof LoginError ? error.message : "Unable to connect to the backend service");
     } finally {
       setLoading(false);
     }
