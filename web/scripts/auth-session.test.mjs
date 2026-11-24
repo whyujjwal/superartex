@@ -25,6 +25,7 @@ function createSession(mock = false) {
   };
   runInNewContext(compiled, {
     exports,
+    atob,
     localStorage,
     window: {
       localStorage,
@@ -112,4 +113,45 @@ test("a sign-out listener can be removed when the protected layout unmounts", ()
   session.emit({ key, oldValue: "previous-token", newValue: null });
 
   assert.deepEqual(session.cookieWrites, []);
+});
+
+function tokenWithClaims(claims) {
+  const payload = Buffer.from(JSON.stringify(claims)).toString("base64url");
+  return `eyJhbGciOiJIUzI1NiJ9.${payload}.fixture`;
+}
+
+test("session expiry reads the current token's numeric timestamp without changing session state", () => {
+  const session = createSession();
+  const previousToken = tokenWithClaims({ sub: "SUPERARTEX", exp: 1700000000 });
+  session.values.set(key, previousToken);
+
+  assert.equal(session.auth.getSessionExpiry()?.toISOString(), "2023-11-14T22:13:20.000Z");
+  assert.equal(session.auth.getCurrentUser()?.name, "SUPERARTEX");
+  assert.equal(session.auth.getToken(), previousToken);
+
+  const nextToken = tokenWithClaims({ exp: 1800000000 });
+  session.values.set(key, nextToken);
+  assert.equal(session.auth.getSessionExpiry()?.toISOString(), "2027-01-15T08:00:00.000Z");
+  assert.equal(session.auth.getToken(), nextToken);
+  assert.equal(session.removals, 0);
+  assert.deepEqual(session.cookieWrites, []);
+});
+
+test("session expiry is omitted when the token or its expiry is unavailable or invalid", () => {
+  const session = createSession(true);
+  session.values.delete(key);
+  assert.equal(session.auth.getSessionExpiry(), null);
+
+  for (const token of [
+    "not-a-jwt",
+    "header.bad-base64!.fixture",
+    tokenWithClaims({ exp: 1800000000 }).replace(/fixture$/, ""),
+    tokenWithClaims({ sub: "SUPERARTEX" }),
+    tokenWithClaims({ exp: "1800000000" }),
+    tokenWithClaims({ exp: 1e20 }),
+    tokenWithClaims(null),
+  ]) {
+    session.values.set(key, token);
+    assert.equal(session.auth.getSessionExpiry(), null);
+  }
 });

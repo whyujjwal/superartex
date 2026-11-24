@@ -5,6 +5,19 @@ function clearTokenCookie(): void {
   document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`;
 }
 
+// These claims are for display only. The server verifies the token independently.
+function readTokenClaims(token: string | null): Record<string, unknown> | null {
+  const parts = token?.split(".");
+  if (parts?.length !== 3 || parts.some((part) => !/^[A-Za-z0-9_-]+$/.test(part))) return null;
+  try {
+    const payload: unknown = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (payload === null || typeof payload !== "object" || Array.isArray(payload)) return null;
+    return payload as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -51,19 +64,17 @@ export const auth = {
     return unsubscribe;
   },
 
-  // Parse the current user from the JWT payload's sub field; display only, no signature verification.
+  getSessionExpiry(): Date | null {
+    const exp = readTokenClaims(this.getToken())?.exp;
+    if (typeof exp !== "number") return null;
+    const expiry = new Date(exp * 1000);
+    return Number.isFinite(expiry.getTime()) ? expiry : null;
+  },
+
   getCurrentUser(): CurrentUser | null {
-    const token = this.getToken();
-    if (!token) return null;
-    try {
-      const parts = token.split(".");
-      if (parts.length !== 3) return null;
-      // base64url → base64
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
-      const username: string = payload.sub ?? "SUPERARTEX";
-      return { id: "1", name: username, username, email: "", avatar: "", role: "operator" };
-    } catch {
-      return null;
-    }
+    const claims = readTokenClaims(this.getToken());
+    if (!claims) return null;
+    const username = typeof claims.sub === "string" ? claims.sub : "SUPERARTEX";
+    return { id: "1", name: username, username, email: "", avatar: "", role: "operator" };
   },
 };

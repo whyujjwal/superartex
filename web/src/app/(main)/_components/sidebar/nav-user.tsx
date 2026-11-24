@@ -18,6 +18,7 @@ import { auth } from "@/lib/auth";
 import { getInitials } from "@/lib/utils";
 
 import { ChangePasswordDialog } from "./change-password-dialog";
+import { SessionExpiryLabel } from "./session-expiry-label";
 
 export function NavUser({
   user,
@@ -79,6 +80,7 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <SessionExpiryLabel />
             <DropdownMenuItem onClick={() => setPwOpen(true)}>
               <KeyRound />
               Change password
