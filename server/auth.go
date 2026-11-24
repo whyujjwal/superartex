@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"log"
 	"math/big"
 	"net/http"
@@ -254,7 +255,7 @@ func (s *Server) authStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 // initSetupToken generates the one-time setup token when no admin password is set
-// and writes it to the server log. Without it, anyone who can reach the port
+// and prints it to process stderr. Without it, anyone who can reach the port
 // before the operator could claim the instance through POST /api/auth/init.
 func (s *Server) initSetupToken() {
 	if s.m == nil || s.m.pg == nil {
@@ -268,7 +269,12 @@ func (s *Server) initSetupToken() {
 		log.Fatalf("[auth] generate setup token: %v", err)
 	}
 	s.setupToken = hex.EncodeToString(buf)
-	log.Printf("[auth] no admin password is set. Setup token for the /setup page: %s", s.setupToken)
+	printSetupToken(os.Stderr, s.setupToken)
+}
+
+func printSetupToken(stderr io.Writer, token string) {
+	// The standard logger feeds the application's log viewer and persistent log store.
+	log.New(stderr, "", log.LstdFlags).Printf("[auth] no admin password is set. Setup token for the /setup page: %s", token)
 }
 
 // checkSetupToken compares got with the active setup token in constant time.

@@ -1,7 +1,10 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -14,6 +17,32 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func TestSetupTokenBypassesCapturedLogs(t *testing.T) {
+	var terminal bytes.Buffer
+	captured := &logSinkT{cap: 16, out: io.Discard, dbCh: make(chan dbWriteReq, 16)}
+	previous := log.Writer()
+	log.SetOutput(captured)
+	t.Cleanup(func() { log.SetOutput(previous) })
+
+	const ordinary = "regular startup log fixture"
+	const token = "synthetic-setup-token-fixture"
+	log.Print(ordinary)
+	printSetupToken(&terminal, token)
+
+	want := "[auth] no admin password is set. Setup token for the /setup page: " + token + "\n"
+	if !strings.HasSuffix(terminal.String(), want) {
+		t.Fatal("operator output is missing the setup line")
+	}
+
+	lines, _ := captured.recent(0, 0)
+	if len(lines) != 1 || lines[0].Text != ordinary {
+		t.Fatal("application log capture did not receive only the ordinary startup line")
+	}
+	if len(captured.dbCh) != 1 || (<-captured.dbCh).ll.Text != ordinary {
+		t.Fatal("log persistence queue did not receive only the ordinary startup line")
+	}
+}
 
 func TestSensitiveAPIResponsesDisableCaching(t *testing.T) {
 	key := []byte("0123456789abcdef0123456789abcdef")
