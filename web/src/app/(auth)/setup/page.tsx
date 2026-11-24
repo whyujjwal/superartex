@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "@/lib/api";
 import { auth } from "@/lib/auth";
+import { getNewPasswordFeedback, NEW_PASSWORD_REQUIREMENTS } from "@/lib/new-password";
+import { cn } from "@/lib/utils";
 
 import styles from "../auth.module.css";
 
@@ -26,6 +28,12 @@ export default function SetupPage() {
   // when the initialization state cannot be fetched, do not default to "not initialized" — that would show the setup form to an
   // instance that already has a password, and following it would overwrite the original. Close the entrance instead.
   const [unavailable, setUnavailable] = useState(false);
+  const { isValid, lengthInvalid, confirmationMismatch, lengthMessage, confirmationMessage } = getNewPasswordFeedback(
+    password,
+    confirm,
+  );
+  const trimmedSetupToken = setupToken.trim();
+  const canSubmit = Boolean(trimmedSetupToken) && isValid;
 
   useEffect(() => {
     api
@@ -42,18 +50,11 @@ export default function SetupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password !== confirm) {
-      setError("The two passwords do not match");
-      return;
-    }
-    if (password.length < 12) {
-      setError("Password must be at least 12 characters");
-      return;
-    }
+    if (!canSubmit || loading) return;
     setLoading(true);
     setError("");
     try {
-      const { token } = await api.initPassword(password, setupToken.trim());
+      const { token } = await api.initPassword(password, trimmedSetupToken);
       auth.setToken(token);
       router.replace("/function/tasks");
     } catch (err) {
@@ -78,7 +79,7 @@ export default function SetupPage() {
         <p className="text-muted-foreground text-sm leading-relaxed">
           {unavailable
             ? "The backend or database is temporarily unavailable. To avoid overwriting a password already set on this instance, setup is temporarily closed — restore the service and try again."
-            : "Use the setup token from the server log and choose a password of at least 12 characters."}
+            : "Use the setup token from the server log."}
         </p>
       </header>
       {unavailable ? (
@@ -102,6 +103,7 @@ export default function SetupPage() {
               onChange={(e) => setSetupToken(e.target.value)}
               autoFocus
               autoComplete="off"
+              required
               className="h-11 bg-card"
             />
           </div>
@@ -113,8 +115,21 @@ export default function SetupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
+              required
+              aria-describedby="setup-password-requirements setup-password-feedback"
+              aria-invalid={lengthInvalid || undefined}
               className="h-11 bg-card"
             />
+            <p id="setup-password-requirements" className="text-muted-foreground text-xs">
+              {NEW_PASSWORD_REQUIREMENTS}
+            </p>
+            <p
+              id="setup-password-feedback"
+              role="status"
+              className={cn("text-xs", lengthInvalid ? "text-destructive" : "text-muted-foreground")}
+            >
+              {lengthMessage}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirm">Confirm password</Label>
@@ -124,19 +139,25 @@ export default function SetupPage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               autoComplete="new-password"
+              required
+              aria-describedby="setup-confirm-feedback"
+              aria-invalid={confirmationMismatch || undefined}
               className="h-11 bg-card"
             />
+            <p
+              id="setup-confirm-feedback"
+              role="status"
+              className={cn("text-xs", confirmationMismatch ? "text-destructive" : "text-muted-foreground")}
+            >
+              {confirmationMessage}
+            </p>
           </div>
           {error && (
             <p role="alert" className="text-destructive text-sm">
               {error}
             </p>
           )}
-          <Button
-            type="submit"
-            className="h-11 w-full justify-between px-4"
-            disabled={loading || !setupToken.trim() || !password || !confirm}
-          >
+          <Button type="submit" className="h-11 w-full justify-between px-4" disabled={loading || !canSubmit}>
             {loading ? "Saving..." : "Set password and sign in"}
             <ArrowRight aria-hidden="true" />
           </Button>

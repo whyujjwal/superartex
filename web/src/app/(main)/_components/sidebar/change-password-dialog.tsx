@@ -16,18 +16,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "@/lib/api";
+import { getNewPasswordFeedback, NEW_PASSWORD_REQUIREMENTS } from "@/lib/new-password";
 import { cn } from "@/lib/utils";
-
-// Match the new-password limits in server/auth.go.
-const MIN_PASSWORD_CHARACTERS = 12;
-const MAX_PASSWORD_BYTES = 72;
-
-function newPasswordIssue(password: string): string {
-  if (!password) return "";
-  if ([...password].length < MIN_PASSWORD_CHARACTERS) return "New password is too short.";
-  if (new TextEncoder().encode(password).length > MAX_PASSWORD_BYTES) return "New password is too long.";
-  return "";
-}
 
 export function ChangePasswordDialog({
   open,
@@ -40,10 +30,11 @@ export function ChangePasswordDialog({
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [saving, setSaving] = React.useState(false);
-  const lengthIssue = newPasswordIssue(newPassword);
-  const passwordsMatch = Boolean(confirmPassword) && confirmPassword === newPassword;
-  const confirmationMismatch = Boolean(confirmPassword) && !passwordsMatch;
-  const canSubmit = Boolean(oldPassword) && passwordsMatch && !lengthIssue;
+  const { isValid, lengthInvalid, confirmationMismatch, lengthMessage, confirmationMessage } = getNewPasswordFeedback(
+    newPassword,
+    confirmPassword,
+  );
+  const canSubmit = Boolean(oldPassword) && isValid;
 
   // reset fields whenever the dialog closes
   React.useEffect(() => {
@@ -100,20 +91,20 @@ export function ChangePasswordDialog({
                 autoComplete="new-password"
                 required
                 aria-describedby="cp-new-requirements cp-new-feedback"
-                aria-invalid={Boolean(lengthIssue) || undefined}
+                aria-invalid={lengthInvalid || undefined}
                 value={newPassword}
                 disabled={saving}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
               <p id="cp-new-requirements" className="text-muted-foreground text-xs">
-                Use at least {MIN_PASSWORD_CHARACTERS} characters and at most {MAX_PASSWORD_BYTES} UTF-8 bytes.
+                {NEW_PASSWORD_REQUIREMENTS}
               </p>
               <p
                 id="cp-new-feedback"
                 role="status"
-                className={cn("text-xs", lengthIssue ? "text-destructive" : "text-muted-foreground")}
+                className={cn("text-xs", lengthInvalid ? "text-destructive" : "text-muted-foreground")}
               >
-                {newPassword && (lengthIssue || "Length requirements met.")}
+                {lengthMessage}
               </p>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -134,7 +125,7 @@ export function ChangePasswordDialog({
                 role="status"
                 className={cn("text-xs", confirmationMismatch ? "text-destructive" : "text-muted-foreground")}
               >
-                {confirmPassword && (confirmationMismatch ? "Passwords do not match." : "Passwords match.")}
+                {confirmationMessage}
               </p>
             </div>
           </div>
