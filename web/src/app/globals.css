@@ -280,47 +280,46 @@ html {
   }
 }
 
-[data-print-root] {
+[data-print-root="task-report"] {
   display: none;
 }
 
 @media print {
-  @page {
-    size: Letter;
+  @page task-report {
+    margin: 0.6in;
+  }
+
+  html:has(> body > [data-print-root="task-report"]),
+  body:has(> [data-print-root="task-report"]) {
     margin: 0;
+    overflow: visible;
+    background: white;
   }
 
-  html,
-  body {
-    width: 8.5in !important;
-    height: 11in !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-  }
-
-  body > *:not([data-print-root]) {
+  body:has(> [data-print-root="task-report"]) > :not([data-print-root="task-report"]) {
     display: none !important;
   }
 
-  [data-print-root] {
-    display: block !important;
-    width: 8.5in !important;
-    height: 11in !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    background: white !important;
+  [data-print-root="task-report"] {
+    --foreground: #171717;
+    --muted: #f3f4f6;
+    --muted-foreground: #4b5563;
+    --border: #b0b7c3;
+    --primary: #1f4e79;
+
+    page: task-report;
+    display: block;
+    color-scheme: light;
+    color: var(--foreground);
+    overflow-wrap: anywhere;
   }
 
-  [data-print-root] [data-print-paper] {
-    width: 8.5in !important;
-    height: 11in !important;
-    margin: 0 !important;
-    box-shadow: none !important;
+  [data-print-root="task-report"] pre {
+    overflow: visible;
+    white-space: pre-wrap;
   }
 
-  [data-print-root] [data-print-paper],
-  [data-print-root] [data-print-paper] * {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+  [data-print-root="task-report"] .overflow-x-auto {
+    overflow: visible;
   }
 }

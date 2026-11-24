@@ -2,7 +2,8 @@
 
 import * as React from "react";
 
-import { CheckIcon, CopyIcon, DownloadIcon, FileTextIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, DownloadIcon, FileTextIcon, PrinterIcon } from "lucide-react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
 import { Markdown } from "@/components/markdown";
@@ -24,6 +25,7 @@ function TaskReport({ taskId }: { taskId: string }) {
   const copyTimeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const loading = state.status === "loading";
   const report = state.status === "ready" ? state.text : "";
+  const preview = report ? <Markdown text={report} allowImages={false} /> : null;
 
   React.useEffect(() => {
     if (!loading) return;
@@ -80,6 +82,10 @@ function TaskReport({ taskId }: { taskId: string }) {
     }
   }
 
+  function print() {
+    if (report && mounted.current) window.print();
+  }
+
   return (
     <Card>
       <CardHeader className="items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
@@ -94,14 +100,15 @@ function TaskReport({ taskId }: { taskId: string }) {
             <Button type="button" size="sm" variant="outline" onClick={download}>
               <DownloadIcon aria-hidden="true" /> Download
             </Button>
+            <Button type="button" size="sm" variant="outline" onClick={print}>
+              <PrinterIcon aria-hidden="true" /> Print
+            </Button>
           </div>
         )}
       </CardHeader>
       <CardContent>
-        {report ? (
-          <div className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4">
-            <Markdown text={report} allowImages={false} />
-          </div>
+        {preview ? (
+          <div className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4">{preview}</div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
             <FileTextIcon aria-hidden="true" className="size-8 opacity-40" />
@@ -120,6 +127,7 @@ function TaskReport({ taskId }: { taskId: string }) {
           </div>
         )}
       </CardContent>
+      {preview && createPortal(<article data-print-root="task-report">{preview}</article>, document.body)}
     </Card>
   );
 }
