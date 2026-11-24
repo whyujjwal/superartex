@@ -3,6 +3,7 @@
 // a few fields the backend serializes differently (e.g. created_at as a unix int)
 // are passed through and formatted at the call site.
 
+import { auth } from "@/lib/auth";
 import type { ChatMention } from "@/lib/chat-mentions";
 import { MOCK } from "@/lib/mock/enabled";
 import { mockHandle } from "@/lib/mock/handler";
@@ -135,8 +136,7 @@ export async function http<T>(
   if (!r.ok && errorForResponse) throw errorForResponse(r);
   if (r.status === 401) {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("superartex_token");
-      document.cookie = "superartex_token=; path=/; max-age=0";
+      auth.clearToken();
       window.location.href = "/login";
     }
     throw new Error("Unauthorized");

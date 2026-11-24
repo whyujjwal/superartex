@@ -10,7 +10,7 @@ const compiled = ts.transpileModule(readFileSync(new URL("../src/lib/auth.ts", i
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function createSession(mock = false) {
+function createSession(mock = false, protocol = "http:") {
   const exports = {};
   const values = new Map([[key, "previous-token"]]);
   const listeners = new Set();
@@ -18,6 +18,7 @@ function createSession(mock = false) {
   let removals = 0;
   const localStorage = {
     getItem: (name) => values.get(name) ?? null,
+    setItem: (name, value) => values.set(name, value),
     removeItem(name) {
       removals++;
       values.delete(name);
@@ -28,6 +29,7 @@ function createSession(mock = false) {
     atob,
     localStorage,
     window: {
+      location: { protocol },
       localStorage,
       addEventListener(type, listener) {
         if (type === "storage") listeners.add(listener);
@@ -56,19 +58,36 @@ function createSession(mock = false) {
   };
 }
 
-test("a sign-out from another tab clears the stale cookie without writing to localStorage", () => {
-  const session = createSession();
-  let signOuts = 0;
-  session.auth.onCrossTabSignOut(() => signOuts++);
+for (const [protocol, secure] of [
+  ["http:", ""],
+  ["https:", "; Secure"],
+]) {
+  test(`signing in and out writes the expected cookie on ${protocol}`, () => {
+    const session = createSession(false, protocol);
+    session.auth.setToken("new/session");
+    assert.equal(session.auth.getToken(), "new/session");
+    session.auth.clearToken();
+    assert.equal(session.auth.getToken(), null);
+    assert.deepEqual(session.cookieWrites, [
+      `${key}=new%2Fsession; path=/; max-age=604800; SameSite=Lax${secure}`,
+      `${key}=; path=/; max-age=0${secure}`,
+    ]);
+  });
 
-  session.values.delete(key);
-  session.emit({ key, oldValue: "previous-token", newValue: null });
-  session.emit({ key: null, newValue: null });
+  test(`cross-tab sign-out on ${protocol} clears the cookie without writing to localStorage`, () => {
+    const session = createSession(false, protocol);
+    let signOuts = 0;
+    session.auth.onCrossTabSignOut(() => signOuts++);
 
-  assert.equal(signOuts, 1);
-  assert.deepEqual(session.cookieWrites, [`${key}=; path=/; max-age=0`]);
-  assert.equal(session.removals, 0);
-});
+    session.values.delete(key);
+    session.emit({ key, oldValue: "previous-token", newValue: null });
+    session.emit({ key: null, newValue: null });
+
+    assert.equal(signOuts, 1);
+    assert.deepEqual(session.cookieWrites, [`${key}=; path=/; max-age=0${secure}`]);
+    assert.equal(session.removals, 0);
+  });
+}
 
 test("only auth removal from localStorage signs out and a replacement token wins over stale events", () => {
   const session = createSession();

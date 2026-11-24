@@ -1,8 +1,12 @@
 const TOKEN_KEY = "superartex_token";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days (seconds)
 
+function secureCookieAttribute(): string {
+  return window.location.protocol === "https:" ? "; Secure" : "";
+}
+
 function clearTokenCookie(): void {
-  document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`;
+  document.cookie = `${TOKEN_KEY}=; path=/; max-age=0${secureCookieAttribute()}`;
 }
 
 // These claims are for display only. The server verifies the token independently.
@@ -37,7 +41,7 @@ export const auth = {
   setToken(token: string): void {
     localStorage.setItem(TOKEN_KEY, token);
     // Also write a cookie for the Next.js middleware to read server-side
-    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax${secureCookieAttribute()}`;
   },
 
   clearToken(): void {

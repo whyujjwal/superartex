@@ -1,30 +1,41 @@
+import ts from "typescript";
+
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
 
-import ts from "typescript";
+function compile(name) {
+  const source = readFileSync(new URL(`../src/lib/${name}.ts`, import.meta.url), "utf8");
+  return ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+}
 
-const source = readFileSync(new URL("../src/lib/api.ts", import.meta.url), "utf8");
-const clientCode = ts.transpileModule(source, {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-}).outputText;
+const clientCode = compile("api");
+const authCode = compile("auth");
 
-function createClient(response, pathname = "/login?from=settings") {
+function createClient(response, pathname = "/login?from=settings", protocol = "http:") {
   const exports = {};
-  const location = { href: pathname };
+  const authExports = {};
+  const location = { href: pathname, protocol };
   const document = { cookie: "superartex_token=previous-session" };
   const stored = new Map([["superartex_token", "previous-session"]]);
+  const browser = {
+    window: { location },
+    document,
+    localStorage: { getItem: stored.get.bind(stored), removeItem: stored.delete.bind(stored) },
+  };
+  runInNewContext(authCode, { ...browser, exports: authExports });
   const imports = {
+    "@/lib/auth": authExports,
     "@/lib/mock/enabled": { MOCK: false },
     "@/lib/mock/handler": {},
   };
   runInNewContext(clientCode, {
+    ...browser,
     exports,
     require: (name) => imports[name],
-    window: { location },
-    document,
-    localStorage: { getItem: stored.get.bind(stored), removeItem: stored.delete.bind(stored) },
     fetch: async () => response,
   });
   return { api: exports.api, location, document, stored };
@@ -73,12 +84,17 @@ test("successful login still returns the issued token", async () => {
   assert.deepEqual(await api.login("SUPERARTEX", "password"), { token: "new-session" });
 });
 
-test("an expired session on a protected account request redirects and clears credentials", async () => {
-  const response = Response.json({ error: "Unauthorized" }, { status: 401 });
-  const { api, location, document, stored } = createClient(response, "/function/tasks");
+for (const [protocol, secure] of [
+  ["http:", ""],
+  ["https:", "; Secure"],
+]) {
+  test(`an expired protected session on ${protocol} redirects and clears credentials`, async () => {
+    const response = Response.json({ error: "Unauthorized" }, { status: 401 });
+    const { api, location, document, stored } = createClient(response, "/function/tasks", protocol);
 
-  await assert.rejects(api.changePassword("old password", "new password"), { message: "Unauthorized" });
-  assert.equal(location.href, "/login");
-  assert.equal(document.cookie, "superartex_token=; path=/; max-age=0");
-  assert.equal(stored.has("superartex_token"), false);
-});
+    await assert.rejects(api.changePassword("old password", "new password"), { message: "Unauthorized" });
+    assert.equal(location.href, "/login");
+    assert.equal(document.cookie, `superartex_token=; path=/; max-age=0${secure}`);
+    assert.equal(stored.has("superartex_token"), false);
+  });
+}
