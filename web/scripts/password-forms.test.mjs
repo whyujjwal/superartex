@@ -21,6 +21,7 @@ function compile(path) {
 
 const changePasswordForm = compile("../src/app/(main)/_components/sidebar/change-password-dialog.tsx");
 const setupForm = compile("../src/app/(auth)/setup/page.tsx");
+const passwordInputCode = compile("../src/components/ui/password-input.tsx");
 const newPassword = {};
 runInNewContext(compile("../src/lib/new-password.ts"), { exports: newPassword, TextEncoder });
 
@@ -35,6 +36,7 @@ function findElement(element, matches) {
 
 function fixture({ setup = false } = {}) {
   const exports = {};
+  const passwordInput = {};
   const state = [];
   const calls = [];
   const openChanges = [];
@@ -49,7 +51,7 @@ function fixture({ setup = false } = {}) {
       useState(initial) {
         const index = nextState++;
         state[index] ??= initial;
-        return [state[index], (next) => (state[index] = next)];
+        return [state[index], (next) => (state[index] = typeof next === "function" ? next(state[index]) : next)];
       },
       useEffect(effect) {
         if (!setup || mounted) return;
@@ -59,7 +61,7 @@ function fixture({ setup = false } = {}) {
     },
     "react/jsx-runtime": jsxRuntime,
     "next/navigation": { useRouter: () => router },
-    "lucide-react": { ArrowRight: "svg" },
+    "lucide-react": { ArrowRight: "svg", Eye: "svg", EyeOff: "svg" },
     sonner: { toast: { success: noop, error: noop } },
     "@/components/ui/button": { Button: "button" },
     "@/components/ui/input": { Input: "input" },
@@ -72,7 +74,7 @@ function fixture({ setup = false } = {}) {
       DialogTitle: "h2",
     },
     "@/components/ui/label": { Label: "label" },
-    "@/components/ui/password-input": { PasswordInput: "input" },
+    "@/components/ui/password-input": passwordInput,
     "@/lib/api": {
       api: {
         async authStatus() {
@@ -92,6 +94,7 @@ function fixture({ setup = false } = {}) {
     "@/lib/utils": { cn: (...classes) => classes.filter(Boolean).join(" ") },
     "../auth.module.css": { default: {} },
   };
+  runInNewContext(passwordInputCode, { exports: passwordInput, require: (name) => imports[name] });
   runInNewContext(setup ? setupForm : changePasswordForm, { exports, TextEncoder, require: (name) => imports[name] });
 
   function render() {
@@ -106,6 +109,11 @@ function fixture({ setup = false } = {}) {
   return {
     render,
     byId,
+    passwordField(id) {
+      const field = findElement(render(), (element) => element.props.id === id);
+      assert.equal(field.type, passwordInput.PasswordInput, `${id} should use the shared masked input`);
+      return field.type(field.props);
+    },
     input: (id, value) => byId(id).onChange({ target: { value } }),
     submitDisabled: () => getProps((element) => element.props.type === "submit").disabled,
     submit: () => getProps((element) => element.type === "form").onSubmit({ preventDefault: noop }),
@@ -190,6 +198,36 @@ test("initial setup enforces the same Unicode password boundaries before calling
   }
   await form.submit();
   assert.equal(form.calls.length, 0);
+});
+
+test("initial setup masks the focused token and lets the user reveal it", async () => {
+  const form = fixture({ setup: true });
+  assert.equal(
+    findElement(form.render(), (element) => element.props.id === "setup-token"),
+    undefined,
+  );
+  await setImmediate();
+  const tokenId = "setup-token";
+  const label = findElement(form.render(), (element) => element.props.htmlFor === tokenId);
+  assert.equal(label.props.children, "Setup token");
+  const tokenField = () => form.passwordField(tokenId);
+  const input = () => findElement(tokenField(), (element) => element.type === "input").props;
+  const reveal = () => findElement(tokenField(), (element) => element.props["aria-controls"] === tokenId).props;
+  assert.equal(input().autoFocus, true);
+  assert.equal(input().autoComplete, "off");
+  assert.equal(input().type, "password");
+  assert.equal(reveal().type, "button");
+  assert.equal(reveal()["aria-label"], "Show setup token");
+
+  form.input(tokenId, "  test-setup-token  ");
+  reveal().onClick();
+  assert.equal(input().type, "text");
+  assert.equal(input().value, "  test-setup-token  ");
+  assert.equal(reveal()["aria-label"], "Hide setup token");
+  reveal().onClick();
+  assert.equal(input().type, "password");
+  assert.deepEqual(form.calls, []);
+  assert.deepEqual(form.sessionTokens, []);
 });
 
 test("initial setup explains confirmation errors and signs in with the issued session", async () => {

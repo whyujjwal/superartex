@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "@/lib/api";
@@ -97,8 +96,9 @@ export default function SetupPage() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="space-y-2">
             <Label htmlFor="setup-token">Setup token</Label>
-            <Input
+            <PasswordInput
               id="setup-token"
+              passwordLabel="setup token"
               value={setupToken}
               onChange={(e) => setSetupToken(e.target.value)}
               autoFocus
