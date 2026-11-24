@@ -1,6 +1,9 @@
 "use client";
 
+import { useRef } from "react";
+
 import { Settings } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -8,6 +11,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { type FontKey, fontOptions } from "@/lib/fonts/registry";
+import {
+  MAX_APPEARANCE_FILE_BYTES,
+  parseAppearanceFile,
+  serializeAppearanceFile,
+} from "@/lib/preferences/appearance-file";
 import {
   type ContentLayout,
   type NavbarStyle,
@@ -24,7 +32,7 @@ import {
   applySidebarVariant,
   applyUiScale,
 } from "@/lib/preferences/layout-utils";
-import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
+import { PREFERENCE_DEFAULTS, type PreferenceValueMap } from "@/lib/preferences/preferences-config";
 import { persistPreference } from "@/lib/preferences/preferences-storage";
 import { THEME_PRESET_OPTIONS, type ThemeMode, type ThemePreset } from "@/lib/preferences/theme";
 import { applyThemePreset } from "@/lib/preferences/theme-utils";
@@ -48,6 +56,8 @@ export function LayoutControls() {
   const setFont = usePreferencesStore((s) => s.setFont);
   const uiScale = usePreferencesStore((s) => s.uiScale);
   const setUiScale = usePreferencesStore((s) => s.setUiScale);
+  const importInput = useRef<HTMLInputElement>(null);
+  const importSequence = useRef(0);
 
   const onThemePresetChange = (preset: ThemePreset) => {
     applyThemePreset(preset);
@@ -103,19 +113,68 @@ export function LayoutControls() {
     void persistPreference("ui_scale", scale);
   };
 
-  const handleRestore = () => {
-    onThemePresetChange(PREFERENCE_DEFAULTS.theme_preset);
-    onThemeModeChange(PREFERENCE_DEFAULTS.theme_mode);
-    onContentLayoutChange(PREFERENCE_DEFAULTS.content_layout);
-    onNavbarStyleChange(PREFERENCE_DEFAULTS.navbar_style);
-    onSidebarStyleChange(PREFERENCE_DEFAULTS.sidebar_variant);
-    onSidebarCollapseModeChange(PREFERENCE_DEFAULTS.sidebar_collapsible);
-    onFontChange(PREFERENCE_DEFAULTS.font);
-    onUiScaleChange(PREFERENCE_DEFAULTS.ui_scale);
+  const applyPreferences = (settings: PreferenceValueMap) => {
+    onThemePresetChange(settings.theme_preset);
+    onThemeModeChange(settings.theme_mode);
+    onContentLayoutChange(settings.content_layout);
+    onNavbarStyleChange(settings.navbar_style);
+    onSidebarStyleChange(settings.sidebar_variant);
+    onSidebarCollapseModeChange(settings.sidebar_collapsible);
+    onFontChange(settings.font);
+    onUiScaleChange(settings.ui_scale);
+  };
+
+  const exportSettings = () => {
+    const text = serializeAppearanceFile({
+      theme_mode: themeMode,
+      theme_preset: themePreset,
+      font,
+      ui_scale: uiScale,
+      content_layout: contentLayout,
+      navbar_style: navbarStyle,
+      sidebar_variant: variant,
+      sidebar_collapsible: collapsible,
+    });
+    const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "superartex-appearance.json";
+    try {
+      document.body.appendChild(link);
+      link.click();
+    } finally {
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  };
+
+  const importSettings = async (input: HTMLInputElement) => {
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+
+    const sequence = ++importSequence.current;
+    const text = file.size <= MAX_APPEARANCE_FILE_BYTES ? await file.text().catch(() => null) : null;
+    if (sequence !== importSequence.current || importInput.current !== input) return;
+
+    const settings = text === null ? null : parseAppearanceFile(text);
+    if (!settings) {
+      toast.error("Choose a valid SUPERARTEX appearance JSON file.");
+      return;
+    }
+    applyPreferences(settings);
+    toast.success("Appearance imported.");
   };
 
   return (
     <Popover>
+      <input
+        ref={importInput}
+        type="file"
+        accept=".json,application/json"
+        onChange={(event) => void importSettings(event.currentTarget)}
+        hidden
+      />
       <PopoverTrigger asChild>
         <Button size="icon" variant="ghost" className="text-muted-foreground" aria-label="Appearance settings">
           <Settings />
@@ -297,7 +356,24 @@ export function LayoutControls() {
               </ToggleGroup>
             </div>
 
-            <Button type="button" size="sm" variant="outline" className="w-full text-xs" onClick={handleRestore}>
+            <div className="grid grid-cols-2 gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={exportSettings}>
+                Export JSON
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={() => importInput.current?.click()}>
+                Import JSON
+              </Button>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="w-full text-xs"
+              onClick={() => {
+                importSequence.current++;
+                applyPreferences(PREFERENCE_DEFAULTS);
+              }}
+            >
               Restore Defaults
             </Button>
           </div>
