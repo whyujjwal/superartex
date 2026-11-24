@@ -29,6 +29,9 @@ function TaskReport({ taskId }: { taskId: string }) {
   const loading = state.status === "loading";
   const hasLoaded = state.text !== undefined;
   const report = state.text ?? "";
+  const safeTaskId = taskId.replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 80) || "unknown";
+  const reportFileStem = `task-${safeTaskId}-report`;
+  const print = useReportPrint(report ? reportFileStem : null);
 
   React.useEffect(() => {
     if (!loading) return;
@@ -86,11 +89,10 @@ function TaskReport({ taskId }: { taskId: string }) {
   function download() {
     if (!report || !mounted.current) return;
 
-    const safeTaskId = taskId.replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 80) || "unknown";
     const url = URL.createObjectURL(new Blob([report], { type: "text/markdown;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = `task-${safeTaskId}-report.md`;
+    link.download = `${reportFileStem}.md`;
     try {
       document.body.appendChild(link);
       link.click();
@@ -98,10 +100,6 @@ function TaskReport({ taskId }: { taskId: string }) {
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-  }
-
-  function print() {
-    if (report && mounted.current) window.print();
   }
 
   function loadReport() {
@@ -187,6 +185,60 @@ function TaskReport({ taskId }: { taskId: string }) {
         )}
     </Card>
   );
+}
+
+function useReportPrint(title: string | null) {
+  const openPrint = React.useRef<(() => void) | null>(null);
+
+  React.useLayoutEffect(() => {
+    if (title === null) return;
+    const printTitle = title;
+    let originalTitle: string | undefined;
+    let previewStarted = false;
+
+    function prepareTitle() {
+      if (originalTitle !== undefined) return;
+      originalTitle = document.title;
+      document.title = printTitle;
+    }
+
+    function beforePrint() {
+      previewStarted = true;
+      prepareTitle();
+    }
+
+    function restoreTitle() {
+      if (originalTitle === undefined) return;
+      if (document.title === printTitle) document.title = originalTitle;
+      originalTitle = undefined;
+    }
+
+    openPrint.current = () => {
+      if (originalTitle !== undefined) return;
+      previewStarted = false;
+      prepareTitle();
+      try {
+        window.print();
+      } catch {
+        restoreTitle();
+        toast.error("Could not open the print dialog");
+        return;
+      }
+      // A started print preview can outlast print(). Its afterprint event restores the title.
+      if (!previewStarted) restoreTitle();
+    };
+
+    window.addEventListener("beforeprint", beforePrint);
+    window.addEventListener("afterprint", restoreTitle);
+    return () => {
+      openPrint.current = null;
+      window.removeEventListener("beforeprint", beforePrint);
+      window.removeEventListener("afterprint", restoreTitle);
+      restoreTitle();
+    };
+  }, [title]);
+
+  return () => openPrint.current?.();
 }
 
 function ReportPreview({ report, titleId }: { report: string; titleId: string }) {
