@@ -15,6 +15,44 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestSensitiveAPIResponsesDisableCaching(t *testing.T) {
+	key := []byte("0123456789abcdef0123456789abcdef")
+	token, err := signJWT(key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := &Server{m: &Manager{}, jwtKey: key}
+	handler := s.Handler()
+
+	for _, tc := range []struct {
+		name, method, path, token string
+		status                    int
+		cacheControl              string
+	}{
+		{"auth status unavailable", http.MethodGet, "/api/auth/status", "", http.StatusServiceUnavailable, "no-store"},
+		{"auth setup unavailable", http.MethodPost, "/api/auth/init", "", http.StatusServiceUnavailable, "no-store"},
+		{"auth login unavailable", http.MethodPost, "/api/auth/login", "", http.StatusServiceUnavailable, "no-store"},
+		{"password change unavailable", http.MethodPost, "/api/auth/change-password", token, http.StatusServiceUnavailable, "no-store"},
+		{"report requires authentication", http.MethodGet, "/api/report?task=1", "", http.StatusUnauthorized, "no-store"},
+		{"requested task does not exist", http.MethodGet, "/api/report?task=1", token, http.StatusNotFound, "no-store"},
+		{"health", http.MethodGet, "/api/health", "", http.StatusOK, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, tc.path, nil)
+			if tc.token != "" {
+				r.Header.Set("Authorization", "Bearer "+tc.token)
+			}
+			w := httptest.NewRecorder()
+			handler.ServeHTTP(w, r)
+			res := w.Result()
+			defer res.Body.Close()
+			if res.StatusCode != tc.status || res.Header.Get("Cache-Control") != tc.cacheControl {
+				t.Fatalf("status and Cache-Control = %d, %q; want %d, %q", res.StatusCode, res.Header.Get("Cache-Control"), tc.status, tc.cacheControl)
+			}
+		})
+	}
+}
+
 func TestJWTValidation(t *testing.T) {
 	key := []byte("0123456789abcdef0123456789abcdef")
 	now := time.Now()

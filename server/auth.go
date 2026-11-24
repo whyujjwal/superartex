@@ -215,7 +215,11 @@ func extractToken(r *http.Request) string {
 func (s *Server) requireAuth(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
-		if strings.HasPrefix(p, "/api/auth/") || p == "/api/health" {
+		authRoute := strings.HasPrefix(p, "/api/auth/")
+		if authRoute || p == "/api/report" {
+			w.Header().Set("Cache-Control", "no-store")
+		}
+		if authRoute || p == "/api/health" {
 			h.ServeHTTP(w, r)
 			return
 		}
