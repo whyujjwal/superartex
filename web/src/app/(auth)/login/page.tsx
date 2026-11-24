@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { api, LoginError } from "@/lib/api";
 import { auth } from "@/lib/auth";
+import { getLoginDestination } from "@/lib/auth-redirects";
 
 import styles from "../auth.module.css";
 
@@ -50,7 +51,7 @@ export default function LoginPage() {
       // localStorage may still hold credentials while the cookie is gone. Sync first, then start a fresh request,
       // so a server-side guard or route cache cannot bounce the redirect back to the login page still in its checking state.
       auth.setToken(token);
-      window.location.replace("/function/tasks");
+      window.location.replace(getLoginDestination(window.location.search));
       return;
     }
     api
@@ -73,7 +74,7 @@ export default function LoginPage() {
     try {
       const { token } = await api.login("SUPERARTEX", password);
       auth.setToken(token);
-      window.location.replace("/function/tasks");
+      window.location.replace(getLoginDestination(window.location.search));
     } catch (error) {
       setError(error instanceof LoginError ? error.message : "Unable to connect to the backend service");
     } finally {

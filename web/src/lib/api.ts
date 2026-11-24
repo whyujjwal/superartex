@@ -4,6 +4,7 @@
 // are passed through and formatted at the call site.
 
 import { auth } from "@/lib/auth";
+import { getLoginPath } from "@/lib/auth-redirects";
 import type { ChatMention } from "@/lib/chat-mentions";
 import { MOCK } from "@/lib/mock/enabled";
 import { mockHandle } from "@/lib/mock/handler";
@@ -135,9 +136,11 @@ export async function http<T>(
   });
   if (!r.ok && errorForResponse) throw errorForResponse(r);
   if (r.status === 401) {
-    if (typeof window !== "undefined") {
+    // A request can finish after another response has already cleared or replaced its session.
+    if (typeof window !== "undefined" && getToken() === token) {
       auth.clearToken();
-      window.location.href = "/login";
+      const { pathname, search, hash } = window.location;
+      window.location.href = getLoginPath(pathname + search + hash);
     }
     throw new Error("Unauthorized");
   }

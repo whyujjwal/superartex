@@ -14,11 +14,14 @@ function compile(name) {
 
 const clientCode = compile("api");
 const authCode = compile("auth");
+const redirectCode = compile("auth-redirects");
 
-function createClient(response, pathname = "/login?from=settings", protocol = "http:") {
+function createClient(response, path = "/login?from=settings", protocol = "http:") {
   const exports = {};
   const authExports = {};
-  const location = { href: pathname, protocol };
+  const redirects = {};
+  const { pathname, search, hash } = new URL(path, "https://superartex.test");
+  const location = { href: path, protocol, pathname, search, hash };
   const document = { cookie: "superartex_token=previous-session" };
   const stored = new Map([["superartex_token", "previous-session"]]);
   const browser = {
@@ -27,8 +30,10 @@ function createClient(response, pathname = "/login?from=settings", protocol = "h
     localStorage: { getItem: stored.get.bind(stored), removeItem: stored.delete.bind(stored) },
   };
   runInNewContext(authCode, { ...browser, exports: authExports });
+  runInNewContext(redirectCode, { exports: redirects, URLSearchParams });
   const imports = {
     "@/lib/auth": authExports,
+    "@/lib/auth-redirects": redirects,
     "@/lib/mock/enabled": { MOCK: false },
     "@/lib/mock/handler": {},
   };
@@ -98,3 +103,27 @@ for (const [protocol, secure] of [
     assert.equal(stored.has("superartex_token"), false);
   });
 }
+
+test("an expired session in a copied report preserves the report through sign-in", async () => {
+  const response = Response.json({ error: "Unauthorized" }, { status: 401 });
+  const { api, location, stored } = createClient(response, "/function/tasks/detail?id=42&tab=report");
+
+  await assert.rejects(api.task("42"), { message: "Unauthorized" });
+  assert.equal(location.href, "/login?returnTo=%2Ffunction%2Ftasks%2Fdetail%3Fid%3D42%26tab%3Dreport");
+  assert.equal(stored.has("superartex_token"), false);
+});
+
+test("a late unauthorized response does not clear a replacement session", async () => {
+  const path = "/function/tasks/detail?id=42&tab=report";
+  const response = Response.json({ error: "Unauthorized" }, { status: 401 });
+  const { api, location, document, stored } = createClient(response, path);
+
+  const pending = api.task("42");
+  stored.set("superartex_token", "replacement-session");
+  document.cookie = "superartex_token=replacement-session";
+
+  await assert.rejects(pending, { message: "Unauthorized" });
+  assert.equal(location.href, path);
+  assert.equal(stored.get("superartex_token"), "replacement-session");
+  assert.equal(document.cookie, "superartex_token=replacement-session");
+});
