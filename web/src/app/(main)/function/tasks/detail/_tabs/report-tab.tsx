@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { CheckIcon, CopyIcon, DownloadIcon, FileTextIcon, PrinterIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, DownloadIcon, FileTextIcon, PrinterIcon, RefreshCwIcon } from "lucide-react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
 import { copyText } from "@/lib/utils";
 
-type ReportState = { status: "loading" | "error" } | { status: "ready"; text: string };
+type ReportState = { status: "loading" | "error"; text?: string } | { status: "ready"; text: string };
 
 export function ReportTab({ taskId }: { taskId: string }) {
   return <TaskReport key={taskId} taskId={taskId} />;
@@ -20,27 +20,26 @@ export function ReportTab({ taskId }: { taskId: string }) {
 
 function TaskReport({ taskId }: { taskId: string }) {
   const [state, setState] = React.useState<ReportState>({ status: "loading" });
-  const [copied, setCopied] = React.useState(false);
+  const [copiedReport, setCopiedReport] = React.useState<string>();
   const mounted = React.useRef(false);
   const copyTimeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const titleId = React.useId();
   const loading = state.status === "loading";
-  const report = state.status === "ready" ? state.text : "";
+  const hasLoaded = state.text !== undefined;
+  const report = state.text ?? "";
 
   React.useEffect(() => {
     if (!loading) return;
-    let active = true;
-    api.report(taskId).then(
+    const controller = new AbortController();
+    api.report(taskId, controller.signal).then(
       (text) => {
-        if (active) setState({ status: "ready", text });
+        if (!controller.signal.aborted) setState({ status: "ready", text });
       },
       () => {
-        if (active) setState({ status: "error" });
+        if (!controller.signal.aborted) setState((current) => ({ status: "error", text: current.text }));
       },
     );
-    return () => {
-      active = false;
-    };
+    return () => controller.abort();
   }, [taskId, loading]);
 
   React.useLayoutEffect(() => {
@@ -56,10 +55,10 @@ function TaskReport({ taskId }: { taskId: string }) {
     const ok = await copyText(report);
     if (!mounted.current) return;
     if (ok) {
-      setCopied(true);
+      setCopiedReport(report);
       toast.success("Markdown copied");
       clearTimeout(copyTimeout.current);
-      copyTimeout.current = setTimeout(() => setCopied(false), 1500);
+      copyTimeout.current = setTimeout(() => setCopiedReport(undefined), 1500);
     } else {
       toast.error("Copy failed; please select the text and copy it manually");
     }
@@ -86,29 +85,57 @@ function TaskReport({ taskId }: { taskId: string }) {
     if (report && mounted.current) window.print();
   }
 
+  function loadReport() {
+    setState((current) => (current.status === "loading" ? current : { status: "loading", text: current.text }));
+  }
+
   return (
     <Card>
-      <CardHeader className="items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+      <CardHeader className="flex flex-wrap items-center justify-between gap-2">
         <CardTitle className="text-sm">
           <h2 id={titleId} className="flex items-center gap-2">
             <FileTextIcon aria-hidden="true" className="size-4 shrink-0" /> Penetration test report (Markdown)
           </h2>
         </CardTitle>
-        {report && (
+        {hasLoaded && (
           <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" variant="outline" onClick={copy}>
-              {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} Copy
-            </Button>
-            <Button type="button" size="sm" variant="outline" onClick={download}>
-              <DownloadIcon aria-hidden="true" /> Download
-            </Button>
-            <Button type="button" size="sm" variant="outline" onClick={print}>
-              <PrinterIcon aria-hidden="true" /> Print
+            {report && (
+              <>
+                <Button type="button" size="sm" variant="outline" onClick={copy}>
+                  {copiedReport === report ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} Copy
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={download}>
+                  <DownloadIcon aria-hidden="true" /> Download
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={print}>
+                  <PrinterIcon aria-hidden="true" /> Print
+                </Button>
+              </>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              aria-disabled={loading}
+              className="aria-disabled:opacity-50"
+              onClick={loadReport}
+            >
+              <RefreshCwIcon aria-hidden="true" /> Refresh
             </Button>
           </div>
         )}
       </CardHeader>
       <CardContent>
+        {hasLoaded && loading && (
+          <p role="status" className="mb-2 text-muted-foreground text-sm">
+            Refreshing report…
+          </p>
+        )}
+        {hasLoaded && state.status === "error" && (
+          <p role="alert" className="mb-2 text-destructive text-sm">
+            Unable to refresh the report.{report && " Showing the previous report."}
+          </p>
+        )}
         {report ? (
           <section
             aria-labelledby={titleId}
@@ -121,18 +148,18 @@ function TaskReport({ taskId }: { taskId: string }) {
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
             <FileTextIcon aria-hidden="true" className="size-8 opacity-40" />
-            {loading && <p role="status">Loading…</p>}
-            {state.status === "error" && (
+            {!hasLoaded && loading && <p role="status">Loading…</p>}
+            {!hasLoaded && state.status === "error" && (
               <>
                 <p role="alert" className="text-destructive">
                   Unable to load the report
                 </p>
-                <Button type="button" size="sm" variant="outline" onClick={() => setState({ status: "loading" })}>
+                <Button type="button" size="sm" variant="outline" onClick={loadReport}>
                   Try again
                 </Button>
               </>
             )}
-            {state.status === "ready" && <p>No report yet</p>}
+            {hasLoaded && <p>No report yet</p>}
           </div>
         )}
       </CardContent>

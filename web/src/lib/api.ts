@@ -902,11 +902,13 @@ export const api = {
     ).then((r) => ({ ...r, deliveries: arr(r.deliveries) }));
   },
   notifyRetryDelivery: (id: number) => post<{ ok: boolean }>(`/notify/deliveries/${id}/retry`),
-  report: async (task?: string) => {
+  report: async (task?: string, signal?: AbortSignal) => {
     if (MOCK) return mockReport(task);
     const token = getToken();
     const r = await fetch(`/api/report${tq(task)}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
+      cache: "no-store",
+      signal,
     });
     if (!r.ok) throw new Error(`report: ${r.status}`);
     return r.text();
