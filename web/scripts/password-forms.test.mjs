@@ -34,7 +34,7 @@ function findElement(element, matches) {
   }
 }
 
-function fixture({ setup = false } = {}) {
+function fixture({ setup = false, changePassword = async () => undefined } = {}) {
   const exports = {};
   const passwordInput = {};
   const state = [];
@@ -42,9 +42,14 @@ function fixture({ setup = false } = {}) {
   const openChanges = [];
   const sessionTokens = [];
   const redirects = [];
+  const toasts = [];
   const noop = () => undefined;
   let nextState = 0;
   let mounted = false;
+  let open = true;
+  let passiveDependencies = [];
+  let layoutOpen;
+  let layoutCleanup;
   const router = { replace: (path) => redirects.push(path) };
   const imports = {
     react: {
@@ -53,16 +58,32 @@ function fixture({ setup = false } = {}) {
         state[index] ??= initial;
         return [state[index], (next) => (state[index] = typeof next === "function" ? next(state[index]) : next)];
       },
-      useEffect(effect) {
-        if (!setup || mounted) return;
-        mounted = true;
+      useEffect(effect, dependencies) {
+        if (setup) {
+          if (mounted) return;
+          mounted = true;
+        } else {
+          if (dependencies.every((value, index) => value === passiveDependencies[index])) return;
+          passiveDependencies = dependencies;
+        }
         effect();
+      },
+      useRef(initial) {
+        const index = nextState++;
+        state[index] ??= { current: initial };
+        return state[index];
+      },
+      useLayoutEffect(effect, [nextOpen]) {
+        if (layoutOpen === nextOpen) return;
+        layoutCleanup?.();
+        layoutOpen = nextOpen;
+        layoutCleanup = effect();
       },
     },
     "react/jsx-runtime": jsxRuntime,
     "next/navigation": { useRouter: () => router },
     "lucide-react": { ArrowRight: "svg", Eye: "svg", EyeOff: "svg" },
-    sonner: { toast: { success: noop, error: noop } },
+    sonner: { toast: { success: (message) => toasts.push(message), error: (message) => toasts.push(message) } },
     "@/components/ui/button": { Button: "button" },
     "@/components/ui/input": { Input: "input" },
     "@/components/ui/dialog": {
@@ -82,6 +103,7 @@ function fixture({ setup = false } = {}) {
         },
         async changePassword(...args) {
           calls.push(args);
+          await changePassword();
         },
         async initPassword(...args) {
           calls.push(args);
@@ -95,13 +117,18 @@ function fixture({ setup = false } = {}) {
     "../auth.module.css": { default: {} },
   };
   runInNewContext(passwordInputCode, { exports: passwordInput, require: (name) => imports[name] });
-  runInNewContext(setup ? setupForm : changePasswordForm, { exports, TextEncoder, require: (name) => imports[name] });
+  runInNewContext(setup ? setupForm : changePasswordForm, {
+    exports,
+    TextEncoder,
+    Error,
+    require: (name) => imports[name],
+  });
 
   function render() {
     nextState = 0;
     return setup
       ? exports.default()
-      : exports.ChangePasswordDialog({ open: true, onOpenChange: (open) => openChanges.push(open) });
+      : exports.ChangePasswordDialog({ open, onOpenChange: (next) => openChanges.push(next) });
   }
 
   const getProps = (matches) => findElement(render(), matches).props;
@@ -109,6 +136,12 @@ function fixture({ setup = false } = {}) {
   return {
     render,
     byId,
+    setOpen(next) {
+      open = next;
+      render();
+    },
+    alert: () => findElement(render(), (element) => element.props.role === "alert")?.props,
+    submitButton: () => getProps((element) => element.props.type === "submit"),
     passwordField(id) {
       const field = findElement(render(), (element) => element.props.id === id);
       assert.equal(field.type, passwordInput.PasswordInput, `${id} should use the shared masked input`);
@@ -121,6 +154,7 @@ function fixture({ setup = false } = {}) {
     openChanges,
     sessionTokens,
     redirects,
+    toasts,
   };
 }
 
@@ -167,9 +201,114 @@ test("confirmation feedback clears when passwords match and only two values are 
   assert.match(feedback().children, /Passwords match/);
   assert.equal(dialog.submitDisabled(), false);
   dialog.submit();
-  await Promise.resolve();
+  await setImmediate();
   assert.deepEqual(dialog.calls, [["legacy", "a new password"]]);
   assert.deepEqual(dialog.openChanges, [false]);
+});
+
+test("change password keeps a wrong-current-password error inline and preserves values for retry", async () => {
+  let attempts = 0;
+  const dialog = fixture({
+    async changePassword() {
+      if (++attempts === 1) throw new Error("Current password is wrong");
+    },
+  });
+  dialog.input("cp-old", "legacy");
+  dialog.input("cp-new", "a new password");
+  dialog.input("cp-confirm", "a new password");
+  let focusCount = 0;
+  dialog.byId("cp-old").ref.current = { focus: () => focusCount++ };
+  dialog.submit();
+  await setImmediate();
+
+  const current = () => dialog.byId("cp-old");
+  assert.equal(dialog.alert()?.children, "Current password is wrong");
+  assert.equal(current()["aria-describedby"], dialog.alert().id);
+  assert.equal(current()["aria-invalid"], true);
+  assert.equal(focusCount, 1);
+  assert.equal(current().value, "legacy");
+  assert.equal(dialog.byId("cp-new").value, "a new password");
+  assert.equal(dialog.byId("cp-confirm").value, "a new password");
+  assert.deepEqual(dialog.toasts, []);
+  assert.deepEqual(dialog.openChanges, []);
+  assert.equal(dialog.submitDisabled(), false);
+
+  dialog.input("cp-new", "a different password");
+  dialog.input("cp-confirm", "a different password");
+  assert.equal(current()["aria-invalid"], true);
+  dialog.input("cp-old", "correct password");
+  assert.equal(dialog.alert(), undefined);
+  assert.notEqual(current()["aria-invalid"], true);
+  dialog.submit();
+  await setImmediate();
+  assert.deepEqual(dialog.calls[1], ["correct password", "a different password"]);
+  assert.deepEqual(dialog.openChanges, [false]);
+  assert.deepEqual(dialog.toasts, ["Password changed"]);
+});
+
+test("a change request from a closed dialog cannot show an error when reopened", async () => {
+  const pending = Promise.withResolvers();
+  const dialog = fixture({ changePassword: () => pending.promise });
+  dialog.input("cp-old", "legacy");
+  dialog.input("cp-new", "a new password");
+  dialog.input("cp-confirm", "a new password");
+  dialog.submit();
+  dialog.setOpen(false);
+  dialog.setOpen(true);
+  pending.reject(new Error("Current password is wrong"));
+  await setImmediate();
+
+  assert.equal(dialog.alert(), undefined);
+  assert.deepEqual(dialog.toasts, []);
+  assert.deepEqual(dialog.openChanges, []);
+  assert.equal(dialog.byId("cp-old").value, "");
+});
+
+test("a change request from a closed dialog cannot close a reopened dialog on success", async () => {
+  const pending = Promise.withResolvers();
+  const dialog = fixture({ changePassword: () => pending.promise });
+  dialog.input("cp-old", "legacy");
+  dialog.input("cp-new", "a new password");
+  dialog.input("cp-confirm", "a new password");
+  dialog.submit();
+  dialog.setOpen(false);
+  dialog.setOpen(true);
+  pending.resolve();
+  await setImmediate();
+
+  assert.deepEqual(dialog.openChanges, []);
+  assert.deepEqual(dialog.toasts, []);
+});
+
+test("change password shows safe service errors inline and keeps internal errors private", async () => {
+  for (const [message, expected] of [
+    [
+      "Data source temporarily unavailable, please retry later",
+      "Data source temporarily unavailable, please retry later",
+    ],
+    ["Could not save the password. Please try again.", "Could not save the password. Please try again."],
+    ["Save failed: private storage detail", "Unable to change the password. Please try again."],
+  ]) {
+    const dialog = fixture({
+      async changePassword() {
+        throw new Error(message);
+      },
+    });
+    dialog.input("cp-old", "legacy");
+    dialog.input("cp-new", "a new password");
+    dialog.input("cp-confirm", "a new password");
+    let focusCount = 0;
+    dialog.submitButton().ref.current = { focus: () => focusCount++ };
+    dialog.submit();
+    await setImmediate();
+
+    assert.equal(dialog.alert()?.children, expected);
+    assert.notEqual(dialog.byId("cp-old")["aria-invalid"], true);
+    assert.equal(dialog.submitButton().children, "Retry change");
+    assert.equal(focusCount, 1);
+    dialog.input("cp-new", "a different password");
+    assert.equal(dialog.alert(), undefined);
+  }
 });
 
 test("initial setup enforces the same Unicode password boundaries before calling the API", async () => {
