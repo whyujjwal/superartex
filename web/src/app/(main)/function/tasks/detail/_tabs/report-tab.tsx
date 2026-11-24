@@ -197,7 +197,9 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: The rendered headings need to be read again when the report changes.
   React.useLayoutEffect(() => {
-    const headings = preview.current?.querySelectorAll<HTMLHeadingElement>("h1, h2, h3, h4, h5, h6") ?? [];
+    const container = preview.current;
+    if (!container) return;
+    const headings = container.querySelectorAll<HTMLHeadingElement>("h1, h2, h3, h4, h5, h6");
     const visibleHeadings: Omit<ReportSection, "id">[] = [];
     const counts = new Map<string, number>();
     for (const heading of headings) {
@@ -220,6 +222,7 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
     });
     setSections(nextSections);
     setSelectedSection("");
+    return observeReportTables(container);
   }, [report]);
 
   function jumpToSection() {
@@ -269,8 +272,33 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
         tabIndex={0}
         className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4 focus-visible:outline-2 focus-visible:outline-ring"
       >
-        <Markdown text={report} allowImages={false} firstHeadingLevel={3} />
+        <Markdown text={report} allowImages={false} firstHeadingLevel={3} reportTableRegions />
       </section>
     </>
   );
+}
+
+function observeReportTables(preview: HTMLElement) {
+  const regions = preview.querySelectorAll<HTMLElement>("[data-report-table-scroll]");
+  if (!regions.length) return;
+
+  function updateRegions() {
+    regions.forEach((region, index) => {
+      if (region.scrollWidth > region.clientWidth) {
+        region.tabIndex = 0;
+        region.setAttribute("aria-label", `Scrollable report table ${index + 1}`);
+      } else {
+        region.removeAttribute("tabindex");
+        region.removeAttribute("aria-label");
+      }
+    });
+  }
+
+  updateRegions();
+  const observer = new ResizeObserver(updateRegions);
+  for (const region of regions) {
+    observer.observe(region);
+    if (region.firstElementChild) observer.observe(region.firstElementChild);
+  }
+  return () => observer.disconnect();
 }

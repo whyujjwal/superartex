@@ -79,19 +79,34 @@ const componentsWithImageAltText: Components = {
   img: ({ alt }) => (alt?.trim() ? <span>{alt}</span> : null),
 };
 
+function ReportTable({ node, ...props }: ComponentProps<"table"> & ExtraProps) {
+  return (
+    <section
+      data-report-table-scroll
+      className="my-1.5 overflow-x-auto focus-visible:outline-2 focus-visible:outline-ring"
+    >
+      <table className="w-full border-collapse text-xs" {...props} />
+    </section>
+  );
+}
+
 export function Markdown({
   text,
   allowImages = true,
   firstHeadingLevel,
+  reportTableRegions = false,
 }: {
   text: string;
   allowImages?: boolean;
   firstHeadingLevel?: HeadingLevel;
+  reportTableRegions?: boolean;
 }) {
   const elementComponents = allowImages ? components : componentsWithImageAltText;
-  const renderComponents = firstHeadingLevel
-    ? { ...elementComponents, ...headingsByFirstLevel[firstHeadingLevel - 1] }
-    : elementComponents;
+  const renderComponents = {
+    ...elementComponents,
+    ...(firstHeadingLevel && headingsByFirstLevel[firstHeadingLevel - 1]),
+    ...(reportTableRegions && { table: ReportTable }),
+  };
   return (
     <div className="min-w-0 space-y-1.5 text-sm [&>*:first-child]:mt-0">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={renderComponents}>
