@@ -17,6 +17,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { SEARCH_PAGES_KEY } from "@/lib/workspace-shortcuts";
 import type { NavMainItem } from "@/navigation/sidebar/sidebar-items";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
@@ -84,7 +85,7 @@ export function SearchDialog() {
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+      if (e.key === SEARCH_PAGES_KEY && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((prev) => !prev);
       }
@@ -137,12 +138,13 @@ export function SearchDialog() {
         variant="outline"
         size="sm"
         aria-label="Search pages"
+        aria-keyshortcuts={`Control+${SEARCH_PAGES_KEY.toUpperCase()} Meta+${SEARCH_PAGES_KEY.toUpperCase()}`}
         className="justify-start gap-2 bg-background/50 font-normal text-muted-foreground shadow-none sm:min-w-44"
       >
         <Search data-icon="inline-start" />
         <span className="hidden sm:inline">Search pages</span>
         <kbd className="ml-auto hidden select-none rounded-sm border bg-card px-1.5 font-mono text-[10px] sm:inline">
-          ⌘ J
+          ⌘ {SEARCH_PAGES_KEY.toUpperCase()}
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={handleOpenChange}>

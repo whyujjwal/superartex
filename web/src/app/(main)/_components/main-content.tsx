@@ -13,6 +13,7 @@ import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage.
 import { cn } from "@/lib/utils";
 
 import { AccountSwitcher } from "./sidebar/account-switcher";
+import { KeyboardShortcutsDialog } from "./sidebar/keyboard-shortcuts-dialog";
 import { LayoutControls } from "./sidebar/layout-controls";
 import { SearchDialog } from "./sidebar/search-dialog";
 import { ThemeSwitcher } from "./sidebar/theme-switcher";
@@ -99,6 +100,7 @@ export function MainContent({ children }: { children: ReactNode }) {
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
             <SearchDialog />
+            <KeyboardShortcutsDialog />
           </div>
           <div className="flex items-center gap-2">
             {version && (

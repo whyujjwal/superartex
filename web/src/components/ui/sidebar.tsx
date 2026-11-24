@@ -6,6 +6,7 @@ import { Slot } from "radix-ui"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { TOGGLE_SIDEBAR_KEY } from "@/lib/workspace-shortcuts"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -29,7 +30,6 @@ const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
-const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed"
@@ -96,7 +96,7 @@ function SidebarProvider({
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
+        event.key === TOGGLE_SIDEBAR_KEY &&
         (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault()
@@ -263,6 +263,7 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon-sm"
+      aria-keyshortcuts={`Control+${TOGGLE_SIDEBAR_KEY.toUpperCase()} Meta+${TOGGLE_SIDEBAR_KEY.toUpperCase()}`}
       className={cn(className)}
       onClick={(event) => {
         onClick?.(event)
