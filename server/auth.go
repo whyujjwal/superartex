@@ -42,6 +42,8 @@ const (
 // unauthenticated request through on a database error, overwriting the admin password.
 const errDataSourceUnavailable = "Data source temporarily unavailable, please retry later"
 
+const errPasswordSaveFailed = "Could not save the password. Please try again."
+
 // validatePassword returns an empty string when passing, otherwise a reason ready to show the user.
 func validatePassword(pw string) string {
 	if utf8.RuneCountInString(pw) < minPasswordRunes {
@@ -328,7 +330,8 @@ func (s *Server) authInit(w http.ResponseWriter, r *http.Request) {
 	// key. bcrypt runs tens of milliseconds, another request may set the password meanwhile, and the read check itself can fail under an outage.
 	inserted, err := pg.InsertSettingIfAbsent(authPassKey, string(hash))
 	if err != nil {
-		writeErr(w, 500, "Save failed: "+err.Error())
+		log.Print("[auth] failed to save the initial admin password")
+		writeErr(w, http.StatusInternalServerError, errPasswordSaveFailed)
 		return
 	}
 	if !inserted {
@@ -394,7 +397,8 @@ func (s *Server) authChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := pg.SetSetting(authPassKey, string(newHash)); err != nil {
-		writeErr(w, 500, "Save failed: "+err.Error())
+		log.Print("[auth] failed to save the new admin password")
+		writeErr(w, http.StatusInternalServerError, errPasswordSaveFailed)
 		return
 	}
 	writeJSON(w, 200, map[string]any{"ok": true})

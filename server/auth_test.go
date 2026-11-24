@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -16,7 +17,70 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
+
+	"github.com/whyujjwal/superartex/db"
 )
+
+func TestAuthPasswordWriteErrorsStayPrivate(t *testing.T) {
+	const setupToken = "synthetic-setup-token"
+	for _, tc := range []struct {
+		name, path, body string
+		initialized      bool
+	}{
+		{"setup", "/api/auth/init", `{"password":"new test password","setup_token":"` + setupToken + `"}`, false},
+		{"change password", "/api/auth/change-password", `{"old_password":"current test password","new_password":"new test password"}`, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture, err := sql.Open("sqlite", ":memory:")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer fixture.Close()
+			fixture.SetMaxOpenConns(1)
+			// A read-only view lets the settings lookup succeed and rejects the write.
+			for _, query := range []string{
+				"CREATE TABLE fixture_settings (key TEXT PRIMARY KEY, value TEXT, updated_at TEXT)",
+				"CREATE VIEW settings AS SELECT key, value, updated_at FROM fixture_settings",
+			} {
+				if _, err := fixture.Exec(query); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			s := &Server{
+				m:          &Manager{pg: &db.DB{DB: fixture}},
+				jwtKey:     []byte("0123456789abcdef0123456789abcdef"),
+				setupToken: setupToken,
+			}
+			r := httptest.NewRequest(http.MethodPost, tc.path, strings.NewReader(tc.body))
+			if tc.initialized {
+				hash, err := bcrypt.GenerateFromPassword([]byte("current test password"), bcrypt.MinCost)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if _, err := fixture.Exec("INSERT INTO fixture_settings(key, value) VALUES (?, ?)", authPassKey, string(hash)); err != nil {
+					t.Fatal(err)
+				}
+				token, err := signJWT(s.jwtKey)
+				if err != nil {
+					t.Fatal(err)
+				}
+				r.Header.Set("Authorization", "Bearer "+token)
+			}
+
+			w := httptest.NewRecorder()
+			s.Handler().ServeHTTP(w, r)
+			const want = "{\"error\":\"Could not save the password. Please try again.\"}\n"
+			if w.Code != http.StatusInternalServerError || w.Body.String() != want {
+				t.Fatalf("status and response = %d, %q; want HTTP 500 with a generic password save error", w.Code, w.Body.String())
+			}
+			if !tc.initialized && !s.checkSetupToken(setupToken) {
+				t.Fatal("failed setup consumed the setup token")
+			}
+		})
+	}
+}
 
 func TestSetupTokenBypassesCapturedLogs(t *testing.T) {
 	var terminal bytes.Buffer
