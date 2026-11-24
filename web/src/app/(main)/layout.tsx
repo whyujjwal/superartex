@@ -37,21 +37,43 @@ export default function Layout({ children }: Readonly<{ children: ReactNode }>) 
   // protected UI (or its API calls) flashes for a logged-out visitor.
   const [authed, setAuthed] = React.useState(false);
   React.useEffect(() => {
+    function currentLoginPath() {
+      const { pathname, search, hash } = window.location;
+      return getLoginPath(pathname + search + hash);
+    }
+
     if (!auth.getToken()) {
       // When the client-side guard sees a logged-out state, the cookie must be cleared too: otherwise proxy.ts, going
       // by "cookie exists" alone, would bounce us from /login back to the main UI and ping-pong with this guard
       // in an infinite redirect → blank screen (triggered when cookie and localStorage disagree).
       auth.clearToken();
-      const { pathname, search, hash } = window.location;
-      window.location.href = getLoginPath(pathname + search + hash);
+      window.location.href = currentLoginPath();
       return;
     }
 
     setAuthed(true);
-    return auth.onCrossTabSignOut(() => {
+    let redirecting = false;
+
+    function redirectToLogin(destination: string) {
+      if (redirecting) return;
+      redirecting = true;
       flushSync(() => setAuthed(false));
-      window.location.replace("/login");
-    });
+      window.location.replace(destination);
+    }
+
+    function handlePageShow(event: PageTransitionEvent) {
+      // A cached page keeps its rendered state and may have missed sign-out while suspended.
+      if (!event.persisted || redirecting || auth.getToken()) return;
+      auth.clearToken();
+      redirectToLogin(currentLoginPath());
+    }
+
+    const unsubscribe = auth.onCrossTabSignOut(() => redirectToLogin("/login"));
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      unsubscribe();
+      window.removeEventListener("pageshow", handlePageShow);
+    };
   }, []);
 
   const defaultOpen = typeof document === "undefined" ? true : getClientCookie("sidebar_state") !== "false";

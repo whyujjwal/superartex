@@ -88,28 +88,110 @@ test("login ignores untrusted, ambiguous and unsupported return destinations", (
   assert.equal(redirects.getLoginDestination(`${search}&other=1`), "/function/tasks");
 });
 
-test("the static layout guard preserves a copied report URL with its trailing slash", () => {
+function mountProtectedLayout(path, token) {
+  const { pathname, search, hash } = new URL(path, origin);
+  const events = [];
   const location = {
-    pathname: "/function/tasks/detail/",
-    search: "?id=42&tab=report",
-    hash: "",
+    pathname,
+    search,
+    hash,
     href: "",
+    replace: (destination) => events.push(destination),
   };
-  let clears = 0;
+  const window = Object.assign(new EventTarget(), { location });
+  let storedToken = token;
+  let onCrossTabSignOut;
   const effects = [];
   const { default: Layout } = loadModule(
     "src/app/(main)/layout.tsx",
     {
-      react: { useState: (initial) => [initial], useEffect: (effect) => effects.push(effect) },
-      "@/lib/auth": { auth: { getToken: () => null, clearToken: () => clears++ } },
+      react: {
+        useState: (initial) => [initial, (value) => events.push(value ? "shown" : "hidden")],
+        useEffect: (effect) => effects.push(effect),
+      },
+      "react-dom": {
+        flushSync(render) {
+          events.push("flush");
+          render();
+        },
+      },
+      "@/lib/auth": {
+        auth: {
+          getToken: () => storedToken,
+          clearToken: () => events.push("cleared"),
+          onCrossTabSignOut(callback) {
+            onCrossTabSignOut = callback;
+            return () => {
+              onCrossTabSignOut = undefined;
+              events.push("unsubscribed");
+            };
+          },
+        },
+      },
       "@/lib/auth-redirects": redirects,
       "@/lib/preferences/preferences-config": { PREFERENCE_DEFAULTS: {} },
     },
-    { window: { location } },
+    { window },
   );
 
   assert.equal(Layout({ children: null }), null);
-  for (const effect of effects) effect();
-  assert.equal(clears, 1);
+  const cleanup = effects[0]();
+  return {
+    location,
+    events,
+    cleanup,
+    removeStoredToken() {
+      storedToken = null;
+    },
+    crossTabSignOut() {
+      onCrossTabSignOut?.();
+    },
+    pageShow(persisted) {
+      window.dispatchEvent(Object.assign(new Event("pageshow"), { persisted }));
+    },
+  };
+}
+
+test("the static layout guard preserves a copied report URL with its trailing slash", () => {
+  const { location, events } = mountProtectedLayout("/function/tasks/detail/?id=42&tab=report", null);
+  assert.deepEqual(events, ["cleared"]);
   assert.equal(location.href, loginPath.replace("detail%3F", "detail%2F%3F"));
+});
+
+test("restoring a protected page after sign-out hides it before redirecting to login", () => {
+  const layout = mountProtectedLayout(reportPath, "fixture-session");
+  layout.removeStoredToken();
+
+  layout.pageShow(true);
+  layout.pageShow(true);
+
+  assert.deepEqual(layout.events, ["shown", "cleared", "flush", "hidden", loginPath]);
+});
+
+test("regular pageshow and signed-in restores keep the protected page in place", () => {
+  const layout = mountProtectedLayout(reportPath, "fixture-session");
+  layout.pageShow(true);
+  layout.removeStoredToken();
+  layout.pageShow(false);
+
+  assert.deepEqual(layout.events, ["shown"]);
+});
+
+test("cross-tab sign-out retains its login redirect when a restore event also arrives", () => {
+  const layout = mountProtectedLayout(reportPath, "fixture-session");
+  layout.removeStoredToken();
+  layout.crossTabSignOut();
+  layout.pageShow(true);
+
+  assert.deepEqual(layout.events, ["shown", "flush", "hidden", "/login"]);
+});
+
+test("unmounting removes both the storage and persisted pageshow handlers", () => {
+  const layout = mountProtectedLayout(reportPath, "fixture-session");
+  layout.cleanup();
+  layout.removeStoredToken();
+  layout.pageShow(true);
+  layout.crossTabSignOut();
+
+  assert.deepEqual(layout.events, ["shown", "unsubscribed"]);
 });
