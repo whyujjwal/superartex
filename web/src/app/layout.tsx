@@ -32,6 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       data-sidebar-collapsible={sidebar_collapsible}
       data-font={font}
       data-ui-scale={PREFERENCE_DEFAULTS.ui_scale}
+      data-motion={PREFERENCE_DEFAULTS.motion}
       suppressHydrationWarning
     >
       <head>

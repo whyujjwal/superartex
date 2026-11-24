@@ -87,3 +87,9 @@ test("missing or unsupported UI scale uses the standard size", () => {
   assert.equal(loadAppearance("").attributes["data-ui-scale"], "standard");
   assert.equal(loadAppearance("ui_scale=huge").attributes["data-ui-scale"], "standard");
 });
+
+test("saved motion reduction applies before hydration and invalid settings fall back to the system", () => {
+  assert.equal(loadAppearance("motion=reduce").attributes["data-motion"], "reduce");
+  assert.equal(loadAppearance("").attributes["data-motion"], "system");
+  assert.equal(loadAppearance("motion=always").attributes["data-motion"], "system");
+});

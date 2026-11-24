@@ -2,6 +2,7 @@ import { fontRegistry } from "@/lib/fonts/registry";
 
 import {
   CONTENT_LAYOUT_VALUES,
+  MOTION_VALUES,
   NAVBAR_STYLE_VALUES,
   SIDEBAR_COLLAPSIBLE_VALUES,
   SIDEBAR_VARIANT_VALUES,
@@ -11,10 +12,10 @@ import type { PreferenceKey, PreferenceValueMap } from "./preferences-config";
 import { THEME_MODE_VALUES, THEME_PRESET_VALUES } from "./theme";
 
 const FORMAT = "superartex-appearance";
-const VERSION = 1;
+const VERSION = 2;
 export const MAX_APPEARANCE_FILE_BYTES = 4 * 1024;
 
-const allowedValues = {
+const versionOneValues = {
   theme_mode: THEME_MODE_VALUES,
   theme_preset: THEME_PRESET_VALUES,
   font: Object.keys(fontRegistry),
@@ -23,9 +24,16 @@ const allowedValues = {
   navbar_style: NAVBAR_STYLE_VALUES,
   sidebar_variant: SIDEBAR_VARIANT_VALUES,
   sidebar_collapsible: SIDEBAR_COLLAPSIBLE_VALUES,
-} satisfies Record<PreferenceKey, readonly string[]>;
+};
+
+const allowedValues = { ...versionOneValues, motion: MOTION_VALUES } satisfies Record<PreferenceKey, readonly string[]>;
 
 const keys = Object.keys(allowedValues) as PreferenceKey[];
+const versionOneKeys = Object.keys(versionOneValues) as (keyof typeof versionOneValues)[];
+
+// Version 1 files omit motion. Importing them leaves the browser's current choice in place.
+export type ImportedAppearanceSettings = Pick<PreferenceValueMap, keyof typeof versionOneValues> &
+  Partial<Pick<PreferenceValueMap, "motion">>;
 
 export function serializeAppearanceFile(settings: PreferenceValueMap): string {
   const preferences = Object.fromEntries(keys.map((key) => [key, settings[key]]));
@@ -36,22 +44,29 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-export function parseAppearanceFile(text: string): PreferenceValueMap | null {
+export function parseAppearanceFile(text: string): ImportedAppearanceSettings | null {
   let file: unknown;
   try {
     file = JSON.parse(text);
   } catch {
     return null;
   }
-  if (!isRecord(file) || Object.keys(file).length !== 3 || file.format !== FORMAT || file.version !== VERSION)
+  if (
+    !isRecord(file) ||
+    Object.keys(file).length !== 3 ||
+    file.format !== FORMAT ||
+    (file.version !== 1 && file.version !== VERSION)
+  ) {
     return null;
+  }
 
   const preferences = file.preferences;
-  if (!isRecord(preferences) || Object.keys(preferences).length !== keys.length) return null;
-  for (const key of keys) {
+  const requiredKeys = file.version === 1 ? versionOneKeys : keys;
+  if (!isRecord(preferences) || Object.keys(preferences).length !== requiredKeys.length) return null;
+  for (const key of requiredKeys) {
     const accepted: readonly string[] = allowedValues[key];
     const value = preferences[key];
     if (!Object.hasOwn(preferences, key) || typeof value !== "string" || !accepted.includes(value)) return null;
   }
-  return preferences as PreferenceValueMap;
+  return preferences as ImportedAppearanceSettings;
 }

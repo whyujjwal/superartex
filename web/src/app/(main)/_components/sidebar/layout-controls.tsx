@@ -12,12 +12,15 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { type FontKey, fontOptions } from "@/lib/fonts/registry";
 import {
+  type ImportedAppearanceSettings,
   MAX_APPEARANCE_FILE_BYTES,
   parseAppearanceFile,
   serializeAppearanceFile,
 } from "@/lib/preferences/appearance-file";
 import {
   type ContentLayout,
+  MOTION_OPTIONS,
+  type MotionPreference,
   type NavbarStyle,
   type SidebarCollapsible,
   type SidebarVariant,
@@ -27,12 +30,13 @@ import {
 import {
   applyContentLayout,
   applyFont,
+  applyMotion,
   applyNavbarStyle,
   applySidebarCollapsible,
   applySidebarVariant,
   applyUiScale,
 } from "@/lib/preferences/layout-utils";
-import { PREFERENCE_DEFAULTS, type PreferenceValueMap } from "@/lib/preferences/preferences-config";
+import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { persistPreference } from "@/lib/preferences/preferences-storage";
 import { THEME_PRESET_OPTIONS, type ThemeMode, type ThemePreset } from "@/lib/preferences/theme";
 import { applyThemePreset } from "@/lib/preferences/theme-utils";
@@ -56,6 +60,8 @@ export function LayoutControls() {
   const setFont = usePreferencesStore((s) => s.setFont);
   const uiScale = usePreferencesStore((s) => s.uiScale);
   const setUiScale = usePreferencesStore((s) => s.setUiScale);
+  const motion = usePreferencesStore((s) => s.motion);
+  const setMotion = usePreferencesStore((s) => s.setMotion);
   const importInput = useRef<HTMLInputElement>(null);
   const importSequence = useRef(0);
 
@@ -113,7 +119,14 @@ export function LayoutControls() {
     void persistPreference("ui_scale", scale);
   };
 
-  const applyPreferences = (settings: PreferenceValueMap) => {
+  const onMotionChange = (value: MotionPreference | "") => {
+    if (!value) return;
+    applyMotion(value);
+    setMotion(value);
+    void persistPreference("motion", value);
+  };
+
+  const applyPreferences = (settings: ImportedAppearanceSettings) => {
     onThemePresetChange(settings.theme_preset);
     onThemeModeChange(settings.theme_mode);
     onContentLayoutChange(settings.content_layout);
@@ -122,6 +135,7 @@ export function LayoutControls() {
     onSidebarCollapseModeChange(settings.sidebar_collapsible);
     onFontChange(settings.font);
     onUiScaleChange(settings.ui_scale);
+    if (settings.motion) onMotionChange(settings.motion);
   };
 
   const exportSettings = () => {
@@ -130,6 +144,7 @@ export function LayoutControls() {
       theme_preset: themePreset,
       font,
       ui_scale: uiScale,
+      motion,
       content_layout: contentLayout,
       navbar_style: navbarStyle,
       sidebar_variant: variant,
@@ -248,6 +263,27 @@ export function LayoutControls() {
                 onValueChange={onUiScaleChange}
               >
                 {UI_SCALE_OPTIONS.map(({ label, value }) => (
+                  <ToggleGroupItem key={value} value={value}>
+                    {label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+
+            <div className="space-y-1">
+              <Label id="motion-label" className="font-medium text-xs">
+                Motion
+              </Label>
+              <ToggleGroup
+                aria-labelledby="motion-label"
+                size="sm"
+                spacing={0}
+                variant="outline"
+                type="single"
+                value={motion}
+                onValueChange={onMotionChange}
+              >
+                {MOTION_OPTIONS.map(({ label, value }) => (
                   <ToggleGroupItem key={value} value={value}>
                     {label}
                   </ToggleGroupItem>

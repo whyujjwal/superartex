@@ -13,7 +13,14 @@
 
 import type { FontKey } from "@/lib/fonts/registry";
 
-import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant, UiScale } from "./layout";
+import type {
+  ContentLayout,
+  MotionPreference,
+  NavbarStyle,
+  SidebarCollapsible,
+  SidebarVariant,
+  UiScale,
+} from "./layout";
 import type { ThemeMode, ThemePreset } from "./theme";
 
 export type PreferencePersistence = "none" | "client-cookie" | "server-cookie" | "localStorage";
@@ -26,6 +33,7 @@ export type PreferenceValueMap = {
   theme_preset: ThemePreset;
   font: FontKey;
   ui_scale: UiScale;
+  motion: MotionPreference;
   content_layout: ContentLayout;
   navbar_style: NavbarStyle;
   sidebar_variant: SidebarVariant;
@@ -71,6 +79,7 @@ export const PREFERENCE_DEFAULTS: PreferenceValueMap = {
   theme_preset: "default",
   font: "geist",
   ui_scale: "standard",
+  motion: "system",
   content_layout: "full-width",
   navbar_style: "sticky",
   sidebar_variant: "sidebar",
@@ -86,6 +95,7 @@ export const PREFERENCE_PERSISTENCE: PreferencePersistenceConfig = {
   theme_preset: "client-cookie",
   font: "client-cookie",
   ui_scale: "client-cookie",
+  motion: "client-cookie",
   content_layout: "client-cookie",
   navbar_style: "client-cookie",
   sidebar_variant: "client-cookie", // layout-critical → cannot be "localStorage"

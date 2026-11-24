@@ -38,3 +38,10 @@ export const UI_SCALE_OPTIONS = [
 ] as const;
 export const UI_SCALE_VALUES = UI_SCALE_OPTIONS.map((option) => option.value);
 export type UiScale = (typeof UI_SCALE_VALUES)[number];
+
+export const MOTION_OPTIONS = [
+  { label: "Follow system", value: "system" },
+  { label: "Reduce", value: "reduce" },
+] as const;
+export const MOTION_VALUES = MOTION_OPTIONS.map((option) => option.value);
+export type MotionPreference = (typeof MOTION_VALUES)[number];

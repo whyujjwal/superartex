@@ -7,6 +7,7 @@ import { type StoreApi, useStore } from "zustand";
 import { type FontKey, fontRegistry } from "@/lib/fonts/registry";
 import {
   CONTENT_LAYOUT_VALUES,
+  MOTION_VALUES,
   NAVBAR_STYLE_VALUES,
   SIDEBAR_COLLAPSIBLE_VALUES,
   SIDEBAR_VARIANT_VALUES,
@@ -39,6 +40,7 @@ function readDomState(): Partial<PreferencesState> {
     themePreset: getSafeValue(root.getAttribute("data-theme-preset"), THEME_PRESET_VALUES),
     font: getSafeValue(root.getAttribute("data-font"), FONT_VALUES),
     uiScale: getSafeValue(root.getAttribute("data-ui-scale"), UI_SCALE_VALUES) ?? PREFERENCE_DEFAULTS.ui_scale,
+    motion: getSafeValue(root.getAttribute("data-motion"), MOTION_VALUES) ?? PREFERENCE_DEFAULTS.motion,
     contentLayout: getSafeValue(root.getAttribute("data-content-layout"), CONTENT_LAYOUT_VALUES),
     navbarStyle: getSafeValue(root.getAttribute("data-navbar-style"), NAVBAR_STYLE_VALUES),
     sidebarVariant: getSafeValue(root.getAttribute("data-sidebar-variant"), SIDEBAR_VARIANT_VALUES),

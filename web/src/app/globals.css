@@ -259,8 +259,8 @@ html {
   transition: none !important;
 }
 
-/* Keep shared overlays and sidebar controls still when the OS requests reduced motion. */
-@media (prefers-reduced-motion: reduce) {
+/* Reduce decorative motion when requested either in Appearance or by the OS. */
+:is(
   [data-slot="dialog-overlay"],
   [data-slot="dialog-content"],
   [data-slot="alert-dialog-overlay"],
@@ -274,7 +274,14 @@ html {
   [data-slot="tooltip-content"],
   [data-slot="sidebar-gap"],
   [data-slot="sidebar-container"],
-  [data-slot="sidebar"][data-mobile="true"] {
+  [data-slot="sidebar"][data-mobile="true"]
+) {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+  }
+
+  html[data-motion="reduce"] & {
     animation: none;
     transition: none;
   }

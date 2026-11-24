@@ -1,4 +1,4 @@
-import type { UiScale } from "./layout";
+import type { MotionPreference, UiScale } from "./layout";
 
 export function applyContentLayout(value: "centered" | "full-width") {
   const root = document.documentElement;
@@ -27,4 +27,8 @@ export function applyFont(value: string) {
 
 export function applyUiScale(value: UiScale) {
   document.documentElement.setAttribute("data-ui-scale", value);
+}
+
+export function applyMotion(value: MotionPreference) {
+  document.documentElement.setAttribute("data-motion", value);
 }

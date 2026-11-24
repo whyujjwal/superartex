@@ -29,8 +29,9 @@ const preferences = {
   navbar_style: "scroll",
   sidebar_variant: "floating",
   sidebar_collapsible: "offcanvas",
+  motion: "reduce",
 };
-const file = { format: "superartex-appearance", version: 1, preferences };
+const file = { format: "superartex-appearance", version: 2, preferences };
 
 test("appearance settings round-trip with only the supported appearance fields", () => {
   const text = serializeAppearanceFile({ ...preferences, unrelated: "outside the appearance preferences" });
@@ -44,8 +45,8 @@ test("appearance import rejects incomplete or unrecognized envelopes", () => {
     null,
     [file],
     { ...file, format: "other" },
-    { ...file, version: 2 },
-    { ...file, version: "1" },
+    { ...file, version: 3 },
+    { ...file, version: "2" },
     { ...file, extra: true },
     { ...file, preferences: [] },
     { ...file, preferences: { theme_mode: "dark" } },
@@ -53,6 +54,14 @@ test("appearance import rejects incomplete or unrecognized envelopes", () => {
   ]) {
     assert.equal(parseAppearanceFile(JSON.stringify(invalid)), null);
   }
+});
+
+test("appearance import accepts complete legacy files without changing the current motion setting", () => {
+  const { motion: _motion, ...legacyPreferences } = preferences;
+  const legacy = { ...file, version: 1, preferences: legacyPreferences };
+  assert.deepEqual({ ...parseAppearanceFile(JSON.stringify(legacy)) }, legacyPreferences);
+  assert.equal(parseAppearanceFile(JSON.stringify({ ...legacy, preferences })), null);
+  assert.equal(parseAppearanceFile(JSON.stringify({ ...file, preferences: legacyPreferences })), null);
 });
 
 test("appearance import validates every registered preference and rejects a replaced key", () => {
