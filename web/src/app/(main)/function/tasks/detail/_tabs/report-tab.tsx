@@ -23,9 +23,9 @@ function TaskReport({ taskId }: { taskId: string }) {
   const [copied, setCopied] = React.useState(false);
   const mounted = React.useRef(false);
   const copyTimeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const titleId = React.useId();
   const loading = state.status === "loading";
   const report = state.status === "ready" ? state.text : "";
-  const preview = report ? <Markdown text={report} allowImages={false} /> : null;
 
   React.useEffect(() => {
     if (!loading) return;
@@ -89,8 +89,10 @@ function TaskReport({ taskId }: { taskId: string }) {
   return (
     <Card>
       <CardHeader className="items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <FileTextIcon aria-hidden="true" className="size-4 shrink-0" /> Penetration test report (Markdown)
+        <CardTitle className="text-sm">
+          <h2 id={titleId} className="flex items-center gap-2">
+            <FileTextIcon aria-hidden="true" className="size-4 shrink-0" /> Penetration test report (Markdown)
+          </h2>
         </CardTitle>
         {report && (
           <div className="flex flex-wrap gap-2">
@@ -107,8 +109,15 @@ function TaskReport({ taskId }: { taskId: string }) {
         )}
       </CardHeader>
       <CardContent>
-        {preview ? (
-          <div className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4">{preview}</div>
+        {report ? (
+          <section
+            aria-labelledby={titleId}
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: The independently scrollable preview needs keyboard focus for scrolling.
+            tabIndex={0}
+            className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <Markdown text={report} allowImages={false} firstHeadingLevel={3} />
+          </section>
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
             <FileTextIcon aria-hidden="true" className="size-8 opacity-40" />
@@ -127,7 +136,13 @@ function TaskReport({ taskId }: { taskId: string }) {
           </div>
         )}
       </CardContent>
-      {preview && createPortal(<article data-print-root="task-report">{preview}</article>, document.body)}
+      {report &&
+        createPortal(
+          <article data-print-root="task-report">
+            <Markdown text={report} allowImages={false} firstHeadingLevel={1} />
+          </article>,
+          document.body,
+        )}
     </Card>
   );
 }

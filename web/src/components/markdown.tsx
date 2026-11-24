@@ -1,16 +1,43 @@
 "use client";
 
-import * as React from "react";
-import ReactMarkdown, { type Components } from "react-markdown";
+import type { ComponentProps } from "react";
+
+import ReactMarkdown, { type Components, type ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+const headingTags = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
+type HeadingTag = (typeof headingTags)[number];
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
+const headingClasses: Partial<Record<HeadingTag, string>> = {
+  h1: "mt-2.5 text-base font-semibold",
+  h2: "mt-2 text-sm font-semibold",
+  h3: "mt-1.5 text-sm font-medium text-foreground/90",
+  h4: "mt-1.5 text-sm font-medium text-foreground/90",
+};
+
+function renderHeading(source: HeadingTag, Tag: HeadingTag | "div") {
+  return ({ node, ...props }: ComponentProps<"h1"> & ExtraProps) => (
+    <Tag className={headingClasses[source]} {...props} />
+  );
+}
+
+const headingsByFirstLevel = headingTags.map((_, firstIndex) =>
+  Object.fromEntries(
+    headingTags.map((source, index) => [
+      source,
+      renderHeading(source, headingTags[Math.min(firstIndex + index, headingTags.length - 1)]),
+    ]),
+  ),
+);
 
 // Tailwind-styled element overrides (no typography plugin in this project, so we
 // style each element). `node` is stripped — it's not a valid DOM attribute.
 const components: Components = {
-  h1: ({ node, ...p }) => <div className="mt-2.5 text-base font-semibold" {...p} />,
-  h2: ({ node, ...p }) => <div className="mt-2 text-sm font-semibold" {...p} />,
-  h3: ({ node, ...p }) => <div className="mt-1.5 text-sm font-medium text-foreground/90" {...p} />,
-  h4: ({ node, ...p }) => <div className="mt-1.5 text-sm font-medium text-foreground/90" {...p} />,
+  h1: renderHeading("h1", "div"),
+  h2: renderHeading("h2", "div"),
+  h3: renderHeading("h3", "div"),
+  h4: renderHeading("h4", "div"),
   p: ({ node, ...p }) => <p className="leading-relaxed" {...p} />,
   ul: ({ node, ...p }) => <ul className="my-1 list-disc space-y-0.5 pl-5" {...p} />,
   ol: ({ node, ...p }) => <ol className="my-1 list-decimal space-y-0.5 pl-5" {...p} />,
@@ -42,9 +69,7 @@ const components: Components = {
       <table className="w-full border-collapse text-xs" {...p} />
     </div>
   ),
-  th: ({ node, ...p }) => (
-    <th className="border border-border bg-muted/60 px-2 py-1 text-left font-medium" {...p} />
-  ),
+  th: ({ node, ...p }) => <th className="border border-border bg-muted/60 px-2 py-1 text-left font-medium" {...p} />,
   td: ({ node, ...p }) => <td className="border border-border px-2 py-1 align-top" {...p} />,
 };
 
@@ -54,10 +79,22 @@ const componentsWithImageAltText: Components = {
   img: ({ alt }) => (alt?.trim() ? <span>{alt}</span> : null),
 };
 
-export function Markdown({ text, allowImages = true }: { text: string; allowImages?: boolean }) {
+export function Markdown({
+  text,
+  allowImages = true,
+  firstHeadingLevel,
+}: {
+  text: string;
+  allowImages?: boolean;
+  firstHeadingLevel?: HeadingLevel;
+}) {
+  const elementComponents = allowImages ? components : componentsWithImageAltText;
+  const renderComponents = firstHeadingLevel
+    ? { ...elementComponents, ...headingsByFirstLevel[firstHeadingLevel - 1] }
+    : elementComponents;
   return (
     <div className="min-w-0 space-y-1.5 text-sm [&>*:first-child]:mt-0">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={allowImages ? components : componentsWithImageAltText}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={renderComponents}>
         {text}
       </ReactMarkdown>
     </div>
