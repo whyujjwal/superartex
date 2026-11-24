@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { CheckIcon, CopyIcon, DownloadIcon, FileTextIcon, PrinterIcon, RefreshCwIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, DownloadIcon, FileTextIcon, LinkIcon, PrinterIcon, RefreshCwIcon } from "lucide-react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
@@ -66,6 +66,23 @@ function TaskReport({ taskId }: { taskId: string }) {
     }
   }
 
+  async function copyReportLink() {
+    if (!taskId || !mounted.current) return;
+
+    const link = new URL(window.location.origin);
+    link.pathname = window.location.pathname;
+    link.searchParams.set("id", taskId);
+    link.searchParams.set("tab", "report");
+
+    const ok = await copyText(link.href);
+    if (!mounted.current) return;
+    if (ok) {
+      toast.success("Report link copied");
+    } else {
+      toast.error("Could not copy the report link");
+    }
+  }
+
   function download() {
     if (!report || !mounted.current) return;
 
@@ -99,21 +116,24 @@ function TaskReport({ taskId }: { taskId: string }) {
             <FileTextIcon aria-hidden="true" className="size-4 shrink-0" /> Penetration test report (Markdown)
           </h2>
         </CardTitle>
-        {hasLoaded && (
-          <div className="flex flex-wrap gap-2">
-            {report && (
-              <>
-                <Button type="button" size="sm" variant="outline" onClick={copy}>
-                  {copiedReport === report ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} Copy
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={download}>
-                  <DownloadIcon aria-hidden="true" /> Download
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={print}>
-                  <PrinterIcon aria-hidden="true" /> Print
-                </Button>
-              </>
-            )}
+        <div className="flex flex-wrap gap-2">
+          {report && (
+            <>
+              <Button type="button" size="sm" variant="outline" onClick={copy}>
+                {copiedReport === report ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} Copy
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={download}>
+                <DownloadIcon aria-hidden="true" /> Download
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={print}>
+                <PrinterIcon aria-hidden="true" /> Print
+              </Button>
+            </>
+          )}
+          <Button type="button" size="sm" variant="outline" onClick={copyReportLink} disabled={!taskId}>
+            <LinkIcon aria-hidden="true" /> Copy report link
+          </Button>
+          {hasLoaded && (
             <Button
               type="button"
               size="sm"
@@ -124,8 +144,8 @@ function TaskReport({ taskId }: { taskId: string }) {
             >
               <RefreshCwIcon aria-hidden="true" /> Refresh
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {hasLoaded && loading && (
