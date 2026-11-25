@@ -13,6 +13,8 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { api } from "@/lib/api";
 import { copyText } from "@/lib/utils";
 
+import { ReportFind } from "./report-find";
+
 type ReportState = { status: "loading" | "error"; text?: string } | { status: "ready"; text: string };
 type ReportSection = { id: string; heading: HTMLHeadingElement; label: string };
 
@@ -244,6 +246,7 @@ function useReportPrint(title: string | null) {
 function ReportPreview({ report, titleId }: { report: string; titleId: string }) {
   const preview = React.useRef<HTMLElement>(null);
   const selectId = React.useId();
+  const previewId = React.useId();
   const [sections, setSections] = React.useState<ReportSection[]>([]);
   const [selectedSection, setSelectedSection] = React.useState("");
 
@@ -317,12 +320,14 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
           </Button>
         </div>
       )}
+      <ReportFind preview={preview} previewId={previewId} report={report} />
       <section
+        id={previewId}
         ref={preview}
         aria-labelledby={titleId}
         // biome-ignore lint/a11y/noNoninteractiveTabindex: The independently scrollable preview needs keyboard focus for scrolling.
         tabIndex={0}
-        className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4 focus-visible:outline-2 focus-visible:outline-ring"
+        className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4 focus-visible:outline-2 focus-visible:outline-ring [&::highlight(superartex-report-match)]:bg-amber-200 [&::highlight(superartex-report-match)]:text-black [&_[data-report-match]]:outline-2 [&_[data-report-match]]:outline-ring"
       >
         <Markdown text={report} allowImages={false} firstHeadingLevel={3} reportTableRegions />
       </section>
