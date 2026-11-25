@@ -1,5 +1,5 @@
 import { Eye, EyeOff } from "lucide-react";
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,15 @@ export function PasswordInput({
 }: PasswordInputProps) {
   const [visible, setVisible] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
+
+  useEffect(() => {
+    function hideOnBackground() {
+      if (document.visibilityState === "hidden") setVisible(false);
+    }
+
+    document.addEventListener("visibilitychange", hideOnBackground);
+    return () => document.removeEventListener("visibilitychange", hideOnBackground);
+  }, []);
 
   return (
     <div>
