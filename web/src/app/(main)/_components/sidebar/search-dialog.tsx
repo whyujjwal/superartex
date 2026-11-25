@@ -20,6 +20,7 @@ import {
 import { SEARCH_PAGES_KEY } from "@/lib/workspace-shortcuts";
 import type { NavMainItem } from "@/navigation/sidebar/sidebar-items";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 type SearchItem = {
   id: string;
@@ -82,8 +83,11 @@ export function SearchDialog() {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const router = useRouter();
+  const shortcutsEnabled = usePreferencesStore((state) => state.workspaceShortcutsEnabled);
 
   React.useEffect(() => {
+    if (!shortcutsEnabled) return;
+
     const down = (e: KeyboardEvent) => {
       if (e.key === SEARCH_PAGES_KEY && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -92,7 +96,7 @@ export function SearchDialog() {
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [shortcutsEnabled]);
 
   const handleOpenChange = (value: boolean) => {
     setOpen(value);
@@ -138,14 +142,20 @@ export function SearchDialog() {
         variant="outline"
         size="sm"
         aria-label="Search pages"
-        aria-keyshortcuts={`Control+${SEARCH_PAGES_KEY.toUpperCase()} Meta+${SEARCH_PAGES_KEY.toUpperCase()}`}
+        aria-keyshortcuts={
+          shortcutsEnabled
+            ? `Control+${SEARCH_PAGES_KEY.toUpperCase()} Meta+${SEARCH_PAGES_KEY.toUpperCase()}`
+            : undefined
+        }
         className="justify-start gap-2 bg-background/50 font-normal text-muted-foreground shadow-none sm:min-w-44"
       >
         <Search data-icon="inline-start" />
         <span className="hidden sm:inline">Search pages</span>
-        <kbd className="ml-auto hidden select-none rounded-sm border bg-card px-1.5 font-mono text-[10px] sm:inline">
-          ⌘ {SEARCH_PAGES_KEY.toUpperCase()}
-        </kbd>
+        {shortcutsEnabled && (
+          <kbd className="ml-auto hidden select-none rounded-sm border bg-card px-1.5 font-mono text-[10px] sm:inline">
+            ⌘ {SEARCH_PAGES_KEY.toUpperCase()}
+          </kbd>
+        )}
       </Button>
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command>

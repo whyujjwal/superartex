@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { type StoreApi, useStore } from "zustand";
 
 import { type FontKey, fontRegistry } from "@/lib/fonts/registry";
+import { getLocalStorageValue } from "@/lib/local-storage.client";
 import {
   CONTENT_LAYOUT_VALUES,
   MOTION_VALUES,
@@ -16,6 +17,7 @@ import {
 import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { THEME_MODE_VALUES, THEME_PRESET_VALUES } from "@/lib/preferences/theme";
 import { applyThemeMode, subscribeToSystemTheme } from "@/lib/preferences/theme-utils";
+import { WORKSPACE_SHORTCUTS_STORAGE_KEY } from "@/lib/workspace-shortcuts";
 
 import { createPreferencesStore, type PreferencesState } from "./preferences-store";
 
@@ -82,6 +84,7 @@ export const PreferencesStoreProvider = ({
     store.setState((prev) => ({
       ...prev,
       ...domState,
+      workspaceShortcutsEnabled: getLocalStorageValue(WORKSPACE_SHORTCUTS_STORAGE_KEY) !== "off",
       isSynced: true,
     }));
   }, [store]);

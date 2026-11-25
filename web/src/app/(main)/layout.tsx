@@ -18,6 +18,7 @@ import {
 } from "@/lib/preferences/layout";
 import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { cn } from "@/lib/utils";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { MainContent } from "./_components/main-content";
 
@@ -91,7 +92,7 @@ export default function Layout({ children }: Readonly<{ children: ReactNode }>) 
   if (!authed) return null;
 
   return (
-    <SidebarProvider
+    <WorkspaceSidebarProvider
       defaultOpen={defaultOpen}
       style={
         {
@@ -120,6 +121,11 @@ export default function Layout({ children }: Readonly<{ children: ReactNode }>) 
       >
         <MainContent>{children}</MainContent>
       </SidebarInset>
-    </SidebarProvider>
+    </WorkspaceSidebarProvider>
   );
+}
+
+function WorkspaceSidebarProvider(props: React.ComponentProps<typeof SidebarProvider>) {
+  const shortcutsEnabled = usePreferencesStore((state) => state.workspaceShortcutsEnabled);
+  return <SidebarProvider {...props} keyboardShortcutEnabled={shortcutsEnabled} />;
 }

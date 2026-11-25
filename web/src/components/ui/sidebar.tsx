@@ -39,6 +39,7 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  keyboardShortcutEnabled: boolean
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -56,6 +57,7 @@ function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
+  keyboardShortcutEnabled = true,
   className,
   style,
   children,
@@ -64,6 +66,7 @@ function SidebarProvider({
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  keyboardShortcutEnabled?: boolean
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
@@ -94,6 +97,8 @@ function SidebarProvider({
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
+    if (!keyboardShortcutEnabled) return
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
         event.key === TOGGLE_SIDEBAR_KEY &&
@@ -106,7 +111,7 @@ function SidebarProvider({
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [toggleSidebar])
+  }, [keyboardShortcutEnabled, toggleSidebar])
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
@@ -121,8 +126,9 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      keyboardShortcutEnabled,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, keyboardShortcutEnabled]
   )
 
   return (
@@ -255,7 +261,7 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, keyboardShortcutEnabled } = useSidebar()
 
   return (
     <Button
@@ -263,7 +269,11 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon-sm"
-      aria-keyshortcuts={`Control+${TOGGLE_SIDEBAR_KEY.toUpperCase()} Meta+${TOGGLE_SIDEBAR_KEY.toUpperCase()}`}
+      aria-keyshortcuts={
+        keyboardShortcutEnabled
+          ? `Control+${TOGGLE_SIDEBAR_KEY.toUpperCase()} Meta+${TOGGLE_SIDEBAR_KEY.toUpperCase()}`
+          : undefined
+      }
       className={cn(className)}
       onClick={(event) => {
         onClick?.(event)
