@@ -18,16 +18,21 @@ import { getLoginDestination } from "@/lib/auth-redirects";
 
 import styles from "../auth.module.css";
 
+type StatusCheck = "checking" | "retrying" | "unavailable" | "ready";
+
 export default function LoginPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [status, setStatus] = useState<StatusCheck>("checking");
   const [agreed, setAgreed] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [readToEnd, setReadToEnd] = useState(false);
   const termsBodyRef = useRef<HTMLDivElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const retryButtonRef = useRef<HTMLButtonElement>(null);
+  const retrying = status === "retrying";
 
   // Scroll to the bottom of the terms (including when everything fits without scrolling) to unlock "Agree".
   function handleTermsScroll() {
@@ -45,6 +50,8 @@ export default function LoginPage() {
   }, [termsOpen]);
 
   useEffect(() => {
+    if (status !== "checking" && status !== "retrying") return;
+
     // Already signed in — go straight to the main UI (static export has no middleware to do this redirect).
     const token = auth.getToken();
     if (token) {
@@ -54,17 +61,29 @@ export default function LoginPage() {
       window.location.replace(getLoginDestination(window.location.search));
       return;
     }
+    let active = true;
     api
       .authStatus()
       .then(({ initialized }) => {
-        if (!initialized) router.replace("/setup");
+        if (!active) return;
+        if (!initialized) {
+          router.replace("/setup");
+          return;
+        }
+        if (retryButtonRef.current && document.activeElement === retryButtonRef.current) passwordRef.current?.focus();
+        setStatus("ready");
       })
-      .catch(() => setError("Unable to connect to the backend service"))
-      .finally(() => setChecking(false));
-  }, [router]);
+      .catch(() => {
+        if (active) setStatus("unavailable");
+      });
+    return () => {
+      active = false;
+    };
+  }, [router, status]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading || retrying) return;
     if (!agreed) {
       setError("Please read and agree to the Terms of Use first");
       return;
@@ -82,7 +101,7 @@ export default function LoginPage() {
     }
   }
 
-  if (checking) {
+  if (status === "checking") {
     return (
       <p role="status" className="text-muted-foreground text-sm">
         Checking login state…
@@ -95,6 +114,31 @@ export default function LoginPage() {
       <header className={styles.intro}>
         <h1 className={styles.title}>Sign in</h1>
       </header>
+      {(retrying || status === "unavailable") && (
+        <div className="mb-5 flex flex-wrap items-center gap-3 rounded-md border p-3 text-sm">
+          {retrying ? (
+            <p role="status" className="grow text-muted-foreground">
+              Checking sign-in state…
+            </p>
+          ) : (
+            <p role="alert" className="grow text-destructive">
+              Unable to check sign-in state.
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            ref={retryButtonRef}
+            aria-disabled={retrying || loading}
+            className="aria-disabled:opacity-50"
+            onClick={() => {
+              if (!loading && status === "unavailable") setStatus("retrying");
+            }}
+          >
+            Retry status check
+          </Button>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="space-y-2">
           <Label htmlFor="username">Username</Label>
@@ -104,6 +148,7 @@ export default function LoginPage() {
           <Label htmlFor="password">Password</Label>
           <PasswordInput
             id="password"
+            ref={passwordRef}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
@@ -139,7 +184,11 @@ export default function LoginPage() {
             {error}
           </p>
         )}
-        <Button type="submit" className="h-11 w-full justify-between px-4" disabled={loading || !password || !agreed}>
+        <Button
+          type="submit"
+          className="h-11 w-full justify-between px-4"
+          disabled={loading || retrying || !password || !agreed}
+        >
           {loading ? "Signing in..." : "Sign in"}
           <ArrowRight aria-hidden="true" />
         </Button>

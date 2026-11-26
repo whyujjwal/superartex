@@ -89,6 +89,17 @@ test("successful login still returns the issued token", async () => {
   assert.deepEqual(await api.login("SUPERARTEX", "password"), { token: "new-session" });
 });
 
+test("account status requires an explicit boolean initialization state", async () => {
+  for (const value of [null, {}, { initialized: 0 }, { initialized: "false" }]) {
+    const { api } = createClient(Response.json(value));
+    await assert.rejects(api.authStatus(), { message: "Unable to check initialization status" });
+  }
+  for (const initialized of [false, true]) {
+    const { api } = createClient(Response.json({ initialized }));
+    assert.equal((await api.authStatus()).initialized, initialized);
+  }
+});
+
 for (const [protocol, secure] of [
   ["http:", ""],
   ["https:", "; Secure"],

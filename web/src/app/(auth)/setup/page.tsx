@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 
 import styles from "../auth.module.css";
 
+type StatusCheck = "checking" | "retrying" | "unavailable" | "ready";
+
 export default function SetupPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
@@ -23,10 +25,8 @@ export default function SetupPage() {
   const [setupToken, setSetupToken] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
-  // when the initialization state cannot be fetched, do not default to "not initialized" — that would show the setup form to an
-  // instance that already has a password, and following it would overwrite the original. Close the entrance instead.
-  const [unavailable, setUnavailable] = useState(false);
+  const [status, setStatus] = useState<StatusCheck>("checking");
+  const retrying = status === "retrying";
   const { isValid, lengthInvalid, confirmationMismatch, lengthMessage, confirmationMessage } = getNewPasswordFeedback(
     password,
     confirm,
@@ -35,17 +35,26 @@ export default function SetupPage() {
   const canSubmit = Boolean(trimmedSetupToken) && isValid;
 
   useEffect(() => {
+    if (status !== "checking" && status !== "retrying") return;
+
+    let active = true;
     api
       .authStatus()
       .then(({ initialized }) => {
-        if (initialized) router.replace("/login");
+        if (!active) return;
+        if (initialized) {
+          router.replace("/login");
+          return;
+        }
+        setStatus("ready");
       })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : "Unable to connect to the backend service");
-        setUnavailable(true);
-      })
-      .finally(() => setChecking(false));
-  }, [router]);
+      .catch(() => {
+        if (active) setStatus("unavailable");
+      });
+    return () => {
+      active = false;
+    };
+  }, [router, status]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,7 +72,7 @@ export default function SetupPage() {
     }
   }
 
-  if (checking) {
+  if (status === "checking") {
     return (
       <p role="status" className="text-muted-foreground text-sm">
         Checking setup state…
@@ -71,25 +80,35 @@ export default function SetupPage() {
     );
   }
 
+  const unavailable = status !== "ready";
   return (
     <>
       <header className={styles.intro}>
-        <h1 className={styles.title}>{unavailable ? "Cannot confirm initialization state" : "Set initial password"}</h1>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          {unavailable
-            ? "The backend or database is temporarily unavailable. To avoid overwriting a password already set on this instance, setup is temporarily closed — restore the service and try again."
-            : "Use the setup token from the server log."}
-        </p>
+        <h1 className={styles.title}>{unavailable ? "Setup status unavailable" : "Set initial password"}</h1>
+        {!unavailable && (
+          <p className="text-muted-foreground text-sm leading-relaxed">Use the setup token from the server log.</p>
+        )}
       </header>
       {unavailable ? (
         <div className="flex flex-col gap-5">
-          {error && (
-            <p role="alert" className="text-destructive text-sm">
-              {error}
+          {retrying ? (
+            <p role="status" className="text-muted-foreground text-sm">
+              Checking setup state…
+            </p>
+          ) : (
+            <p role="alert" className="text-muted-foreground text-sm">
+              Unable to check initialization status. Retry to confirm whether setup is available.
             </p>
           )}
-          <Button type="button" className="h-11 w-full" onClick={() => window.location.reload()}>
-            Retry
+          <Button
+            type="button"
+            className="h-11 w-full aria-disabled:opacity-50"
+            aria-disabled={retrying}
+            onClick={() => {
+              if (status === "unavailable") setStatus("retrying");
+            }}
+          >
+            Retry status check
           </Button>
         </div>
       ) : (

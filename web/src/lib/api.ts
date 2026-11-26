@@ -267,7 +267,13 @@ export const api = {
   health: () => get<{ ok: boolean; service: string; version: string; latest_version?: string }>("/health"),
 
   // ---- auth ----
-  authStatus: () => get<{ initialized: boolean }>("/auth/status"),
+  authStatus: async () => {
+    const status = await get<unknown>("/auth/status");
+    if (status && typeof status === "object" && "initialized" in status && typeof status.initialized === "boolean") {
+      return { initialized: status.initialized };
+    }
+    throw new Error("Unable to check initialization status");
+  },
   login: (username: string, password: string) =>
     post<{ token: string }>("/auth/login", { username, password }, loginResponseError),
   initPassword: (password: string, setupToken: string) =>

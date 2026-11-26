@@ -20,6 +20,7 @@ function compile(path) {
 }
 
 const changePasswordForm = compile("../src/app/(main)/_components/sidebar/change-password-dialog.tsx");
+const loginForm = compile("../src/app/(auth)/login/page.tsx");
 const setupForm = compile("../src/app/(auth)/setup/page.tsx");
 const passwordInputCode = compile("../src/components/ui/password-input.tsx");
 const newPassword = {};
@@ -34,7 +35,12 @@ function findElement(element, matches) {
   }
 }
 
-function fixture({ setup = false, changePassword = async () => undefined } = {}) {
+function fixture({
+  setup = false,
+  login = false,
+  authStatus = async () => ({ initialized: false }),
+  changePassword = async () => undefined,
+} = {}) {
   const exports = {};
   const passwordInput = {};
   const state = [];
@@ -45,9 +51,9 @@ function fixture({ setup = false, changePassword = async () => undefined } = {})
   const toasts = [];
   const noop = () => undefined;
   let nextState = 0;
-  let mounted = false;
+  let nextEffect = 0;
   let open = true;
-  let passiveDependencies = [];
+  const passiveEffects = [];
   let layoutOpen;
   let layoutCleanup;
   const router = { replace: (path) => redirects.push(path) };
@@ -59,14 +65,11 @@ function fixture({ setup = false, changePassword = async () => undefined } = {})
         return [state[index], (next) => (state[index] = typeof next === "function" ? next(state[index]) : next)];
       },
       useEffect(effect, dependencies) {
-        if (setup) {
-          if (mounted) return;
-          mounted = true;
-        } else {
-          if (dependencies.every((value, index) => value === passiveDependencies[index])) return;
-          passiveDependencies = dependencies;
-        }
-        effect();
+        const index = nextEffect++;
+        const previous = passiveEffects[index];
+        if (previous && dependencies.every((value, index) => value === previous.dependencies[index])) return;
+        previous?.cleanup?.();
+        passiveEffects[index] = { dependencies, cleanup: effect() };
       },
       useRef(initial) {
         const index = nextState++;
@@ -82,12 +85,14 @@ function fixture({ setup = false, changePassword = async () => undefined } = {})
     },
     "react/jsx-runtime": jsxRuntime,
     "next/navigation": { useRouter: () => router },
-    "lucide-react": { ArrowRight: "svg", Eye: "svg", EyeOff: "svg" },
+    "lucide-react": { AlertTriangle: "svg", ArrowRight: "svg", Eye: "svg", EyeOff: "svg", ShieldCheck: "svg" },
     sonner: { toast: { success: (message) => toasts.push(message), error: (message) => toasts.push(message) } },
     "@/components/ui/button": { Button: "button" },
+    "@/components/ui/checkbox": { Checkbox: "input" },
     "@/components/ui/input": { Input: "input" },
     "@/components/ui/dialog": {
       Dialog: "div",
+      DialogClose: "button",
       DialogContent: "div",
       DialogDescription: "p",
       DialogFooter: "footer",
@@ -98,9 +103,7 @@ function fixture({ setup = false, changePassword = async () => undefined } = {})
     "@/components/ui/password-input": passwordInput,
     "@/lib/api": {
       api: {
-        async authStatus() {
-          return { initialized: false };
-        },
+        authStatus,
         async changePassword(...args) {
           calls.push(args);
           await changePassword();
@@ -111,13 +114,17 @@ function fixture({ setup = false, changePassword = async () => undefined } = {})
         },
       },
     },
-    "@/lib/auth": { auth: { setToken: (token) => sessionTokens.push(token) } },
+    "@/lib/auth": { auth: { getToken: () => null, setToken: (token) => sessionTokens.push(token) } },
     "@/lib/new-password": newPassword,
     "@/lib/utils": { cn: (...classes) => classes.filter(Boolean).join(" ") },
     "../auth.module.css": { default: {} },
   };
-  runInNewContext(passwordInputCode, { exports: passwordInput, require: (name) => imports[name] });
-  runInNewContext(setup ? setupForm : changePasswordForm, {
+  runInNewContext(passwordInputCode, {
+    exports: passwordInput,
+    require: (name) => imports[name],
+    document: { addEventListener: noop, removeEventListener: noop },
+  });
+  runInNewContext(setup ? setupForm : login ? loginForm : changePasswordForm, {
     exports,
     TextEncoder,
     Error,
@@ -126,7 +133,8 @@ function fixture({ setup = false, changePassword = async () => undefined } = {})
 
   function render() {
     nextState = 0;
-    return setup
+    nextEffect = 0;
+    return setup || login
       ? exports.default()
       : exports.ChangePasswordDialog({ open, onOpenChange: (next) => openChanges.push(next) });
   }
@@ -141,6 +149,7 @@ function fixture({ setup = false, changePassword = async () => undefined } = {})
       render();
     },
     alert: () => findElement(render(), (element) => element.props.role === "alert")?.props,
+    statusRetry: () => findElement(render(), (element) => element.props.children === "Retry status check")?.props,
     submitButton: () => getProps((element) => element.props.type === "submit"),
     passwordField(id) {
       const field = findElement(render(), (element) => element.props.id === id);
@@ -394,4 +403,75 @@ test("initial setup explains confirmation errors and signs in with the issued se
   assert.deepEqual(form.calls, [[password, "test-setup-token"]]);
   assert.deepEqual(form.sessionTokens, ["issued-session"]);
   assert.deepEqual(form.redirects, ["/function/tasks"]);
+});
+
+test("setup stays closed until an in-place status retry confirms it is uninitialized", async () => {
+  let checks = 0;
+  const retry = Promise.withResolvers();
+  const form = fixture({
+    setup: true,
+    async authStatus() {
+      if (++checks === 1) throw new Error("private service detail");
+      return retry.promise;
+    },
+  });
+  form.render();
+  await setImmediate();
+
+  assert.equal(
+    findElement(form.render(), (element) => element.props.id === "setup-token"),
+    undefined,
+  );
+  assert.doesNotMatch(form.alert().children, /private service detail/);
+  const startRetry = form.statusRetry();
+  assert.ok(startRetry);
+  startRetry.onClick();
+  startRetry.onClick();
+  assert.equal(form.statusRetry()["aria-disabled"], true);
+  assert.equal(
+    findElement(form.render(), (element) => element.props.id === "setup-token"),
+    undefined,
+  );
+  assert.equal(checks, 2);
+
+  retry.resolve({ initialized: false });
+  await setImmediate();
+  assert.equal(form.byId("setup-token").value, "");
+  assert.equal(form.statusRetry(), undefined);
+  assert.deepEqual(form.redirects, []);
+  assert.deepEqual(form.calls, []);
+});
+
+test("login can retry the status check without clearing the password or terms choice", async () => {
+  let checks = 0;
+  const retry = Promise.withResolvers();
+  const form = fixture({
+    login: true,
+    async authStatus() {
+      if (++checks === 1) throw new Error("service unavailable");
+      return retry.promise;
+    },
+  });
+  form.render();
+  await setImmediate();
+
+  form.input("password", "local fixture password");
+  form.byId("agree-terms").onCheckedChange(true);
+  assert.equal(form.submitDisabled(), false);
+  const startRetry = form.statusRetry();
+  assert.ok(startRetry);
+  startRetry.onClick();
+  startRetry.onClick();
+  assert.equal(form.statusRetry()["aria-disabled"], true);
+  assert.equal(form.submitDisabled(), true);
+  assert.equal(form.byId("password").value, "local fixture password");
+  assert.equal(checks, 2);
+
+  retry.resolve({ initialized: true });
+  await setImmediate();
+  assert.equal(form.statusRetry(), undefined);
+  assert.equal(form.submitDisabled(), false);
+  assert.equal(form.byId("password").value, "local fixture password");
+  assert.equal(form.byId("agree-terms").checked, true);
+  assert.deepEqual(form.redirects, []);
 });
