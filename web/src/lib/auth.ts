@@ -9,6 +9,16 @@ function clearTokenCookie(): void {
   document.cookie = `${TOKEN_KEY}=; path=/; max-age=0${secureCookieAttribute()}`;
 }
 
+function onCrossTabSessionChange(onChange: () => void): () => void {
+  function handleStorage(event: StorageEvent) {
+    if (event.storageArea !== window.localStorage || (event.key !== null && event.key !== TOKEN_KEY)) return;
+    onChange();
+  }
+
+  window.addEventListener("storage", handleStorage);
+  return () => window.removeEventListener("storage", handleStorage);
+}
+
 // These claims are for display only. The server verifies the token independently.
 function readTokenClaims(token: string | null): Record<string, unknown> | null {
   const parts = token?.split(".");
@@ -49,22 +59,17 @@ export const auth = {
     clearTokenCookie();
   },
 
-  onCrossTabSignOut(onSignOut: () => void): () => void {
-    function unsubscribe() {
-      window.removeEventListener("storage", handleStorage);
-    }
+  onCrossTabSessionChange,
 
-    function handleStorage(event: StorageEvent) {
-      if (event.storageArea !== window.localStorage || (event.key !== null && event.key !== TOKEN_KEY)) return;
+  onCrossTabSignOut(onSignOut: () => void): () => void {
+    const unsubscribe = onCrossTabSessionChange(() => {
       // A more recent login may have replaced the token before this event was delivered.
       if (auth.getToken()) return;
 
       unsubscribe();
       clearTokenCookie();
       onSignOut();
-    }
-
-    window.addEventListener("storage", handleStorage);
+    });
     return unsubscribe;
   },
 

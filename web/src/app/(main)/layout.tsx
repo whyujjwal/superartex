@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { MainContent } from "./_components/main-content";
+import { SessionExpiryNotice } from "./_components/session-expiry-notice";
 
 // Reads a layout-critical preference from the browser cookie (falls back to the
 // default during static-export prerender where document is unavailable). Kept
@@ -106,6 +107,7 @@ export default function Layout({ children }: Readonly<{ children: ReactNode }>) 
       >
         Skip to main content
       </a>
+      <SessionExpiryNotice />
       <AppSidebar variant={variant} collapsible={collapsible} />
       <SidebarInset
         id="main-content"
