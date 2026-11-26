@@ -1,9 +1,10 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { Settings } from "lucide-react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -39,37 +40,63 @@ import {
   applySidebarVariant,
   applyUiScale,
 } from "@/lib/preferences/layout-utils";
-import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
+import { PREFERENCE_DEFAULTS, type PreferenceKey, type PreferenceValueMap } from "@/lib/preferences/preferences-config";
 import { persistPreference } from "@/lib/preferences/preferences-storage";
 import { THEME_PRESET_OPTIONS, type ThemeMode, type ThemePreset } from "@/lib/preferences/theme";
 import { applyThemePreset } from "@/lib/preferences/theme-utils";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
+const appearanceKeys = Object.keys(PREFERENCE_DEFAULTS) as PreferenceKey[];
+
 export function LayoutControls() {
-  const themeMode = usePreferencesStore((s) => s.themeMode);
+  const appearance = usePreferencesStore(
+    useShallow((state) => ({
+      theme_mode: state.themeMode,
+      theme_preset: state.themePreset,
+      font: state.font,
+      ui_scale: state.uiScale,
+      motion: state.motion,
+      focus_outline: state.focusOutline,
+      content_layout: state.contentLayout,
+      navbar_style: state.navbarStyle,
+      sidebar_variant: state.sidebarVariant,
+      sidebar_collapsible: state.sidebarCollapsible,
+    })),
+  );
+  const {
+    theme_mode: themeMode,
+    theme_preset: themePreset,
+    font,
+    ui_scale: uiScale,
+    motion,
+    focus_outline: focusOutline,
+    content_layout: contentLayout,
+    navbar_style: navbarStyle,
+    sidebar_variant: variant,
+    sidebar_collapsible: collapsible,
+  } = appearance;
   const resolvedThemeMode = usePreferencesStore((s) => s.resolvedThemeMode);
   const setThemeMode = usePreferencesStore((s) => s.setThemeMode);
-  const themePreset = usePreferencesStore((s) => s.themePreset);
   const setThemePreset = usePreferencesStore((s) => s.setThemePreset);
-  const contentLayout = usePreferencesStore((s) => s.contentLayout);
   const setContentLayout = usePreferencesStore((s) => s.setContentLayout);
-  const navbarStyle = usePreferencesStore((s) => s.navbarStyle);
   const setNavbarStyle = usePreferencesStore((s) => s.setNavbarStyle);
-  const variant = usePreferencesStore((s) => s.sidebarVariant);
   const setSidebarVariant = usePreferencesStore((s) => s.setSidebarVariant);
-  const collapsible = usePreferencesStore((s) => s.sidebarCollapsible);
   const setSidebarCollapsible = usePreferencesStore((s) => s.setSidebarCollapsible);
-  const font = usePreferencesStore((s) => s.font);
   const setFont = usePreferencesStore((s) => s.setFont);
-  const uiScale = usePreferencesStore((s) => s.uiScale);
   const setUiScale = usePreferencesStore((s) => s.setUiScale);
-  const motion = usePreferencesStore((s) => s.motion);
   const setMotion = usePreferencesStore((s) => s.setMotion);
-  const focusOutline = usePreferencesStore((s) => s.focusOutline);
   const setFocusOutline = usePreferencesStore((s) => s.setFocusOutline);
   const focusOutlineLabelId = useId();
   const importInput = useRef<HTMLInputElement>(null);
   const importSequence = useRef(0);
+  const restoreDefaultsButton = useRef<HTMLButtonElement>(null);
+  const [resetSnapshot, setResetSnapshot] = useState<{ appearance: PreferenceValueMap; sequence: number } | null>(null);
+  const isDefaultAppearance = appearanceKeys.every((key) => appearance[key] === PREFERENCE_DEFAULTS[key]);
+  const canUndoReset = resetSnapshot !== null && isDefaultAppearance;
+
+  useEffect(() => {
+    if (!isDefaultAppearance) setResetSnapshot(null);
+  }, [isDefaultAppearance]);
 
   const onThemePresetChange = (preset: ThemePreset) => {
     applyThemePreset(preset);
@@ -153,18 +180,7 @@ export function LayoutControls() {
   };
 
   const exportSettings = () => {
-    const text = serializeAppearanceFile({
-      theme_mode: themeMode,
-      theme_preset: themePreset,
-      font,
-      ui_scale: uiScale,
-      motion,
-      focus_outline: focusOutline,
-      content_layout: contentLayout,
-      navbar_style: navbarStyle,
-      sidebar_variant: variant,
-      sidebar_collapsible: collapsible,
-    });
+    const text = serializeAppearanceFile(appearance);
     const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
@@ -183,6 +199,7 @@ export function LayoutControls() {
     input.value = "";
     if (!file) return;
 
+    setResetSnapshot(null);
     const sequence = ++importSequence.current;
     const text = file.size <= MAX_APPEARANCE_FILE_BYTES ? await file.text().catch(() => null) : null;
     if (sequence !== importSequence.current || importInput.current !== input) return;
@@ -194,6 +211,26 @@ export function LayoutControls() {
     }
     applyPreferences(settings);
     toast.success("Appearance imported.");
+  };
+
+  const restoreDefaults = () => {
+    const previousSequence = importSequence.current;
+    const sequence = ++importSequence.current;
+    applyPreferences(PREFERENCE_DEFAULTS);
+    setResetSnapshot((snapshot) => {
+      if (!isDefaultAppearance) return { appearance, sequence };
+      if (snapshot?.sequence === previousSequence) return { ...snapshot, sequence };
+      return null;
+    });
+  };
+
+  const undoReset = () => {
+    if (!canUndoReset || resetSnapshot.sequence !== importSequence.current) return;
+    importSequence.current++;
+    applyPreferences(resetSnapshot.appearance);
+    setResetSnapshot(null);
+    restoreDefaultsButton.current?.focus();
+    toast.success("Previous appearance restored.");
   };
 
   return (
@@ -436,18 +473,28 @@ export function LayoutControls() {
                 Import JSON
               </Button>
             </div>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="w-full text-xs"
-              onClick={() => {
-                importSequence.current++;
-                applyPreferences(PREFERENCE_DEFAULTS);
-              }}
-            >
-              Restore Defaults
-            </Button>
+            <div>
+              <Button
+                ref={restoreDefaultsButton}
+                type="button"
+                size="sm"
+                variant="outline"
+                className="w-full text-xs"
+                onClick={restoreDefaults}
+              >
+                Restore Defaults
+              </Button>
+              <div className={canUndoReset ? "mt-2 flex flex-wrap items-center justify-between gap-2" : "sr-only"}>
+                <p role="status" className="text-muted-foreground text-xs">
+                  {canUndoReset && "Appearance reset to defaults."}
+                </p>
+                {canUndoReset && (
+                  <Button type="button" size="sm" variant="outline" onClick={undoReset}>
+                    Undo reset
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </PopoverContent>
