@@ -31,6 +31,10 @@ function getSafeValue<T extends string>(raw: string | null, allowed: readonly T[
   return allowed.includes(raw as T) ? (raw as T) : undefined;
 }
 
+function readWorkspaceShortcuts() {
+  return getLocalStorageValue(WORKSPACE_SHORTCUTS_STORAGE_KEY) !== "off";
+}
+
 function readDomState(): Partial<PreferencesState> {
   const root = document.documentElement;
 
@@ -87,9 +91,31 @@ export const PreferencesStoreProvider = ({
     store.setState((prev) => ({
       ...prev,
       ...domState,
-      workspaceShortcutsEnabled: getLocalStorageValue(WORKSPACE_SHORTCUTS_STORAGE_KEY) !== "off",
+      workspaceShortcutsEnabled: readWorkspaceShortcuts(),
       isSynced: true,
     }));
+
+    function syncShortcuts() {
+      const current = store.getState();
+      const enabled = readWorkspaceShortcuts();
+      if (current.workspaceShortcutsEnabled !== enabled) current.setWorkspaceShortcutsEnabled(enabled);
+    }
+
+    function handleStorage(event: StorageEvent) {
+      if (event.key !== null && event.key !== WORKSPACE_SHORTCUTS_STORAGE_KEY) return;
+      if (event.storageArea === window.localStorage) syncShortcuts();
+    }
+
+    function handlePageShow(event: PageTransitionEvent) {
+      if (event.persisted) syncShortcuts();
+    }
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
   }, [store]);
 
   useEffect(() => {
