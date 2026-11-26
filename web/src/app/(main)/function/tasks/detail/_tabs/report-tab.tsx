@@ -26,6 +26,7 @@ function TaskReport({ taskId }: { taskId: string }) {
   const [state, setState] = React.useState<ReportState>({ status: "loading" });
   const [copiedReport, setCopiedReport] = React.useState<string>();
   const mounted = React.useRef(false);
+  const preview = React.useRef<HTMLElement>(null);
   const copyTimeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const titleId = React.useId();
   const loading = state.status === "loading";
@@ -57,18 +58,28 @@ function TaskReport({ taskId }: { taskId: string }) {
     };
   }, []);
 
-  async function copy() {
+  async function copyReport(format: "markdown" | "plain text") {
     if (!report || !mounted.current) return;
-    const ok = await copyText(report);
-    if (!mounted.current) return;
-    if (ok) {
-      setCopiedReport(report);
-      toast.success("Markdown copied");
-      clearTimeout(copyTimeout.current);
-      copyTimeout.current = setTimeout(() => setCopiedReport(undefined), 1500);
-    } else {
-      toast.error("Copy failed; please select the text and copy it manually");
+    const plainText = format === "plain text";
+    const text = plainText ? preview.current?.innerText : report;
+    if (!text || (plainText && !text.trim())) {
+      toast.error("No report text to copy");
+      return;
     }
+    const ok = await copyText(text);
+    if (!mounted.current) return;
+    if (!ok) {
+      toast.error("Copy failed; please select the text and copy it manually");
+      return;
+    }
+    if (plainText) {
+      toast.success("Plain text copied");
+      return;
+    }
+    setCopiedReport(report);
+    toast.success("Markdown copied");
+    clearTimeout(copyTimeout.current);
+    copyTimeout.current = setTimeout(() => setCopiedReport(undefined), 1500);
   }
 
   async function copyReportLink() {
@@ -119,8 +130,11 @@ function TaskReport({ taskId }: { taskId: string }) {
         <div className="flex flex-wrap gap-2">
           {report && (
             <>
-              <Button type="button" size="sm" variant="outline" onClick={copy}>
+              <Button type="button" size="sm" variant="outline" onClick={() => void copyReport("markdown")}>
                 {copiedReport === report ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} Copy
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={() => void copyReport("plain text")}>
+                Copy plain text
               </Button>
               <Button type="button" size="sm" variant="outline" onClick={download}>
                 <DownloadIcon aria-hidden="true" /> Download
@@ -159,7 +173,7 @@ function TaskReport({ taskId }: { taskId: string }) {
           </p>
         )}
         {report ? (
-          <ReportPreview report={report} titleId={titleId} />
+          <ReportPreview report={report} titleId={titleId} preview={preview} />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-muted-foreground text-sm">
             <FileTextIcon aria-hidden="true" className="size-8 opacity-40" />
@@ -243,8 +257,15 @@ function useReportPrint(title: string | null) {
   return () => openPrint.current?.();
 }
 
-function ReportPreview({ report, titleId }: { report: string; titleId: string }) {
-  const preview = React.useRef<HTMLElement>(null);
+function ReportPreview({
+  report,
+  titleId,
+  preview,
+}: {
+  report: string;
+  titleId: string;
+  preview: React.RefObject<HTMLElement | null>;
+}) {
   const selectId = React.useId();
   const previewId = React.useId();
   const [expanded, setExpanded] = React.useState(false);
@@ -279,7 +300,7 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
     setSections(nextSections);
     setSelectedSection("");
     return observeReportTables(container);
-  }, [report]);
+  }, [preview, report]);
 
   function jumpToSection() {
     if (!selectedSection) return;
