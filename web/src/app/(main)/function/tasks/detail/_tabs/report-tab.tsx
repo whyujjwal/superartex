@@ -247,6 +247,7 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
   const preview = React.useRef<HTMLElement>(null);
   const selectId = React.useId();
   const previewId = React.useId();
+  const [expanded, setExpanded] = React.useState(false);
   const [sections, setSections] = React.useState<ReportSection[]>([]);
   const [selectedSection, setSelectedSection] = React.useState("");
 
@@ -294,32 +295,44 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
 
   return (
     <>
-      {sections.length > 1 && (
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <label htmlFor={selectId} className="font-medium text-sm">
-            Jump to section
-          </label>
-          <NativeSelect
-            id={selectId}
-            size="sm"
-            className="w-56 min-w-0 max-w-full"
-            value={selectedSection}
-            onChange={(event) => setSelectedSection(event.currentTarget.value)}
-          >
-            <NativeSelectOption value="" disabled>
-              Select a section
-            </NativeSelectOption>
-            {sections.map(({ id, label }, index) => (
-              <NativeSelectOption key={id} value={String(index)}>
-                {label}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {sections.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <label htmlFor={selectId} className="font-medium text-sm">
+              Jump to section
+            </label>
+            <NativeSelect
+              id={selectId}
+              size="sm"
+              className="w-56 min-w-0 max-w-full"
+              value={selectedSection}
+              onChange={(event) => setSelectedSection(event.currentTarget.value)}
+            >
+              <NativeSelectOption value="" disabled>
+                Select a section
               </NativeSelectOption>
-            ))}
-          </NativeSelect>
-          <Button type="button" size="sm" variant="outline" disabled={!selectedSection} onClick={jumpToSection}>
-            Go
-          </Button>
-        </div>
-      )}
+              {sections.map(({ id, label }, index) => (
+                <NativeSelectOption key={id} value={String(index)}>
+                  {label}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+            <Button type="button" size="sm" variant="outline" disabled={!selectedSection} onClick={jumpToSection}>
+              Go
+            </Button>
+          </div>
+        )}
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="ms-auto"
+          aria-controls={previewId}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? "Compact preview" : "Expand preview"}
+        </Button>
+      </div>
       <ReportFind preview={preview} previewId={previewId} report={report} />
       <section
         id={previewId}
@@ -327,7 +340,7 @@ function ReportPreview({ report, titleId }: { report: string; titleId: string })
         aria-labelledby={titleId}
         // biome-ignore lint/a11y/noNoninteractiveTabindex: The independently scrollable preview needs keyboard focus for scrolling.
         tabIndex={0}
-        className="max-h-[60vh] overflow-auto rounded-md border bg-muted/20 p-4 focus-visible:outline-2 focus-visible:outline-ring [&::highlight(superartex-report-match)]:bg-amber-200 [&::highlight(superartex-report-match)]:text-black [&_[data-report-match]]:outline-2 [&_[data-report-match]]:outline-ring"
+        className={`${expanded ? "max-h-[85dvh]" : "max-h-[60vh]"} overflow-auto rounded-md border bg-muted/20 p-4 focus-visible:outline-2 focus-visible:outline-ring [&::highlight(superartex-report-match)]:bg-amber-200 [&::highlight(superartex-report-match)]:text-black [&_[data-report-match]]:outline-2 [&_[data-report-match]]:outline-ring`}
       >
         <Markdown text={report} allowImages={false} firstHeadingLevel={3} reportTableRegions />
       </section>
