@@ -259,6 +259,17 @@ html {
   transition: none !important;
 }
 
+html[data-focus-outline="strong"] :focus-visible {
+  outline: 3px solid var(--focus-outline-color, CanvasText);
+  outline-offset: 2px;
+}
+
+/* Sidebar surfaces use their own palette, including a dark sidebar in the default light theme. */
+html[data-focus-outline="strong"] [data-slot="sidebar"],
+html[data-focus-outline="strong"] [data-sidebar="sidebar"] {
+  --focus-outline-color: var(--sidebar-foreground);
+}
+
 /* Reduce decorative motion when requested either in Appearance or by the OS. */
 :is(
   [data-slot="dialog-overlay"],

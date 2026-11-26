@@ -9,6 +9,7 @@
 import { fontRegistry } from "@/lib/fonts/registry";
 import {
   CONTENT_LAYOUT_VALUES,
+  FOCUS_OUTLINE_VALUES,
   MOTION_VALUES,
   NAVBAR_STYLE_VALUES,
   SIDEBAR_COLLAPSIBLE_VALUES,
@@ -24,6 +25,7 @@ const allowedValues = {
   font: Object.keys(fontRegistry),
   ui_scale: UI_SCALE_VALUES,
   motion: MOTION_VALUES,
+  focus_outline: FOCUS_OUTLINE_VALUES,
   content_layout: CONTENT_LAYOUT_VALUES,
   navbar_style: NAVBAR_STYLE_VALUES,
   sidebar_variant: SIDEBAR_VARIANT_VALUES,
@@ -86,6 +88,7 @@ export function ThemeBootScript() {
         root.setAttribute("data-font", readPreference("font"));
         root.setAttribute("data-ui-scale", readPreference("ui_scale"));
         root.setAttribute("data-motion", readPreference("motion"));
+        root.setAttribute("data-focus-outline", readPreference("focus_outline"));
         root.setAttribute("data-content-layout", readPreference("content_layout"));
         root.setAttribute("data-navbar-style", readPreference("navbar_style"));
         root.setAttribute("data-sidebar-variant", readPreference("sidebar_variant"));

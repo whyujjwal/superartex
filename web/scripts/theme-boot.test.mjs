@@ -93,3 +93,9 @@ test("saved motion reduction applies before hydration and invalid settings fall 
   assert.equal(loadAppearance("").attributes["data-motion"], "system");
   assert.equal(loadAppearance("motion=always").attributes["data-motion"], "system");
 });
+
+test("focus outline strength applies before hydration only for a saved preference", () => {
+  assert.equal(loadAppearance("focus_outline=strong").attributes["data-focus-outline"], "strong");
+  assert.equal(loadAppearance("").attributes["data-focus-outline"], "standard");
+  assert.equal(loadAppearance("focus_outline=always").attributes["data-focus-outline"], "standard");
+});

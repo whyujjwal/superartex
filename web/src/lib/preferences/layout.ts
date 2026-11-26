@@ -45,3 +45,10 @@ export const MOTION_OPTIONS = [
 ] as const;
 export const MOTION_VALUES = MOTION_OPTIONS.map((option) => option.value);
 export type MotionPreference = (typeof MOTION_VALUES)[number];
+
+export const FOCUS_OUTLINE_OPTIONS = [
+  { label: "Standard", value: "standard" },
+  { label: "Strong", value: "strong" },
+] as const;
+export const FOCUS_OUTLINE_VALUES = FOCUS_OUTLINE_OPTIONS.map((option) => option.value);
+export type FocusOutline = (typeof FOCUS_OUTLINE_VALUES)[number];

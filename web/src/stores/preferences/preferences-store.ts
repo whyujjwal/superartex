@@ -3,6 +3,7 @@ import { createStore } from "zustand/vanilla";
 import type { FontKey } from "@/lib/fonts/registry";
 import type {
   ContentLayout,
+  FocusOutline,
   MotionPreference,
   NavbarStyle,
   SidebarCollapsible,
@@ -19,6 +20,7 @@ export type PreferencesState = {
   font: FontKey;
   uiScale: UiScale;
   motion: MotionPreference;
+  focusOutline: FocusOutline;
   contentLayout: ContentLayout;
   navbarStyle: NavbarStyle;
   sidebarVariant: SidebarVariant;
@@ -30,6 +32,7 @@ export type PreferencesState = {
   setFont: (font: FontKey) => void;
   setUiScale: (scale: UiScale) => void;
   setMotion: (motion: MotionPreference) => void;
+  setFocusOutline: (outline: FocusOutline) => void;
   setContentLayout: (layout: ContentLayout) => void;
   setNavbarStyle: (style: NavbarStyle) => void;
   setSidebarVariant: (variant: SidebarVariant) => void;
@@ -47,6 +50,7 @@ export const createPreferencesStore = (init?: Partial<PreferencesState>) =>
     font: init?.font ?? PREFERENCE_DEFAULTS.font,
     uiScale: init?.uiScale ?? PREFERENCE_DEFAULTS.ui_scale,
     motion: init?.motion ?? PREFERENCE_DEFAULTS.motion,
+    focusOutline: init?.focusOutline ?? PREFERENCE_DEFAULTS.focus_outline,
     contentLayout: init?.contentLayout ?? PREFERENCE_DEFAULTS.content_layout,
     navbarStyle: init?.navbarStyle ?? PREFERENCE_DEFAULTS.navbar_style,
     sidebarVariant: init?.sidebarVariant ?? PREFERENCE_DEFAULTS.sidebar_variant,
@@ -58,6 +62,7 @@ export const createPreferencesStore = (init?: Partial<PreferencesState>) =>
     setFont: (font) => set({ font }),
     setUiScale: (scale) => set({ uiScale: scale }),
     setMotion: (motion) => set({ motion }),
+    setFocusOutline: (focusOutline) => set({ focusOutline }),
     setContentLayout: (layout) => set({ contentLayout: layout }),
     setNavbarStyle: (style) => set({ navbarStyle: style }),
     setSidebarVariant: (variant) => set({ sidebarVariant: variant }),

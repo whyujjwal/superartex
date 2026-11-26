@@ -33,6 +33,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       data-font={font}
       data-ui-scale={PREFERENCE_DEFAULTS.ui_scale}
       data-motion={PREFERENCE_DEFAULTS.motion}
+      data-focus-outline={PREFERENCE_DEFAULTS.focus_outline}
       suppressHydrationWarning
     >
       <head>

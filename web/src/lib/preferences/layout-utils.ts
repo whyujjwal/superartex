@@ -1,4 +1,4 @@
-import type { MotionPreference, UiScale } from "./layout";
+import type { FocusOutline, MotionPreference, UiScale } from "./layout";
 
 export function applyContentLayout(value: "centered" | "full-width") {
   const root = document.documentElement;
@@ -31,4 +31,8 @@ export function applyUiScale(value: UiScale) {
 
 export function applyMotion(value: MotionPreference) {
   document.documentElement.setAttribute("data-motion", value);
+}
+
+export function applyFocusOutline(value: FocusOutline) {
+  document.documentElement.setAttribute("data-focus-outline", value);
 }

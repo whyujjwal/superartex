@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useId, useRef } from "react";
 
 import { Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +19,8 @@ import {
 } from "@/lib/preferences/appearance-file";
 import {
   type ContentLayout,
+  FOCUS_OUTLINE_OPTIONS,
+  type FocusOutline,
   MOTION_OPTIONS,
   type MotionPreference,
   type NavbarStyle,
@@ -29,6 +31,7 @@ import {
 } from "@/lib/preferences/layout";
 import {
   applyContentLayout,
+  applyFocusOutline,
   applyFont,
   applyMotion,
   applyNavbarStyle,
@@ -62,6 +65,9 @@ export function LayoutControls() {
   const setUiScale = usePreferencesStore((s) => s.setUiScale);
   const motion = usePreferencesStore((s) => s.motion);
   const setMotion = usePreferencesStore((s) => s.setMotion);
+  const focusOutline = usePreferencesStore((s) => s.focusOutline);
+  const setFocusOutline = usePreferencesStore((s) => s.setFocusOutline);
+  const focusOutlineLabelId = useId();
   const importInput = useRef<HTMLInputElement>(null);
   const importSequence = useRef(0);
 
@@ -126,6 +132,13 @@ export function LayoutControls() {
     void persistPreference("motion", value);
   };
 
+  const onFocusOutlineChange = (value: FocusOutline | "") => {
+    if (!value) return;
+    applyFocusOutline(value);
+    setFocusOutline(value);
+    void persistPreference("focus_outline", value);
+  };
+
   const applyPreferences = (settings: ImportedAppearanceSettings) => {
     onThemePresetChange(settings.theme_preset);
     onThemeModeChange(settings.theme_mode);
@@ -136,6 +149,7 @@ export function LayoutControls() {
     onFontChange(settings.font);
     onUiScaleChange(settings.ui_scale);
     if (settings.motion) onMotionChange(settings.motion);
+    if (settings.focus_outline) onFocusOutlineChange(settings.focus_outline);
   };
 
   const exportSettings = () => {
@@ -145,6 +159,7 @@ export function LayoutControls() {
       font,
       ui_scale: uiScale,
       motion,
+      focus_outline: focusOutline,
       content_layout: contentLayout,
       navbar_style: navbarStyle,
       sidebar_variant: variant,
@@ -284,6 +299,27 @@ export function LayoutControls() {
                 onValueChange={onMotionChange}
               >
                 {MOTION_OPTIONS.map(({ label, value }) => (
+                  <ToggleGroupItem key={value} value={value}>
+                    {label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+
+            <div className="space-y-1">
+              <Label id={focusOutlineLabelId} className="font-medium text-xs">
+                Focus outline
+              </Label>
+              <ToggleGroup
+                aria-labelledby={focusOutlineLabelId}
+                size="sm"
+                spacing={0}
+                variant="outline"
+                type="single"
+                value={focusOutline}
+                onValueChange={onFocusOutlineChange}
+              >
+                {FOCUS_OUTLINE_OPTIONS.map(({ label, value }) => (
                   <ToggleGroupItem key={value} value={value}>
                     {label}
                   </ToggleGroupItem>
