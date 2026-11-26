@@ -153,7 +153,7 @@ export function SearchDialog() {
         <span className="hidden sm:inline">Search pages</span>
         {shortcutsEnabled && (
           <kbd className="ml-auto hidden select-none rounded-sm border bg-card px-1.5 font-mono text-[10px] sm:inline">
-            ⌘ {SEARCH_PAGES_KEY.toUpperCase()}
+            Ctrl/⌘ {SEARCH_PAGES_KEY.toUpperCase()}
           </kbd>
         )}
       </Button>
